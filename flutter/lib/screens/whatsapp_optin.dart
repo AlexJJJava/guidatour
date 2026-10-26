@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/labels.dart';
 import '../state.dart';
 import '../widgets.dart';
 
 /// Opt-in WhatsApp consent-first (BRD §13.1): il consenso è esplicito e tracciato.
+///
+/// Il testo del checkbox resta sempre in italiano in ogni lingua dell'app:
+/// è la prova legale del consenso (coincide con quanto il backend registra
+/// come "ciò che l'utente ha visto", vedi BR-011D), quindi non va tradotto
+/// solo lato UI mentre il backend conserva l'originale italiano.
 class WhatsAppOptInCard extends StatefulWidget {
   const WhatsAppOptInCard({super.key, required this.source});
   final String source;
@@ -16,6 +22,7 @@ class _WhatsAppOptInCardState extends State<WhatsAppOptInCard> {
   final _phone = TextEditingController();
   bool _consent = false;
   bool _done = false;
+  bool _sending = false;
 
   @override
   void dispose() {
@@ -23,44 +30,50 @@ class _WhatsAppOptInCardState extends State<WhatsAppOptInCard> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    final t = l10n(context);
     final phone = _phone.text.trim();
-    if (phone.replaceAll(RegExp(r'\D'), '').length < 8) {
-      snack(context, 'Inserisci un numero di telefono valido.');
+    if (!RegExp(r'^\+[1-9]\d{6,14}$').hasMatch(phone)) {
+      snack(context, t.whatsappInvalidPhone);
       return;
     }
     if (!_consent) {
-      snack(context, 'Serve il consenso esplicito per procedere.');
+      snack(context, t.whatsappNeedConsent);
       return;
     }
-    appState.addConsent(phone, widget.source);
-    setState(() => _done = true);
+    setState(() => _sending = true);
+    try {
+      await appState.addConsent(phone, widget.source);
+      if (mounted) setState(() => _done = true);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _sending = false);
+        snack(context, '$e');
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = l10n(context);
     return Material(
       color: const Color(0xFFE9F3F0),
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: _done
-            ? const Row(
+            ? Row(
                 children: [
-                  Icon(Icons.check_circle, color: kPrimary),
-                  SizedBox(width: 10),
-                  Expanded(
-                      child: Text(
-                          'Fatto! Riceverai su WhatsApp la lista aggiornata dei tour a Roma. '
-                          'Puoi annullare in qualsiasi momento rispondendo STOP.')),
+                  const Icon(Icons.check_circle, color: kPrimary),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(t.whatsappDone)),
                 ],
               )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                      'Vuoi ricevere su WhatsApp la lista aggiornata delle escursioni a Roma?',
-                      style: TextStyle(
+                  Text(t.whatsappTitle,
+                      style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           color: kInk)),
@@ -68,12 +81,12 @@ class _WhatsAppOptInCardState extends State<WhatsAppOptInCard> {
                   TextField(
                     controller: _phone,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Numero WhatsApp',
-                      hintText: '+39 …',
+                    decoration: InputDecoration(
+                      labelText: t.fieldWhatsappNumber,
+                      hintText: t.whatsappHint,
                       filled: true,
                       fillColor: Colors.white,
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   CheckboxListTile(
@@ -85,9 +98,9 @@ class _WhatsAppOptInCardState extends State<WhatsAppOptInCard> {
                         style: TextStyle(fontSize: 13)),
                   ),
                   FilledButton.icon(
-                    onPressed: _submit,
+                    onPressed: _sending ? null : _submit,
                     icon: const Icon(Icons.chat),
-                    label: const Text('Ricevi la lista su WhatsApp'),
+                    label: Text(t.whatsappSubmit),
                   ),
                 ],
               ),

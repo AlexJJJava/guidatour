@@ -5,3 +5,9 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Claude Code local state (non fa parte del progetto)
+.claude/
+
+# File locali con segreti: non committare mai password/chiavi in chiaro
+supabase.txt

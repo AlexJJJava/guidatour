@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../l10n/labels.dart';
 import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
@@ -13,10 +14,11 @@ class PosterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = l10n(context);
     final guide = appState.guideById(tour.guideId);
     final link = '${tour.url}?src=qr';
     return Scaffold(
-      appBar: AppBar(title: const Text('QR e locandina')),
+      appBar: AppBar(title: Text(t.qrAndPoster)),
       body: PageBody(
         maxWidth: 560,
         child: Column(
@@ -31,8 +33,8 @@ class PosterScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  const Text('GUIDATOUR · ROMA',
-                      style: TextStyle(
+                  Text('GUIDATOUR · ${t.cityRome}',
+                      style: const TextStyle(
                           letterSpacing: 2,
                           fontSize: 12,
                           color: kPrimary,
@@ -47,9 +49,9 @@ class PosterScreen extends StatelessWidget {
                           color: kInk)),
                   const SizedBox(height: 10),
                   Text(
-                      '${fmtDate(tour.start)} · ${tour.duration} · ${tour.language}',
+                      '${fmtDate(tour.start)} · ${tour.duration} · ${languageLabel(context, tour.language)}',
                       textAlign: TextAlign.center),
-                  Text('Ritrovo: ${tour.meetingPoint}',
+                  Text(t.detailMeetingPoint(tour.meetingPoint),
                       textAlign: TextAlign.center),
                   const SizedBox(height: 18),
                   QrImageView(data: link, size: 200),
@@ -60,12 +62,13 @@ class PosterScreen extends StatelessWidget {
                           fontWeight: FontWeight.w800,
                           color: kPrimary)),
                   const SizedBox(height: 6),
-                  Text('con ${guide?.name} · ${guide?.role.label}',
+                  Text(
+                      t.posterByGuide(guide?.name ?? '',
+                          guide == null ? '' : roleLabel(context, guide.role)),
                       style: const TextStyle(color: kMuted)),
                   const SizedBox(height: 6),
-                  const Text(
-                      'Inquadra il QR per info e richiesta di prenotazione',
-                      style: TextStyle(fontSize: 12, color: kMuted)),
+                  Text(t.posterScanHint,
+                      style: const TextStyle(fontSize: 12, color: kMuted)),
                 ],
               ),
             ),
@@ -75,25 +78,29 @@ class PosterScreen extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: () async {
                 await Clipboard.setData(ClipboardData(text: link));
-                if (context.mounted) snack(context, 'Link copiato');
+                if (context.mounted) snack(context, t.linkCopied);
               },
               icon: const Icon(Icons.copy),
-              label: const Text('Copia link'),
+              label: Text(t.copyLink),
             ),
             const SizedBox(height: 8),
             TextButton.icon(
-              onPressed: () {
-                appState.recordScan(tour);
-                snack(context,
-                    'Scansione simulata registrata (${tour.scans} totali)');
+              onPressed: () async {
+                try {
+                  await appState.recordScan(tour);
+                  if (context.mounted) {
+                    snack(context, t.scanSimulated(tour.scans));
+                  }
+                } catch (e) {
+                  if (context.mounted) snack(context, '$e');
+                }
               },
               icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Simula una scansione (demo)'),
+              label: Text(t.simulateScan),
             ),
-            const Text(
-                'L’esportazione PDF della locandina sarà aggiunta nel prossimo passo.',
+            Text(t.posterPdfComingSoon,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: kMuted)),
+                style: const TextStyle(fontSize: 12, color: kMuted)),
           ],
         ),
       ),

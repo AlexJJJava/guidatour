@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'l10n/labels.dart';
+import 'l10n/locale_controller.dart';
 import 'models.dart';
 import 'state.dart';
 
@@ -94,6 +96,7 @@ class TourCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final guide = appState.guideById(tour.guideId);
+    final roleText = guide == null ? '' : roleLabel(context, guide.role);
     return Card(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
@@ -126,7 +129,8 @@ class TourCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${tour.category} · ${tour.language}'.toUpperCase(),
+                      '${categoryLabel(context, tour.category)} · ${languageLabel(context, tour.language)}'
+                          .toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -146,7 +150,7 @@ class TourCard extends StatelessWidget {
                             color: kInk)),
                     const SizedBox(height: 2),
                     Text(
-                      '${guide?.name ?? ''} · ${guide?.role.label ?? ''}',
+                      '${guide?.name ?? ''} · $roleText',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 11, color: kMuted),
@@ -212,16 +216,65 @@ class PlatformDisclaimer extends StatelessWidget {
   const PlatformDisclaimer({super.key});
 
   @override
-  Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.only(top: 24),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 24),
         child: Text(
-          'GuidaTour è una piattaforma di promozione e contatto: non organizza i '
-          'tour né incassa pagamenti. Disponibilità, conferma, pagamento ed '
-          'esecuzione restano in capo a guida od operatore che pubblica l’offerta.',
-          style: TextStyle(fontSize: 12, color: kMuted, height: 1.4),
+          l10n(context).platformDisclaimer,
+          style: const TextStyle(fontSize: 12, color: kMuted, height: 1.4),
         ),
       );
 }
 
+/// Selettore di lingua (IT/EN/ES), sempre visibile in alto a destra.
+class LanguagePicker extends StatelessWidget {
+  const LanguagePicker({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Locale>(
+      valueListenable: localeController,
+      builder: (context, locale, _) {
+        return Material(
+          color: Colors.white,
+          elevation: 1,
+          borderRadius: BorderRadius.circular(20),
+          child: PopupMenuButton<Locale>(
+            tooltip: localeDisplayName(locale),
+            initialValue: locale,
+            onSelected: localeController.setLocale,
+            itemBuilder: (context) => [
+              for (final l in supportedLocales)
+                PopupMenuItem(value: l, child: Text(localeDisplayName(l))),
+            ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.language, size: 18, color: kPrimary),
+                  const SizedBox(width: 6),
+                  Text(locale.languageCode.toUpperCase(),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, color: kInk)),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 void snack(BuildContext context, String msg) =>
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+
+/// Esegue una chiamata al backend mostrando l'errore in uno snackbar se fallisce.
+Future<void> runOrSnack(
+    BuildContext context, Future<void> Function() action) async {
+  try {
+    await action();
+  } catch (e) {
+    if (context.mounted) snack(context, '$e');
+  }
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/labels.dart';
 import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
@@ -14,6 +15,7 @@ class DashboardScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: appState,
       builder: (context, _) {
+        final t = l10n(context);
         final user = appState.currentUser;
         if (user == null) return const SizedBox.shrink();
         return DefaultTabController(
@@ -28,30 +30,31 @@ class DashboardScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Ciao ${user.name}',
+                          Text(t.greetingHello(user.name),
                               style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w800,
                                   color: kInk)),
                           Text(
-                              '${user.role.label}${user.verified ? ' · verificato' : ' · in attesa di verifica'}',
+                              '${roleLabel(context, user.role)}'
+                              '${user.verified ? ' · ${t.verifiedSuffix}' : ' · ${t.unverifiedSuffix}'}',
                               style: const TextStyle(color: kMuted)),
                         ],
                       ),
                     ),
                     TextButton(
-                        onPressed: appState.logout, child: const Text('Esci')),
+                        onPressed: appState.logout, child: Text(t.logout)),
                   ],
                 ),
               ),
-              const TabBar(
+              TabBar(
                 isScrollable: true,
                 tabAlignment: TabAlignment.start,
                 tabs: [
-                  Tab(text: 'Panoramica'),
-                  Tab(text: 'I miei tour'),
-                  Tab(text: 'Assegnazioni'),
-                  Tab(text: 'Contatti'),
+                  Tab(text: t.dashTabOverview),
+                  Tab(text: t.dashTabMyTours),
+                  Tab(text: t.dashTabAssignments),
+                  Tab(text: t.dashTabContacts),
                 ],
               ),
               Expanded(
@@ -109,11 +112,12 @@ class _Overview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mine = appState.tours.where((t) => t.guideId == user.id).toList();
-    final ids = mine.map((t) => t.id).toSet();
+    final t = l10n(context);
+    final mine = appState.tours.where((tour) => tour.guideId == user.id).toList();
+    final ids = mine.map((tour) => tour.id).toSet();
     final reqs = appState.requests.where((r) => ids.contains(r.tourId)).length;
-    final visits = mine.fold(0, (s, t) => s + t.visits);
-    final scans = mine.fold(0, (s, t) => s + t.scans);
+    final visits = mine.fold(0, (s, tour) => s + tour.visits);
+    final scans = mine.fold(0, (s, tour) => s + tour.scans);
     final alerts = appState.overbookingAlerts(user.id);
     final rate = visits == 0 ? 0 : (reqs * 100 / visits);
     return PageBody(
@@ -122,18 +126,18 @@ class _Overview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Wrap(spacing: 12, runSpacing: 12, children: [
-            _StatTile('Tour pubblicati', '${mine.length}', Icons.map_outlined),
-            _StatTile('Visite pagina', '$visits', Icons.visibility_outlined),
-            _StatTile('Scansioni QR', '$scans', Icons.qr_code_2),
-            _StatTile('Richieste', '$reqs', Icons.mail_outline),
-            _StatTile('Conversione', '${rate.toStringAsFixed(1)}%',
+            _StatTile(t.statToursPublished, '${mine.length}', Icons.map_outlined),
+            _StatTile(t.statPageViews, '$visits', Icons.visibility_outlined),
+            _StatTile(t.statQrScans, '$scans', Icons.qr_code_2),
+            _StatTile(t.statRequests, '$reqs', Icons.mail_outline),
+            _StatTile(t.statConversion, '${rate.toStringAsFixed(1)}%',
                 Icons.trending_up),
           ]),
           const SizedBox(height: 28),
-          const SectionHeading(title: 'Alert disponibilità'),
+          SectionHeading(title: t.dashAlertsTitle),
           const SizedBox(height: 10),
           if (alerts.isEmpty)
-            const InfoBanner('Nessuna criticità: posti e orari sono in regola.')
+            InfoBanner(t.dashNoAlerts)
           else
             for (final a in alerts)
               Padding(
@@ -141,10 +145,10 @@ class _Overview extends StatelessWidget {
                 child: InfoBanner(a, warning: true),
               ),
           const SizedBox(height: 28),
-          const SectionHeading(title: 'Ultime notifiche'),
+          SectionHeading(title: t.dashNotificationsTitle),
           const SizedBox(height: 10),
           if (appState.notifications.isEmpty)
-            const Text('Nessuna notifica.', style: TextStyle(color: kMuted))
+            Text(t.dashNoNotifications, style: const TextStyle(color: kMuted))
           else
             for (final n in appState.notifications.reversed.take(8))
               ListTile(
@@ -165,7 +169,8 @@ class _MyTours extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mine = appState.tours.where((t) => t.guideId == user.id).toList();
+    final t = l10n(context);
+    final mine = appState.tours.where((tour) => tour.guideId == user.id).toList();
     return PageBody(
       maxWidth: 900,
       child: Column(
@@ -175,11 +180,11 @@ class _MyTours extends StatelessWidget {
             onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const TourFormScreen())),
             icon: const Icon(Icons.add),
-            label: const Text('Nuovo tour'),
+            label: Text(t.newTour),
           ),
           const SizedBox(height: 16),
-          if (mine.isEmpty) const Text('Non hai ancora pubblicato tour.'),
-          for (final t in mine)
+          if (mine.isEmpty) Text(t.dashNoToursYet),
+          for (final tour in mine)
             Card(
               elevation: 0,
               color: Colors.white,
@@ -192,12 +197,12 @@ class _MyTours extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(t.title,
+                    Text(tour.title,
                         style: const TextStyle(
                             fontWeight: FontWeight.w800, fontSize: 16)),
                     Text(
-                        '${fmtDate(t.start)} · ${fmtPrice(t.price)} · ${t.seats} posti · '
-                        '${t.visits} visite · ${t.scans} scansioni',
+                        t.dashTourLine(fmtDate(tour.start), fmtPrice(tour.price),
+                            tour.seats, tour.visits, tour.scans),
                         style: const TextStyle(color: kMuted, fontSize: 12)),
                     const SizedBox(height: 8),
                     Wrap(
@@ -206,14 +211,14 @@ class _MyTours extends StatelessWidget {
                         OutlinedButton.icon(
                           onPressed: () => Navigator.of(context).push(
                               MaterialPageRoute(
-                                  builder: (_) => PosterScreen(tour: t))),
+                                  builder: (_) => PosterScreen(tour: tour))),
                           icon: const Icon(Icons.qr_code_2, size: 18),
-                          label: const Text('QR e locandina'),
+                          label: Text(t.qrAndPoster),
                         ),
                         OutlinedButton.icon(
-                          onPressed: () => _propose(context, t),
+                          onPressed: () => _propose(context, tour),
                           icon: const Icon(Icons.swap_horiz, size: 18),
-                          label: const Text('Proponi a un collega'),
+                          label: Text(t.proposeToColleague),
                         ),
                       ],
                     ),
@@ -226,30 +231,34 @@ class _MyTours extends StatelessWidget {
     );
   }
 
-  Future<void> _propose(BuildContext context, Tour t) async {
+  Future<void> _propose(BuildContext context, Tour tour) async {
+    final t = l10n(context);
     final candidates = appState.guides
         .where((g) => g.id != user.id && g.role == Role.guida)
         .toList();
     final chosen = await showDialog<Guide>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: const Text('Scegli la guida destinataria'),
+        title: Text(t.chooseRecipientGuide),
         children: [
           if (candidates.isEmpty)
-            const Padding(
-                padding: EdgeInsets.all(20),
-                child: Text('Nessuna guida disponibile.')),
+            Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(t.noGuideAvailable)),
           for (final g in candidates)
             SimpleDialogOption(
               onPressed: () => Navigator.pop(ctx, g),
-              child: Text('${g.name} · ${g.languages.join(', ')}'),
+              child: Text('${g.name} · ${g.languages.map((l) => languageLabel(context, l)).join(', ')}'),
             ),
         ],
       ),
     );
-    if (chosen != null && context.mounted) {
-      appState.proposeAssignment(t, chosen);
-      snack(context, 'Proposta inviata a ${chosen.name}');
+    if (chosen == null) return;
+    try {
+      await appState.proposeAssignment(tour, chosen);
+      if (context.mounted) snack(context, t.proposalSentTo(chosen.name));
+    } catch (e) {
+      if (context.mounted) snack(context, '$e');
     }
   }
 }
@@ -260,6 +269,7 @@ class _Assignments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = l10n(context);
     final sent =
         appState.assignments.where((a) => a.fromGuideId == user.id).toList();
     final received =
@@ -269,53 +279,70 @@ class _Assignments extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const InfoBanner(
-              'La guida destinataria può solo accettare o rifiutare: non può riassegnare il tour ad altri.'),
+          InfoBanner(t.assignmentInfoBanner),
           const SizedBox(height: 20),
-          const SectionHeading(title: 'Ricevute'),
-          if (received.isEmpty) const Text('Nessuna proposta ricevuta.'),
+          SectionHeading(title: t.received),
+          if (received.isEmpty) Text(t.noProposalsReceived),
           for (final a in received)
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(appState.tourById(a.tourId)?.title ?? ''),
-              subtitle: Text(
-                  'Da ${appState.guideById(a.fromGuideId)?.name} · ${a.status.name}'),
+              subtitle: Text(t.fromGuideStatus(
+                  appState.guideById(a.fromGuideId)?.name ?? '',
+                  assignmentStatusLabel(context, a.status))),
               trailing: a.status == AssignmentStatus.proposto
                   ? Wrap(spacing: 4, children: [
                       IconButton(
-                        tooltip: 'Rifiuta',
+                        tooltip: t.reject,
                         icon: const Icon(Icons.close, color: Colors.red),
-                        onPressed: () {
-                          appState.respond(a, false);
-                          snack(context,
-                              'Rifiutato. Notifica inviata alla guida titolare.');
+                        onPressed: () async {
+                          try {
+                            await appState.respond(a, false);
+                            if (context.mounted) {
+                              snack(context, t.rejectedNotified);
+                            }
+                          } catch (e) {
+                            if (context.mounted) snack(context, '$e');
+                          }
                         },
                       ),
                       IconButton(
-                        tooltip: 'Accetta',
+                        tooltip: t.accept,
                         icon: const Icon(Icons.check, color: kPrimary),
-                        onPressed: () {
-                          appState.respond(a, true);
-                          snack(context,
-                              'Accettato. Notifica inviata alla guida titolare.');
+                        onPressed: () async {
+                          try {
+                            await appState.respond(a, true);
+                            if (context.mounted) {
+                              snack(context, t.acceptedNotified);
+                            }
+                          } catch (e) {
+                            if (context.mounted) snack(context, '$e');
+                          }
                         },
                       ),
                     ])
                   : null,
             ),
           const SizedBox(height: 20),
-          const SectionHeading(title: 'Inviate'),
-          if (sent.isEmpty) const Text('Nessuna proposta inviata.'),
+          SectionHeading(title: t.sent),
+          if (sent.isEmpty) Text(t.noProposalsSent),
           for (final a in sent)
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(appState.tourById(a.tourId)?.title ?? ''),
-              subtitle: Text(
-                  'A ${appState.guideById(a.toGuideId)?.name} · ${a.status.name}'),
+              subtitle: Text(t.toGuideStatus(
+                  appState.guideById(a.toGuideId)?.name ?? '',
+                  assignmentStatusLabel(context, a.status))),
               trailing: a.status == AssignmentStatus.proposto
                   ? TextButton(
-                      onPressed: () => appState.cancelAssignment(a),
-                      child: const Text('Annulla'))
+                      onPressed: () async {
+                        try {
+                          await appState.cancelAssignment(a);
+                        } catch (e) {
+                          if (context.mounted) snack(context, '$e');
+                        }
+                      },
+                      child: Text(t.cancel))
                   : null,
             ),
         ],
@@ -330,9 +357,10 @@ class _Contacts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = l10n(context);
     final ids = appState.tours
-        .where((t) => t.guideId == user.id)
-        .map((t) => t.id)
+        .where((tour) => tour.guideId == user.id)
+        .map((tour) => tour.id)
         .toSet();
     final reqs = appState.requests
         .where((r) => ids.contains(r.tourId))
@@ -343,38 +371,48 @@ class _Contacts extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeading(title: 'Richieste di prenotazione'),
-          if (reqs.isEmpty) const Text('Nessuna richiesta ricevuta.'),
+          SectionHeading(title: t.bookingRequestsTitle),
+          if (reqs.isEmpty) Text(t.noRequestsReceived),
           for (final r in reqs)
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.mail_outline),
-              title: Text('${r.name} · ${r.people} persone'),
+              title: Text(t.nameAndPeople(r.name, r.people)),
               subtitle: Text('${appState.tourById(r.tourId)?.title}\n${r.email}'
                   '${r.phone.isEmpty ? '' : ' · ${r.phone}'}'
                   '${r.message.isEmpty ? '' : '\n“${r.message}”'}'),
               isThreeLine: true,
-              trailing: r.status == 'Inviata'
+              trailing: r.status == 'inviata'
                   ? Wrap(spacing: 4, children: [
                       IconButton(
-                        tooltip: 'Rifiuta',
+                        tooltip: t.reject,
                         icon: const Icon(Icons.close, color: Colors.red),
-                        onPressed: () =>
-                            appState.setRequestStatus(r, 'Rifiutata'),
+                        onPressed: () async {
+                          try {
+                            await appState.setRequestStatus(r, 'rifiutata');
+                          } catch (e) {
+                            if (context.mounted) snack(context, '$e');
+                          }
+                        },
                       ),
                       IconButton(
-                        tooltip: 'Conferma',
+                        tooltip: t.confirm,
                         icon: const Icon(Icons.check, color: kPrimary),
-                        onPressed: () =>
-                            appState.setRequestStatus(r, 'Confermata'),
+                        onPressed: () async {
+                          try {
+                            await appState.setRequestStatus(r, 'confermata');
+                          } catch (e) {
+                            if (context.mounted) snack(context, '$e');
+                          }
+                        },
                       ),
                     ])
-                  : Text(r.status,
+                  : Text(requestStatusLabel(context, r.status),
                       style: const TextStyle(fontWeight: FontWeight.w700)),
             ),
           const SizedBox(height: 24),
-          const SectionHeading(title: 'Consensi WhatsApp raccolti'),
-          if (appState.consents.isEmpty) const Text('Nessun opt-in raccolto.'),
+          SectionHeading(title: t.whatsappConsentsTitle),
+          if (appState.consents.isEmpty) Text(t.noOptins),
           for (final c in appState.consents)
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -382,14 +420,20 @@ class _Contacts extends StatelessWidget {
                   c.revoked ? Icons.block : Icons.check_circle_outline,
                   color: c.revoked ? Colors.red : kPrimary),
               title: Text(c.phone),
-              subtitle:
-                  Text('${fmtDate(c.at)} · ${c.source} · mittente: ${c.sender}'
-                      '${c.revoked ? ' · REVOCATO' : ''}'),
+              subtitle: Text(
+                  '${t.consentLine(fmtDate(c.at), c.source, c.sender)}'
+                  '${c.revoked ? ' · ${t.revokedSuffix}' : ''}'),
               trailing: c.revoked
                   ? null
                   : TextButton(
-                      onPressed: () => appState.revokeConsent(c),
-                      child: const Text('Registra revoca')),
+                      onPressed: () async {
+                        try {
+                          await appState.revokeConsent(c);
+                        } catch (e) {
+                          if (context.mounted) snack(context, '$e');
+                        }
+                      },
+                      child: Text(t.registerRevoke)),
             ),
         ],
       ),

@@ -3,14 +3,10 @@ enum Role { turista, guida, accompagnatore, tourOperator }
 
 extension RoleLabel on Role {
   bool get isProfessional => this != Role.turista;
-
-  String get label => switch (this) {
-        Role.turista => 'Turista',
-        Role.guida => 'Guida turistica',
-        Role.accompagnatore => 'Accompagnatore turistico',
-        Role.tourOperator => 'Tour operator',
-      };
 }
+
+Role roleFromString(String? s) =>
+    Role.values.firstWhere((r) => r.name == s, orElse: () => Role.turista);
 
 class Guide {
   Guide({
@@ -22,6 +18,7 @@ class Guide {
     this.languages = const ['Italiano'],
     this.bio = '',
     this.provider = 'email',
+    this.isAdmin = false,
   });
   final String id;
   final String name;
@@ -31,6 +28,33 @@ class Guide {
   final bool verified;
   final List<String> languages;
   final String bio;
+  final bool isAdmin;
+
+  /// Dal profilo pubblico (`GET /guides`, `/tours/:id`): niente email.
+  factory Guide.fromPublicJson(Map<String, dynamic> j) => Guide(
+        id: j['id'] as String,
+        name: j['name'] as String? ?? '',
+        email: '',
+        role: roleFromString(j['role'] as String?),
+        verified: j['verified'] as bool? ?? false,
+        languages:
+            (j['languages'] as List?)?.cast<String>() ?? const ['Italiano'],
+        bio: j['bio'] as String? ?? '',
+      );
+
+  /// Dal proprio profilo (`GET /me`): dati completi.
+  factory Guide.fromProfileJson(Map<String, dynamic> j) => Guide(
+        id: j['id'] as String,
+        name: j['name'] as String? ?? '',
+        email: j['email'] as String? ?? '',
+        role: roleFromString(j['role'] as String?),
+        verified: j['verified'] as bool? ?? false,
+        languages:
+            (j['languages'] as List?)?.cast<String>() ?? const ['Italiano'],
+        bio: j['bio'] as String? ?? '',
+        provider: j['provider'] as String? ?? 'email',
+        isAdmin: j['isAdmin'] as bool? ?? false,
+      );
 }
 
 /// Servizi accessori che possono trasformare un tour in pacchetto turistico (BR-014G).
@@ -87,10 +111,28 @@ class Tour {
 
   bool get isPackage => accessories.isNotEmpty;
   String get url => 'https://guidatour.it/roma/tour/$id';
+
+  factory Tour.fromJson(Map<String, dynamic> j) => Tour(
+        id: j['id'] as String,
+        title: j['title'] as String? ?? '',
+        category: j['category'] as String? ?? '',
+        language: j['language'] as String? ?? '',
+        duration: j['duration'] as String? ?? '',
+        start: DateTime.parse(j['start'] as String).toLocal(),
+        price: (j['price'] as num).toDouble(),
+        meetingPoint: j['meetingPoint'] as String? ?? '',
+        description: j['description'] as String? ?? '',
+        seats: (j['seats'] as num).toInt(),
+        guideId: j['guideId'] as String,
+        accessories: (j['accessories'] as List?)?.cast<String>() ?? const [],
+        visits: (j['visits'] as num?)?.toInt() ?? 0,
+        scans: (j['scans'] as num?)?.toInt() ?? 0,
+      );
 }
 
 class BookingRequest {
   BookingRequest({
+    this.id,
     required this.tourId,
     required this.name,
     required this.email,
@@ -99,8 +141,9 @@ class BookingRequest {
     required this.message,
     required this.createdAt,
     this.userId,
-    this.status = 'Inviata',
+    this.status = 'inviata',
   });
+  final String? id;
   final String tourId;
   final String name;
   final String email;
@@ -112,8 +155,21 @@ class BookingRequest {
   /// Account del turista, se era loggato quando ha inviato la richiesta.
   final String? userId;
 
-  /// 'Inviata' → 'Confermata' o 'Rifiutata' dalla guida.
+  /// 'inviata' → 'confermata' o 'rifiutata' dalla guida.
   String status;
+
+  factory BookingRequest.fromJson(Map<String, dynamic> j) => BookingRequest(
+        id: j['id'] as String?,
+        tourId: j['tourId'] as String,
+        name: j['name'] as String? ?? '',
+        email: j['email'] as String? ?? '',
+        phone: j['phone'] as String? ?? '',
+        people: (j['people'] as num).toInt(),
+        message: j['message'] as String? ?? '',
+        createdAt: DateTime.parse(j['createdAt'] as String).toLocal(),
+        userId: j['userId'] as String?,
+        status: j['status'] as String? ?? 'inviata',
+      );
 }
 
 /// Voce del carrello: un tour con il numero di persone da richiedere.
@@ -121,11 +177,15 @@ class CartItem {
   CartItem(this.tourId, {this.people = 2});
   final String tourId;
   int people;
+
+  factory CartItem.fromJson(Map<String, dynamic> j) =>
+      CartItem(j['tourId'] as String, people: (j['people'] as num).toInt());
 }
 
 /// Prova del consenso WhatsApp (BR-011D).
 class WhatsAppConsent {
   WhatsAppConsent({
+    this.id,
     required this.phone,
     required this.at,
     required this.source,
@@ -133,12 +193,23 @@ class WhatsAppConsent {
     required this.sender,
     this.revoked = false,
   });
+  final String? id;
   final String phone;
   final DateTime at;
   final String source;
   final String text;
   final String sender;
   bool revoked;
+
+  factory WhatsAppConsent.fromJson(Map<String, dynamic> j) => WhatsAppConsent(
+        id: j['id'] as String?,
+        phone: j['phone'] as String? ?? '',
+        at: DateTime.parse(j['at'] as String).toLocal(),
+        source: j['source'] as String? ?? '',
+        text: j['text'] as String? ?? '',
+        sender: j['sender'] as String? ?? '',
+        revoked: j['revokedAt'] != null,
+      );
 }
 
 enum AssignmentStatus { proposto, accettato, rifiutato, annullato, completato }
@@ -156,6 +227,17 @@ class Assignment {
   final String fromGuideId;
   final String toGuideId;
   AssignmentStatus status;
+
+  factory Assignment.fromJson(Map<String, dynamic> j) => Assignment(
+        id: j['id'] as String,
+        tourId: j['tourId'] as String,
+        fromGuideId: j['fromGuideId'] as String,
+        toGuideId: j['toGuideId'] as String,
+        status: AssignmentStatus.values.firstWhere(
+          (s) => s.name == (j['status'] as String?),
+          orElse: () => AssignmentStatus.proposto,
+        ),
+      );
 }
 
 String fmtDate(DateTime d) {

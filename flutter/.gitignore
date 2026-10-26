@@ -33,6 +33,10 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Localizzazione: rigenerati da `flutter gen-l10n` (automatico con generate: true)
+lib/l10n/gen/
+untranslated.txt
+
 # Symbolication related
 app.*.symbols
 

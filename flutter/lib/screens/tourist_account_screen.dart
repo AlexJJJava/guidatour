@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/labels.dart';
 import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
@@ -14,6 +15,7 @@ class TouristAccountScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: appState,
       builder: (context, _) {
+        final t = l10n(context);
         final user = appState.currentUser;
         if (user == null) return const SizedBox.shrink();
         return DefaultTabController(
@@ -28,7 +30,7 @@ class TouristAccountScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Ciao ${user.name}',
+                          Text(t.greetingHello(user.name),
                               style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w800,
@@ -39,15 +41,15 @@ class TouristAccountScreen extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                        onPressed: appState.logout, child: const Text('Esci')),
+                        onPressed: appState.logout, child: Text(t.logout)),
                   ],
                 ),
               ),
               TabBar(
                 tabs: [
-                  const Tab(text: 'Preferiti'),
-                  Tab(text: 'Carrello (${appState.cart.length})'),
-                  const Tab(text: 'Storico'),
+                  Tab(text: t.navFavorites),
+                  Tab(text: '${t.navCart} (${appState.cart.length})'),
+                  Tab(text: t.bookingsTitleSent),
                 ],
               ),
               const Expanded(
@@ -68,19 +70,18 @@ class _Favorites extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = l10n(context);
     final favs = appState.favoriteTours;
     return PageBody(
       maxWidth: 900,
       child: favs.isEmpty
-          ? const Padding(
-              padding: EdgeInsets.symmetric(vertical: 40),
-              child: Center(
-                  child: Text(
-                      'Nessun preferito. Tocca il cuore su un tour per salvarlo.')),
+          ? Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Center(child: Text(t.favoritesEmpty)),
             )
           : ResponsiveGrid(children: [
-              for (final t in favs)
-                TourCard(tour: t, onTap: () => openTour(context, t)),
+              for (final tour in favs)
+                TourCard(tour: tour, onTap: () => openTour(context, tour)),
             ]),
     );
   }
@@ -98,13 +99,13 @@ class _CartState extends State<_Cart> {
 
   @override
   Widget build(BuildContext context) {
+    final t = l10n(context);
     final items = appState.cart;
     if (items.isEmpty) {
-      return const Center(
+      return Center(
           child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Text('Il carrello è vuoto. Aggiungi i tour che ti interessano '
-            'dalla scheda del tour.'),
+        padding: const EdgeInsets.all(24),
+        child: Text(t.cartEmpty),
       ));
     }
     return PageBody(
@@ -112,16 +113,14 @@ class _CartState extends State<_Cart> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const InfoBanner(
-              'Nessun pagamento online: inviamo una richiesta non vincolante per '
-              'ogni tour. Ogni guida ti contatterà per confermare disponibilità e pagamento.'),
+          InfoBanner(t.cartNoPaymentInfo),
           const SizedBox(height: 16),
           for (final item in items) _line(context, item),
           const Divider(height: 32),
           Row(
             children: [
-              const Text('Totale stimato',
-                  style: TextStyle(fontWeight: FontWeight.w700)),
+              Text(t.cartTotalLabel,
+                  style: const TextStyle(fontWeight: FontWeight.w700)),
               const Spacer(),
               Text(fmtPrice(appState.cartTotal),
                   style: const TextStyle(
@@ -135,23 +134,24 @@ class _CartState extends State<_Cart> {
             controlAffinity: ListTileControlAffinity.leading,
             value: _privacy,
             onChanged: (v) => setState(() => _privacy = v ?? false),
-            title: const Text(
-                'Acconsento a condividere nome ed email con le guide per essere '
-                'ricontattato.',
-                style: TextStyle(fontSize: 13)),
+            title: Text(t.cartShareConsent, style: const TextStyle(fontSize: 13)),
           ),
           FilledButton(
             onPressed: !_privacy
                 ? null
-                : () {
-                    final n = appState.checkoutCart();
-                    snack(context,
-                        '$n richieste inviate. Le trovi nello Storico.');
-                    setState(() => _privacy = false);
+                : () async {
+                    try {
+                      final n = await appState.checkoutCart();
+                      if (!context.mounted) return;
+                      snack(context, t.cartCheckoutDone(n, t.bookingsTitleSent));
+                      setState(() => _privacy = false);
+                    } catch (e) {
+                      if (context.mounted) snack(context, '$e');
+                    }
                   },
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text('Invia le richieste'),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(t.cartSubmit),
             ),
           ),
         ],
@@ -160,8 +160,9 @@ class _CartState extends State<_Cart> {
   }
 
   Widget _line(BuildContext context, CartItem item) {
-    final t = appState.tourById(item.tourId);
-    if (t == null) return const SizedBox.shrink();
+    final t = l10n(context);
+    final tour = appState.tourById(item.tourId);
+    if (tour == null) return const SizedBox.shrink();
     return Card(
       elevation: 0,
       color: Colors.white,
@@ -175,14 +176,16 @@ class _CartState extends State<_Cart> {
           children: [
             Expanded(
               child: InkWell(
-                onTap: () => openTour(context, t),
+                onTap: () => openTour(context, tour),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(t.title,
+                    Text(tour.title,
                         style: const TextStyle(
                             fontWeight: FontWeight.w800, fontSize: 15)),
-                    Text('${fmtDate(t.start)} · ${fmtPrice(t.price)} a persona',
+                    Text(
+                        t.cartLinePricePerPerson(
+                            fmtDate(tour.start), fmtPrice(tour.price)),
                         style: const TextStyle(color: kMuted, fontSize: 12)),
                   ],
                 ),
@@ -190,19 +193,22 @@ class _CartState extends State<_Cart> {
             ),
             IconButton(
               onPressed: item.people > 1
-                  ? () => appState.setCartPeople(item, item.people - 1)
+                  ? () => runOrSnack(context, () =>
+                      appState.setCartPeople(item, item.people - 1))
                   : null,
               icon: const Icon(Icons.remove_circle_outline),
             ),
             Text('${item.people}',
                 style: const TextStyle(fontWeight: FontWeight.w700)),
             IconButton(
-              onPressed: () => appState.setCartPeople(item, item.people + 1),
+              onPressed: () => runOrSnack(context, () =>
+                  appState.setCartPeople(item, item.people + 1)),
               icon: const Icon(Icons.add_circle_outline),
             ),
             IconButton(
-              tooltip: 'Rimuovi',
-              onPressed: () => appState.removeFromCart(item),
+              tooltip: t.remove,
+              onPressed: () =>
+                  runOrSnack(context, () => appState.removeFromCart(item)),
               icon: const Icon(Icons.delete_outline),
             ),
           ],
@@ -217,35 +223,37 @@ class _History extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = l10n(context);
     final reqs = appState.myRequests;
     return PageBody(
       maxWidth: 900,
       child: reqs.isEmpty
-          ? const Padding(
-              padding: EdgeInsets.symmetric(vertical: 40),
-              child: Center(child: Text('Non hai ancora inviato richieste.')),
+          ? Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Center(child: Text(t.historyEmpty)),
             )
           : Column(
               children: [
                 for (final r in reqs)
                   Builder(builder: (context) {
-                    final t = appState.tourById(r.tourId);
+                    final tour = appState.tourById(r.tourId);
                     final color = switch (r.status) {
-                      'Confermata' => kPrimary,
-                      'Rifiutata' => Colors.red,
+                      'confermata' => kPrimary,
+                      'rifiutata' => Colors.red,
                       _ => kMuted,
                     };
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.history),
-                      title: Text(t?.title ?? 'Tour non più disponibile'),
-                      subtitle: Text(
-                          '${fmtDate(r.createdAt)} · ${r.people} persone'
-                          '${t == null ? '' : ' · tour del ${fmtDate(t.start)}'}'),
-                      trailing: Text(r.status,
+                      title: Text(tour?.title ?? t.tourUnavailable),
+                      subtitle: Text(tour == null
+                          ? t.historyLine(fmtDate(r.createdAt), r.people)
+                          : t.historyLineWithTourDate(fmtDate(r.createdAt),
+                              r.people, fmtDate(tour.start))),
+                      trailing: Text(requestStatusLabel(context, r.status),
                           style: TextStyle(
                               color: color, fontWeight: FontWeight.w700)),
-                      onTap: t == null ? null : () => openTour(context, t),
+                      onTap: tour == null ? null : () => openTour(context, tour),
                     );
                   }),
               ],

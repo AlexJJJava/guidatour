@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/labels.dart';
 import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
@@ -28,17 +29,18 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = l10n(context);
     return ListenableBuilder(
       listenable: appState,
       builder: (context, _) {
         final q = _controller.text.trim().toLowerCase();
-        final results = appState.tours.where((t) {
-          final okCat = _category == null || t.category == _category;
-          final okLang = _language == null || t.language == _language;
+        final results = appState.tours.where((tour) {
+          final okCat = _category == null || tour.category == _category;
+          final okLang = _language == null || tour.language == _language;
           final okQuery = q.isEmpty ||
-              t.title.toLowerCase().contains(q) ||
-              t.description.toLowerCase().contains(q) ||
-              t.meetingPoint.toLowerCase().contains(q);
+              tour.title.toLowerCase().contains(q) ||
+              tour.description.toLowerCase().contains(q) ||
+              tour.meetingPoint.toLowerCase().contains(q);
           return okCat && okLang && okQuery;
         }).toList()
           ..sort((a, b) => a.start.compareTo(b.start));
@@ -47,15 +49,15 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Tour a Roma',
-                  style: TextStyle(
+              Text(t.searchTitle,
+                  style: const TextStyle(
                       fontSize: 30, fontWeight: FontWeight.w800, color: kInk)),
               const SizedBox(height: 16),
               TextField(
                 controller: _controller,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: 'Es. Colosseo, Trastevere, bambini…',
+                  hintText: t.searchHint,
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: q.isEmpty
                       ? null
@@ -71,28 +73,32 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ),
               const SizedBox(height: 14),
-              _chips(['Tutti', ...tourCategories], _category ?? 'Tutti',
-                  (v) => setState(() => _category = v == 'Tutti' ? null : v)),
+              _chips(
+                  context,
+                  [t.filterAll, ...tourCategories.map((c) => categoryLabel(context, c))],
+                  [null, ...tourCategories],
+                  _category,
+                  (v) => setState(() => _category = v)),
               const SizedBox(height: 8),
               _chips(
-                  ['Ogni lingua', ...tourLanguages],
-                  _language ?? 'Ogni lingua',
-                  (v) => setState(
-                      () => _language = v == 'Ogni lingua' ? null : v)),
+                  context,
+                  [t.filterAnyLanguage, ...tourLanguages.map((l) => languageLabel(context, l))],
+                  [null, ...tourLanguages],
+                  _language,
+                  (v) => setState(() => _language = v)),
               const SizedBox(height: 22),
-              Text('${results.length} tour',
+              Text(t.searchResultsCount(results.length),
                   style: const TextStyle(color: kMuted)),
               const SizedBox(height: 12),
               if (results.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 40),
-                  child: Center(
-                      child: Text('Nessun tour trovato con questi filtri.')),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Center(child: Text(t.searchNoResults)),
                 )
               else
                 ResponsiveGrid(children: [
-                  for (final t in results)
-                    TourCard(tour: t, onTap: () => openTour(context, t)),
+                  for (final tour in results)
+                    TourCard(tour: tour, onTap: () => openTour(context, tour)),
                 ]),
               const PlatformDisclaimer(),
             ],
@@ -102,23 +108,26 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _chips(
-      List<String> items, String selected, ValueChanged<String> onTap) {
+  /// [labels] e [values] sono parallele: labels[i] è il testo mostrato per
+  /// values[i] (il valore canonico, null per "tutti/ogni lingua").
+  Widget _chips(BuildContext context, List<String> labels,
+      List<String?> values, String? selected, ValueChanged<String?> onTap) {
     return Wrap(
       spacing: 4,
       runSpacing: 4,
       children: [
-        for (final c in items)
+        for (var i = 0; i < values.length; i++)
           ChoiceChip(
             visualDensity: VisualDensity.compact,
             padding: const EdgeInsets.symmetric(horizontal: 4),
             backgroundColor: const Color(0xFFE1F0EC),
             selectedColor: kPrimary,
             side: BorderSide.none,
-            labelStyle: TextStyle(color: selected == c ? Colors.white : kInk),
-            selected: selected == c,
-            label: Text(c),
-            onSelected: (_) => onTap(c),
+            labelStyle: TextStyle(
+                color: selected == values[i] ? Colors.white : kInk),
+            selected: selected == values[i],
+            label: Text(labels[i]),
+            onSelected: (_) => onTap(values[i]),
           ),
       ],
     );

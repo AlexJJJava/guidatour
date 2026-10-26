@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/labels.dart';
 import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
@@ -65,60 +66,69 @@ class _TourFormScreenState extends State<TourFormScreen> {
   }
 
   /// Restituisce il motivo del blocco, o null se si può pubblicare.
-  String? _blockReason() {
+  String? _blockReason(BuildContext context) {
+    final t = l10n(context);
     final role = _user.role;
     if (_accessories.isNotEmpty) {
       if (role != Role.tourOperator) {
-        return 'Con servizi accessori (${_accessories.join(', ')}) l’offerta diventa un '
-            'pacchetto turistico. Il profilo ${role.label} può pubblicare solo la propria '
-            'visita o attività: rimuovi i servizi accessori oppure usa un profilo Tour operator verificato.';
+        return t.formBlockAccessoriesNotOperator(
+            _accessories.map((a) => accessoryLabel(context, a)).join(', '),
+            roleLabel(context, role));
       }
       if (!_user.verified) {
-        return 'I pacchetti completi richiedono un profilo Tour operator verificato. '
-            'Il tuo profilo è in attesa di verifica.';
+        return t.formBlockNotVerified;
       }
     }
     if (role == Role.accompagnatore) {
       final text = '${_title.text} ${_description.text}'.toLowerCase();
       if (_category != 'Accompagnamento') {
-        return 'L’accompagnatore turistico può pubblicare solo attività di accompagnamento, '
-            'non visite guidate: la categoria è riservata alla guida abilitata.';
+        return t.formBlockAccompagnatoreCategory;
       }
       if (_culturalKeywords.any(text.contains)) {
-        return 'Il testo sembra descrivere una visita guidata specialistica su beni culturali, '
-            'riservata alla guida abilitata. Riformula come attività di accompagnamento o '
-            'invia a revisione amministrativa.';
+        return t.formBlockCulturalKeywords;
       }
     }
     return null;
   }
 
-  void _submit() {
+  bool _submitting = false;
+
+  Future<void> _submit() async {
+    final t = l10n(context);
     if (!_key.currentState!.validate()) return;
     if (_start == null) {
-      snack(context, 'Scegli data e ora.');
+      snack(context, t.formChooseDateTime);
       return;
     }
-    if (_blockReason() != null) return;
+    if (_blockReason(context) != null) return;
     if (!_declaration) {
-      snack(context, 'Conferma la dichiarazione di responsabilità.');
+      snack(context, t.formConfirmDeclaration);
       return;
     }
-    final tour = appState.addTour(
-      title: _title.text.trim(),
-      category: _category,
-      language: _language,
-      duration: _duration.text.trim(),
-      start: _start!,
-      price: double.parse(_price.text.replaceAll(',', '.')),
-      meetingPoint: _meeting.text.trim(),
-      description: _description.text.trim(),
-      seats: int.parse(_seats.text),
-      accessories: _accessories.toList(),
-    );
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => PosterScreen(tour: tour)),
-    );
+    setState(() => _submitting = true);
+    try {
+      final tour = await appState.addTour(
+        title: _title.text.trim(),
+        category: _category,
+        language: _language,
+        duration: _duration.text.trim(),
+        start: _start!,
+        price: double.parse(_price.text.replaceAll(',', '.')),
+        meetingPoint: _meeting.text.trim(),
+        description: _description.text.trim(),
+        seats: int.parse(_seats.text),
+        accessories: _accessories.toList(),
+      );
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => PosterScreen(tour: tour)),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _submitting = false);
+        snack(context, '$e');
+      }
+    }
   }
 
   Future<void> _pickDate() async {
@@ -136,18 +146,18 @@ class _TourFormScreenState extends State<TourFormScreen> {
     setState(() => _start = DateTime(d.year, d.month, d.day, t.hour, t.minute));
   }
 
-  String? _required(String? v) =>
-      (v == null || v.trim().isEmpty) ? 'Obbligatorio' : null;
-
   @override
   Widget build(BuildContext context) {
-    final block = _blockReason();
+    final t = l10n(context);
+    final block = _blockReason(context);
     final categories = _user.role == Role.accompagnatore
         ? tourCategories
         : tourCategories.where((c) => c != 'Accompagnamento').toList();
     if (!categories.contains(_category)) _category = categories.first;
+    String? required(String? v) =>
+        (v == null || v.trim().isEmpty) ? t.validationRequired : null;
     return Scaffold(
-      appBar: AppBar(title: const Text('Nuovo tour')),
+      appBar: AppBar(title: Text(t.newTour)),
       body: PageBody(
         maxWidth: 680,
         child: Form(
@@ -156,34 +166,33 @@ class _TourFormScreenState extends State<TourFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              InfoBanner(
-                  'Stai pubblicando come ${_user.role.label}. Città: Roma.'),
+              InfoBanner(t.formPublishingAs(roleLabel(context, _user.role))),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _title,
-                decoration: const InputDecoration(
-                    labelText: 'Titolo del tour', border: OutlineInputBorder()),
-                validator: _required,
+                decoration: InputDecoration(
+                    labelText: t.fieldTourTitle, border: const OutlineInputBorder()),
+                validator: required,
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
                 initialValue: _category,
-                decoration: const InputDecoration(
-                    labelText: 'Categoria', border: OutlineInputBorder()),
+                decoration: InputDecoration(
+                    labelText: t.fieldCategory, border: const OutlineInputBorder()),
                 items: [
                   for (final c in categories)
-                    DropdownMenuItem(value: c, child: Text(c)),
+                    DropdownMenuItem(value: c, child: Text(categoryLabel(context, c))),
                 ],
                 onChanged: (v) => setState(() => _category = v!),
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
                 initialValue: _language,
-                decoration: const InputDecoration(
-                    labelText: 'Lingua', border: OutlineInputBorder()),
+                decoration: InputDecoration(
+                    labelText: t.fieldLanguage, border: const OutlineInputBorder()),
                 items: [
                   for (final l in tourLanguages)
-                    DropdownMenuItem(value: l, child: Text(l)),
+                    DropdownMenuItem(value: l, child: Text(languageLabel(context, l))),
                 ],
                 onChanged: (v) => setState(() => _language = v!),
               ),
@@ -191,7 +200,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
               OutlinedButton.icon(
                 onPressed: _pickDate,
                 icon: const Icon(Icons.event),
-                label: Text(_start == null ? 'Data e ora' : fmtDate(_start!)),
+                label: Text(_start == null ? t.fieldDateTime : fmtDate(_start!)),
               ),
               const SizedBox(height: 14),
               Row(
@@ -199,9 +208,9 @@ class _TourFormScreenState extends State<TourFormScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _duration,
-                      decoration: const InputDecoration(
-                          labelText: 'Durata', border: OutlineInputBorder()),
-                      validator: _required,
+                      decoration: InputDecoration(
+                          labelText: t.fieldDuration, border: const OutlineInputBorder()),
+                      validator: required,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -209,13 +218,13 @@ class _TourFormScreenState extends State<TourFormScreen> {
                     child: TextFormField(
                       controller: _price,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                          labelText: 'Prezzo (€)',
-                          border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                          labelText: t.fieldPrice,
+                          border: const OutlineInputBorder()),
                       validator: (v) =>
                           double.tryParse((v ?? '').replaceAll(',', '.')) ==
                                   null
-                              ? 'Numero'
+                              ? t.validationNumber
                               : null,
                     ),
                   ),
@@ -224,10 +233,11 @@ class _TourFormScreenState extends State<TourFormScreen> {
                     child: TextFormField(
                       controller: _seats,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                          labelText: 'Posti', border: OutlineInputBorder()),
-                      validator: (v) =>
-                          (int.tryParse(v ?? '') ?? 0) < 1 ? '≥ 1' : null,
+                      decoration: InputDecoration(
+                          labelText: t.fieldSeats, border: const OutlineInputBorder()),
+                      validator: (v) => (int.tryParse(v ?? '') ?? 0) < 1
+                          ? t.validationAtLeastOne
+                          : null,
                     ),
                   ),
                 ],
@@ -235,28 +245,28 @@ class _TourFormScreenState extends State<TourFormScreen> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _meeting,
-                decoration: const InputDecoration(
-                    labelText: 'Punto di incontro',
-                    border: OutlineInputBorder()),
-                validator: _required,
+                decoration: InputDecoration(
+                    labelText: t.fieldMeetingPoint,
+                    border: const OutlineInputBorder()),
+                validator: required,
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _description,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                    labelText: 'Descrizione', border: OutlineInputBorder()),
-                validator: _required,
+                decoration: InputDecoration(
+                    labelText: t.fieldDescription, border: const OutlineInputBorder()),
+                validator: required,
               ),
               const SizedBox(height: 18),
-              const Text('Servizi accessori inclusi',
-                  style: TextStyle(fontWeight: FontWeight.w700)),
+              Text(t.fieldAccessories,
+                  style: const TextStyle(fontWeight: FontWeight.w700)),
               Wrap(
                 spacing: 8,
                 children: [
                   for (final s in accessoryServices)
                     FilterChip(
-                      label: Text(s),
+                      label: Text(accessoryLabel(context, s)),
                       selected: _accessories.contains(s),
                       onSelected: (v) => setState(() =>
                           v ? _accessories.add(s) : _accessories.remove(s)),
@@ -272,18 +282,21 @@ class _TourFormScreenState extends State<TourFormScreen> {
                 controlAffinity: ListTileControlAffinity.leading,
                 value: _declaration,
                 onChanged: (v) => setState(() => _declaration = v ?? false),
-                title: const Text(
-                    'Dichiaro di essere responsabile del contenuto pubblicato, della mia '
-                    'abilitazione (ove richiesta), della disponibilità e dello svolgimento '
-                    'dell’offerta.',
-                    style: TextStyle(fontSize: 13)),
+                title: Text(t.formDeclaration, style: const TextStyle(fontSize: 13)),
               ),
               const SizedBox(height: 8),
               FilledButton(
-                onPressed: block == null ? _submit : null,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Text('Pubblica e genera QR'),
+                onPressed: block == null && !_submitting ? _submit : null,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: _submitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        )
+                      : Text(t.formSubmit),
                 ),
               ),
             ],

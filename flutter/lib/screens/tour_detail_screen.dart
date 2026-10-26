@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/labels.dart';
 import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
+import 'tour_map.dart';
 import 'whatsapp_optin.dart';
 
 void openTour(BuildContext context, Tour t, {bool fromQr = false}) {
@@ -27,15 +29,17 @@ class TourDetailScreen extends StatelessWidget {
   /// Preferiti e carrello richiedono un account turista.
   bool _needsTourist(BuildContext context) {
     if (appState.isTourist) return false;
+    final t = l10n(context);
     snack(
         context,
         appState.currentUser == null
-            ? 'Accedi o registrati (scheda Account) per usare preferiti e carrello.'
-            : 'Preferiti e carrello sono riservati agli account turista.');
+            ? t.detailNeedLoginFavorites
+            : t.detailNeedTourist);
     return true;
   }
 
   Widget _content(BuildContext context) {
+    final t = l10n(context);
     final guide = appState.guideById(tour.guideId);
     final fav = appState.isFavorite(tour.id);
     final inCart = appState.inCart(tour.id);
@@ -44,12 +48,16 @@ class TourDetailScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(
-            tooltip: fav ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti',
+            tooltip: fav ? t.favRemoveTooltip : t.favAddTooltip,
             icon: Icon(fav ? Icons.favorite : Icons.favorite_border,
                 color: fav ? Colors.red : null),
-            onPressed: () {
+            onPressed: () async {
               if (_needsTourist(context)) return;
-              appState.toggleFavorite(tour.id);
+              try {
+                await appState.toggleFavorite(tour.id);
+              } catch (e) {
+                if (context.mounted) snack(context, '$e');
+              }
             },
           ),
         ],
@@ -70,7 +78,9 @@ class TourDetailScreen extends StatelessWidget {
                   size: 84, color: Colors.white.withValues(alpha: 0.9)),
             ),
             const SizedBox(height: 22),
-            Text('${tour.category} · ROMA'.toUpperCase(),
+            Text(
+                '${categoryLabel(context, tour.category)} · ${t.cityRome}'
+                    .toUpperCase(),
                 style: const TextStyle(
                     fontSize: 12,
                     letterSpacing: 1,
@@ -90,20 +100,22 @@ class TourDetailScreen extends StatelessWidget {
               children: [
                 _Fact(Icons.event, fmtDate(tour.start)),
                 _Fact(Icons.schedule, tour.duration),
-                _Fact(Icons.language, tour.language),
+                _Fact(Icons.language, languageLabel(context, tour.language)),
                 _Fact(Icons.euro, fmtPrice(tour.price)),
-                _Fact(Icons.event_seat_outlined, '${tour.seats} posti'),
+                _Fact(Icons.event_seat_outlined, t.detailSeatsCount(tour.seats)),
               ],
             ),
             const SizedBox(height: 14),
-            _Fact(Icons.place_outlined, 'Ritrovo: ${tour.meetingPoint}'),
+            _Fact(Icons.place_outlined, t.detailMeetingPoint(tour.meetingPoint)),
+            const SizedBox(height: 20),
+            TourMeetingPointMap(meetingPoint: tour.meetingPoint),
             const SizedBox(height: 20),
             Text(tour.description,
                 style: const TextStyle(fontSize: 16, height: 1.5)),
             if (tour.isPackage) ...[
               const SizedBox(height: 16),
-              InfoBanner(
-                  'Pacchetto completo organizzato da ${guide?.name}. Include: ${tour.accessories.join(', ')}.'),
+              InfoBanner(t.detailPackageInfo(guide?.name ?? '',
+                  tour.accessories.map((a) => accessoryLabel(context, a)).join(', '))),
             ],
             const SizedBox(height: 22),
             Card(
@@ -122,8 +134,9 @@ class TourDetailScreen extends StatelessWidget {
                 title: Text(guide?.name ?? '',
                     style: const TextStyle(fontWeight: FontWeight.w700)),
                 subtitle: Text(
-                    '${guide?.role.label}${guide?.verified == true ? ' · verificato' : ''}'
-                    '\n${guide?.languages.join(', ')}'),
+                    '${guide == null ? '' : roleLabel(context, guide.role)}'
+                    '${guide?.verified == true ? ' · ${t.verifiedSuffix}' : ''}'
+                    '\n${guide?.languages.map((l) => languageLabel(context, l)).join(', ')}'),
                 isThreeLine: true,
               ),
             ),
@@ -131,14 +144,20 @@ class TourDetailScreen extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: inCart
                   ? null
-                  : () {
+                  : () async {
                       if (_needsTourist(context)) return;
-                      appState.addToCart(tour.id);
-                      snack(context, 'Aggiunto al carrello');
+                      try {
+                        await appState.addToCart(tour.id);
+                        if (context.mounted) {
+                          snack(context, t.cartAdded);
+                        }
+                      } catch (e) {
+                        if (context.mounted) snack(context, '$e');
+                      }
                     },
               icon:
                   Icon(inCart ? Icons.check : Icons.add_shopping_cart_outlined),
-              label: Text(inCart ? 'Nel carrello' : 'Aggiungi al carrello'),
+              label: Text(inCart ? t.inCart : t.addToCart),
             ),
             const SizedBox(height: 20),
             BookingForm(tour: tour),
@@ -190,6 +209,7 @@ class _BookingFormState extends State<BookingForm> {
   int _people = 2;
   bool _privacy = false;
   bool _sent = false;
+  bool _sending = false;
 
   @override
   void dispose() {
@@ -199,67 +219,75 @@ class _BookingFormState extends State<BookingForm> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    final t = l10n(context);
     if (!_key.currentState!.validate()) return;
     if (!_privacy) {
-      snack(context, 'Per inviare la richiesta serve il consenso privacy.');
+      snack(context, t.bookingNeedPrivacy);
       return;
     }
-    appState.addRequest(BookingRequest(
-      tourId: widget.tour.id,
-      name: _name.text.trim(),
-      email: _email.text.trim(),
-      phone: _phone.text.trim(),
-      people: _people,
-      message: _message.text.trim(),
-      createdAt: DateTime.now(),
-      userId: appState.isTourist ? appState.currentUser!.id : null,
-    ));
-    setState(() => _sent = true);
+    setState(() => _sending = true);
+    try {
+      await appState.addRequest(BookingRequest(
+        tourId: widget.tour.id,
+        name: _name.text.trim(),
+        email: _email.text.trim(),
+        phone: _phone.text.trim(),
+        people: _people,
+        message: _message.text.trim(),
+        createdAt: DateTime.now(),
+        userId: appState.isTourist ? appState.currentUser!.id : null,
+      ));
+      if (mounted) setState(() => _sent = true);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _sending = false);
+        snack(context, '$e');
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = l10n(context);
     if (_sent) {
-      return const InfoBanner(
-          'Richiesta inviata! La guida ti contatterà per confermare disponibilità e pagamento. '
-          'Questa richiesta non è una prenotazione vincolante.');
+      return InfoBanner(t.bookingSentInfo);
     }
     return Form(
       key: _key,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionHeading(title: 'Richiedi informazioni / prenota'),
+          SectionHeading(title: t.bookingSectionTitle),
           const SizedBox(height: 12),
           TextFormField(
             controller: _name,
-            decoration: const InputDecoration(
-                labelText: 'Nome e cognome', border: OutlineInputBorder()),
+            decoration: InputDecoration(
+                labelText: t.fieldFullName, border: const OutlineInputBorder()),
             validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Obbligatorio' : null,
+                (v == null || v.trim().isEmpty) ? t.validationRequired : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _email,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-                labelText: 'Email', border: OutlineInputBorder()),
+            decoration: InputDecoration(
+                labelText: t.fieldEmail, border: const OutlineInputBorder()),
             validator: (v) =>
-                (v == null || !v.contains('@')) ? 'Email non valida' : null,
+                (v == null || !v.contains('@')) ? t.validationEmail : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _phone,
             keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-                labelText: 'Telefono (facoltativo)',
-                border: OutlineInputBorder()),
+            decoration: InputDecoration(
+                labelText: t.fieldPhoneOptional,
+                border: const OutlineInputBorder()),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              const Text('Persone'),
+              Text(t.fieldPeople),
               const SizedBox(width: 12),
               IconButton.outlined(
                 onPressed: _people > 1 ? () => setState(() => _people--) : null,
@@ -281,26 +309,31 @@ class _BookingFormState extends State<BookingForm> {
           TextFormField(
             controller: _message,
             maxLines: 3,
-            decoration: const InputDecoration(
-                labelText: 'Messaggio (facoltativo)',
-                border: OutlineInputBorder()),
+            decoration: InputDecoration(
+                labelText: t.fieldMessageOptional,
+                border: const OutlineInputBorder()),
           ),
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.leading,
             value: _privacy,
             onChanged: (v) => setState(() => _privacy = v ?? false),
-            title: const Text(
-                'Ho letto l’informativa privacy e acconsento al trattamento dei dati '
-                'per essere ricontattato dalla guida.',
-                style: TextStyle(fontSize: 13)),
+            title:
+                Text(t.bookingPrivacyConsent, style: const TextStyle(fontSize: 13)),
           ),
           const SizedBox(height: 8),
           FilledButton(
-            onPressed: _submit,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text('Invia richiesta'),
+            onPressed: _sending ? null : _submit,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: _sending
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text(t.bookingSubmit),
             ),
           ),
         ],

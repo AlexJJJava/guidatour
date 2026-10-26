@@ -1,177 +1,203 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'api_client.dart';
 import 'models.dart';
 
-/// Stato applicativo in memoria (nessun backend nell'MVP di prototipo).
+/// Stato applicativo: dati pubblici cache-ati localmente, dati dell'utente
+/// caricati dal backend dopo il login (Supabase Auth + API GuidaTour).
 class AppState extends ChangeNotifier {
   AppState() {
-    _seed();
+    _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final session = data.session;
+      if (session == null) {
+        if (currentUser != null) _clearUserData();
+      } else if (currentUser == null || currentUser!.id != session.user.id) {
+        unawaited(_loadMyProfile());
+      }
+    });
+  }
+
+  late final StreamSubscription<AuthState> _authSub;
+
+  @override
+  void dispose() {
+    _authSub.cancel();
+    super.dispose();
   }
 
   final List<Guide> guides = [];
   final List<Tour> tours = [];
-  final List<BookingRequest> requests = [];
-  final List<WhatsAppConsent> consents = [];
-  final List<Assignment> assignments = [];
-  final List<String> notifications = [];
+  List<Tour> favoriteTours = [];
+  List<CartItem> cart = [];
+
+  /// Richieste ricevute (se guida/operatore) o inviate (se turista).
+  List<BookingRequest> requests = [];
+  List<BookingRequest> myRequests = [];
+  List<WhatsAppConsent> consents = [];
+  List<Assignment> assignments = [];
+  List<String> notifications = [];
   Guide? currentUser;
-  int _seq = 100;
+  bool ready = false;
 
   static const whatsappConsentText =
       'Acconsento a ricevere su WhatsApp la lista aggiornata di tour ed '
       'escursioni a Roma da GuidaTour. Posso revocare il consenso in qualsiasi '
       'momento rispondendo STOP.';
 
-  void _seed() {
-    guides.addAll([
-      Guide(
-        id: 'g1',
-        name: 'Giulia Romano',
-        email: 'giulia@demo.it',
-        role: Role.guida,
-        verified: true,
-        languages: ['Italiano', 'English'],
-        bio: 'Guida abilitata, archeologia e Roma imperiale.',
-      ),
-      Guide(
-        id: 'g2',
-        name: 'Marco Bellini',
-        email: 'marco@demo.it',
-        role: Role.guida,
-        verified: true,
-        languages: ['Italiano', 'Français'],
-        bio: 'Guida abilitata, Trastevere, ghetto e cucina romana.',
-      ),
-      Guide(
-        id: 'g3',
-        name: 'Roma Tour Srl',
-        email: 'operatore@demo.it',
-        role: Role.tourOperator,
-        verified: true,
-        bio: 'Tour operator autorizzato, pacchetti completi.',
-      ),
-      Guide(
-        id: 'g5',
-        name: 'Elena Turista',
-        email: 'elena@demo.it',
-        role: Role.turista,
-      ),
-      Guide(
-        id: 'g4',
-        name: 'Sara Conti',
-        email: 'sara@demo.it',
-        role: Role.accompagnatore,
-        verified: true,
-        languages: ['Italiano', 'English', 'Español'],
-        bio: 'Accompagnatrice turistica per gruppi.',
-      ),
-    ]);
-    final now = DateTime.now();
-    DateTime at(int days, int h) =>
-        DateTime(now.year, now.month, now.day + days, h);
-    tours.addAll([
-      Tour(
-        id: 'colosseo-foro',
-        title: 'Colosseo e Foro Romano',
-        category: 'Visita guidata',
-        language: 'Italiano',
-        duration: '2 ore 30',
-        start: at(2, 10),
-        price: 35,
-        meetingPoint: 'Uscita metro Colosseo, Linea B',
-        description: 'Un percorso tra anfiteatro Flavio, Foro e Palatino '
-            'con una guida abilitata. Ingressi non inclusi.',
-        seats: 4,
-        guideId: 'g1',
-        visits: 128,
-        scans: 41,
-      ),
-      Tour(
-        id: 'roma-bambini',
-        title: 'Roma per bambini: gladiatori e leggende',
-        category: 'Bambini e famiglie',
-        language: 'English',
-        duration: '2 ore',
-        start: at(3, 15),
-        price: 25,
-        meetingPoint: 'Piazza Venezia, sotto il Vittoriano',
-        description: 'Caccia al tesoro tra le rovine, pensata per famiglie '
-            'con bambini dai 5 ai 12 anni.',
-        seats: 10,
-        guideId: 'g1',
-        visits: 64,
-        scans: 12,
-      ),
-      Tour(
-        id: 'trastevere-sera',
-        title: 'Trastevere by night',
-        category: 'Serale',
-        language: 'Français',
-        duration: '2 ore',
-        start: at(1, 20),
-        price: 22,
-        meetingPoint: 'Piazza Trilussa',
-        description: 'Vicoli, storie e aneddoti nel rione più vivo di Roma '
-            'dopo il tramonto.',
-        seats: 12,
-        guideId: 'g2',
-        visits: 89,
-        scans: 30,
-      ),
-      Tour(
-        id: 'roma-gusto',
-        title: 'Roma a tavola: mercati e sapori',
-        category: 'Enogastronomico',
-        language: 'Italiano',
-        duration: '3 ore',
-        start: at(4, 11),
-        price: 45,
-        meetingPoint: 'Mercato di Testaccio, ingresso principale',
-        description: 'Passeggiata tra i banchi del mercato con assaggi '
-            'pagati direttamente in loco.',
-        seats: 8,
-        guideId: 'g2',
-        visits: 40,
-        scans: 9,
-      ),
-      Tour(
-        id: 'vaticano-cena',
-        title: 'Vaticano + cena romana (pacchetto)',
-        category: 'Visita guidata',
-        language: 'English',
-        duration: '6 ore',
-        start: at(5, 16),
-        price: 129,
-        meetingPoint: 'Viale Vaticano, ingresso Musei',
-        description: 'Musei Vaticani con guida e cena tipica in trattoria, '
-            'transfer incluso. Organizzato da tour operator autorizzato.',
-        seats: 14,
-        guideId: 'g3',
-        accessories: ['Cena / ristorante', 'Transfer / auto'],
-        visits: 52,
-        scans: 7,
-      ),
-    ]);
-    requests.addAll([
-      BookingRequest(
-        tourId: 'colosseo-foro',
-        name: 'Anna Schmidt',
-        email: 'anna@example.com',
-        phone: '+491701234567',
-        people: 3,
-        message: 'Possiamo avere un tour in tedesco?',
-        createdAt: now.subtract(const Duration(hours: 5)),
-      ),
-      BookingRequest(
-        tourId: 'colosseo-foro',
-        name: 'John Miller',
-        email: 'john@example.com',
-        phone: '+14155550101',
-        people: 2,
-        message: '',
-        createdAt: now.subtract(const Duration(hours: 2)),
-      ),
-    ]);
+  /// Da chiamare una volta all'avvio dell'app.
+  Future<void> init() async {
+    await Future.wait([_loadTours(), _loadGuides()]);
+    ready = true;
+    notifyListeners();
+  }
+
+  Future<void> _loadTours() async {
+    try {
+      final json = await api.get('/tours') as Map;
+      final list = (json['tours'] as List)
+          .map((j) => Tour.fromJson(j as Map<String, dynamic>))
+          .toList();
+      tours
+        ..clear()
+        ..addAll(list);
+    } catch (_) {
+      // Resta con la cache precedente (vuota al primo avvio).
+    }
+    notifyListeners();
+  }
+
+  /// Aggiunge/aggiorna un tour nella cache locale senza perdere gli altri
+  /// (usato quando un tour arriva da un endpoint diverso da GET /tours,
+  /// es. carrello o dashboard, e potrebbe non essere tra i futuri).
+  void _cacheTour(Tour t) {
+    final i = tours.indexWhere((x) => x.id == t.id);
+    if (i >= 0) {
+      tours[i] = t;
+    } else {
+      tours.add(t);
+    }
+  }
+
+  Future<void> _loadGuides() async {
+    try {
+      final json = await api.get('/guides') as Map;
+      final list = (json['guides'] as List)
+          .map((j) => Guide.fromPublicJson(j as Map<String, dynamic>))
+          .toList();
+      guides
+        ..clear()
+        ..addAll(list);
+    } catch (_) {
+      // Resta con la cache precedente.
+    }
+    notifyListeners();
+  }
+
+  Future<void> _loadMyProfile() async {
+    try {
+      final json = await api.get('/me') as Map<String, dynamic>;
+      currentUser = Guide.fromProfileJson(json);
+    } catch (_) {
+      currentUser = null;
+      notifyListeners();
+      return;
+    }
+    if (currentUser!.role.isProfessional) {
+      await _loadProfessionalData();
+    } else {
+      await _loadTouristData();
+    }
+    notifyListeners();
+  }
+
+  Future<void> _loadTouristData() async {
+    try {
+      final favJson = await api.get('/me/favorites') as Map;
+      favoriteTours = (favJson['tours'] as List)
+          .map((j) => Tour.fromJson(j as Map<String, dynamic>))
+          .toList();
+      for (final t in favoriteTours) {
+        _cacheTour(t);
+      }
+    } catch (_) {
+      favoriteTours = [];
+    }
+    try {
+      final cartJson = await api.get('/me/cart') as Map;
+      final items = (cartJson['items'] as List).cast<Map<String, dynamic>>();
+      cart = items
+          .map((i) => CartItem(i['tourId'] as String,
+              people: (i['people'] as num).toInt()))
+          .toList();
+      for (final i in items) {
+        _cacheTour(Tour.fromJson(i['tour'] as Map<String, dynamic>));
+      }
+    } catch (_) {
+      cart = [];
+    }
+    try {
+      final reqJson = await api.get('/me/requests') as Map;
+      myRequests = (reqJson['requests'] as List)
+          .map((j) => BookingRequest.fromJson(j as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      myRequests = [];
+    }
+    notifyListeners();
+  }
+
+  Future<void> _loadProfessionalData() async {
+    try {
+      final reqJson = await api.get('/requests/received') as Map;
+      requests = (reqJson['requests'] as List)
+          .map((j) => BookingRequest.fromJson(j as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      requests = [];
+    }
+    try {
+      final notifJson = await api.get('/me/notifications') as Map;
+      notifications = (notifJson['notifications'] as List)
+          .cast<Map<String, dynamic>>()
+          .map((j) => j['message'] as String)
+          .toList();
+    } catch (_) {
+      notifications = [];
+    }
+    try {
+      final asJson = await api.get('/assignments') as Map;
+      assignments = (asJson['assignments'] as List)
+          .map((j) => Assignment.fromJson(j as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      assignments = [];
+    }
+    try {
+      // Riservato agli admin: per gli altri il backend risponde 403, lo
+      // ignoriamo e la lista resta vuota.
+      final consJson = await api.get('/consents') as Map;
+      consents = (consJson['consents'] as List)
+          .map((j) => WhatsAppConsent.fromJson(j as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      consents = [];
+    }
+    notifyListeners();
+  }
+
+  void _clearUserData() {
+    currentUser = null;
+    favoriteTours = [];
+    cart = [];
+    requests = [];
+    myRequests = [];
+    consents = [];
+    assignments = [];
+    notifications = [];
+    notifyListeners();
   }
 
   Guide? guideById(String id) {
@@ -189,50 +215,45 @@ class AppState extends ChangeNotifier {
   }
 
   // --- Account ---
-  String? login(String email) {
-    for (final g in guides) {
-      if (g.email.toLowerCase() == email.trim().toLowerCase()) {
-        currentUser = g;
-        notifyListeners();
-        return null;
+
+  /// Restituisce un messaggio di errore, o null se l'accesso è riuscito.
+  Future<String?> loginWithPassword(String email, String password) async {
+    try {
+      await Supabase.instance.client.auth
+          .signInWithPassword(email: email.trim(), password: password);
+      return null;
+    } on AuthException catch (e) {
+      return e.message;
+    } catch (_) {
+      return 'Accesso non riuscito. Controlla la connessione e riprova.';
+    }
+  }
+
+  /// Restituisce un messaggio da mostrare (errore, o avviso di conferma email),
+  /// oppure null se la registrazione ha avviato subito una sessione valida.
+  Future<String?> registerWithPassword(
+      String name, String email, String password, Role role) async {
+    try {
+      final res = await Supabase.instance.client.auth.signUp(
+        email: email.trim(),
+        password: password,
+        data: {'name': name.trim(), 'role': role.name},
+      );
+      if (res.session == null) {
+        return 'Account creato: controlla la tua email per confermarlo prima di accedere.';
       }
+      return null;
+    } on AuthException catch (e) {
+      return e.message;
+    } catch (_) {
+      return 'Registrazione non riuscita. Controlla la connessione e riprova.';
     }
-    return 'Nessun account con questa email. Registrati oppure usa un account demo.';
   }
 
-  void loginAs(Guide g) {
-    currentUser = g;
-    notifyListeners();
-  }
-
-  Guide? findByEmail(String email) {
-    for (final g in guides) {
-      if (g.email.toLowerCase() == email.trim().toLowerCase()) return g;
-    }
-    return null;
-  }
-
-  Guide register(String name, String email, Role role,
-      {String provider = 'email'}) {
-    final g = Guide(
-        id: 'g${_seq++}',
-        name: name,
-        email: email,
-        role: role,
-        provider: provider);
-    guides.add(g);
-    currentUser = g;
-    notifyListeners();
-    return g;
-  }
-
-  void logout() {
-    currentUser = null;
-    notifyListeners();
-  }
+  Future<void> logout() => Supabase.instance.client.auth.signOut();
 
   // --- Tour ---
-  Tour addTour({
+  Future<Tour> addTour({
     required String title,
     required String category,
     required String language,
@@ -243,79 +264,78 @@ class AppState extends ChangeNotifier {
     required String description,
     required int seats,
     required List<String> accessories,
-  }) {
-    final slug = title
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-        .replaceAll(RegExp(r'^-+|-+$'), '');
-    final tour = Tour(
-      id: '$slug-${_seq++}',
-      title: title,
-      category: category,
-      language: language,
-      duration: duration,
-      start: start,
-      price: price,
-      meetingPoint: meetingPoint,
-      description: description,
-      seats: seats,
-      guideId: currentUser!.id,
-      accessories: accessories,
-    );
-    tours.add(tour);
+  }) async {
+    final json = await api.post('/tours', {
+      'title': title,
+      'category': category,
+      'language': language,
+      'duration': duration,
+      'start': start.toUtc().toIso8601String(),
+      'price': price,
+      'meetingPoint': meetingPoint,
+      'description': description,
+      'seats': seats,
+      'accessories': accessories,
+    }) as Map<String, dynamic>;
+    final tour = Tour.fromJson(json);
+    _cacheTour(tour);
     notifyListeners();
     return tour;
   }
 
-  void recordVisit(Tour t) {
-    t.visits++;
+  Future<void> recordVisit(Tour t) async {
+    try {
+      await api.post('/tours/${t.id}/visit');
+    } catch (_) {
+      // Non blocca l'esperienza utente.
+    }
   }
 
-  void recordScan(Tour t) {
+  Future<void> recordScan(Tour t) async {
+    await api.post('/tours/${t.id}/scan');
     t.scans++;
     t.visits++;
     notifyListeners();
   }
 
   // --- Account turista: preferiti, carrello, storico ---
-  final Map<String, Set<String>> _favorites = {};
-  final Map<String, List<CartItem>> _carts = {};
 
-  bool get isTourist => currentUser?.role == Role.turista;
+  bool get isTourist => currentUser != null && !currentUser!.role.isProfessional;
 
   bool isFavorite(String tourId) =>
-      _favorites[currentUser?.id]?.contains(tourId) ?? false;
+      favoriteTours.any((t) => t.id == tourId);
 
-  List<Tour> get favoriteTours => [
-        for (final id in _favorites[currentUser?.id] ?? <String>{})
-          if (tourById(id) != null) tourById(id)!,
-      ];
-
-  void toggleFavorite(String tourId) {
-    final set = _favorites.putIfAbsent(currentUser!.id, () => {});
-    if (!set.remove(tourId)) set.add(tourId);
+  Future<void> toggleFavorite(String tourId) async {
+    if (isFavorite(tourId)) {
+      await api.delete('/me/favorites/$tourId');
+      favoriteTours.removeWhere((t) => t.id == tourId);
+    } else {
+      await api.put('/me/favorites/$tourId');
+      final t = tourById(tourId);
+      if (t != null) favoriteTours.add(t);
+    }
     notifyListeners();
   }
-
-  List<CartItem> get cart => _carts[currentUser?.id] ?? const [];
 
   bool inCart(String tourId) => cart.any((c) => c.tourId == tourId);
 
-  void addToCart(String tourId, {int people = 2}) {
+  Future<void> addToCart(String tourId, {int people = 2}) async {
     if (inCart(tourId)) return;
-    _carts
-        .putIfAbsent(currentUser!.id, () => [])
-        .add(CartItem(tourId, people: people));
+    await api.post('/me/cart', {'tourId': tourId, 'people': people});
+    cart.add(CartItem(tourId, people: people));
     notifyListeners();
   }
 
-  void removeFromCart(CartItem item) {
-    _carts[currentUser!.id]?.remove(item);
+  Future<void> removeFromCart(CartItem item) async {
+    await api.delete('/me/cart/${item.tourId}');
+    cart.remove(item);
     notifyListeners();
   }
 
-  void setCartPeople(CartItem item, int people) {
-    item.people = people < 1 ? 1 : people;
+  Future<void> setCartPeople(CartItem item, int people) async {
+    final n = people < 1 ? 1 : people;
+    await api.patch('/me/cart/${item.tourId}', {'people': n});
+    item.people = n;
     notifyListeners();
   }
 
@@ -325,61 +345,41 @@ class AppState extends ChangeNotifier {
       });
 
   /// Invia una richiesta non vincolante per ogni tour nel carrello (nessun pagamento).
-  int checkoutCart() {
-    final user = currentUser!;
-    final items = [...cart];
-    for (final c in items) {
-      addRequest(BookingRequest(
-        tourId: c.tourId,
-        name: user.name,
-        email: user.email,
-        phone: '',
-        people: c.people,
-        message: 'Richiesta dal carrello',
-        createdAt: DateTime.now(),
-        userId: user.id,
-      ));
-    }
-    _carts[user.id]?.clear();
+  Future<int> checkoutCart() async {
+    final json = await api.post('/me/cart/checkout', {
+      'phone': '',
+      'message': 'Richiesta dal carrello',
+    }) as Map;
+    final n = (json['requestIds'] as List).length;
+    cart = [];
+    unawaited(_loadTouristData());
     notifyListeners();
-    return items.length;
+    return n;
   }
 
-  List<BookingRequest> get myRequests => requests
-      .where((r) => r.userId == currentUser?.id)
-      .toList()
-      .reversed
-      .toList();
-
-  void setRequestStatus(BookingRequest r, String status) {
+  Future<void> setRequestStatus(BookingRequest r, String status) async {
+    await api.patch('/requests/${r.id}', {'status': status});
     r.status = status;
     notifyListeners();
   }
 
   // --- Richieste e consensi ---
-  void addRequest(BookingRequest r) {
-    requests.add(r);
-    final tour = tourById(r.tourId);
-    final guide = tour == null ? null : guideById(tour.guideId);
-    if (guide != null) {
-      notifications.add(
-          'Email a ${guide.email}: nuova richiesta da ${r.name} per "${tour!.title}" (${r.people} persone).');
-    }
-    notifyListeners();
+  Future<void> addRequest(BookingRequest r) async {
+    await api.post('/tours/${r.tourId}/requests', {
+      'name': r.name,
+      'email': r.email,
+      'phone': r.phone,
+      'people': r.people,
+      'message': r.message,
+    });
   }
 
-  void addConsent(String phone, String source) {
-    consents.add(WhatsAppConsent(
-      phone: phone,
-      at: DateTime.now(),
-      source: source,
-      text: whatsappConsentText,
-      sender: 'GuidaTour',
-    ));
-    notifyListeners();
+  Future<void> addConsent(String phone, String source) async {
+    await api.post('/consents', {'phone': phone, 'source': source});
   }
 
-  void revokeConsent(WhatsAppConsent c) {
+  Future<void> revokeConsent(WhatsAppConsent c) async {
+    await api.post('/consents/${c.id}/revoke');
     c.revoked = true;
     notifyListeners();
   }
@@ -412,31 +412,33 @@ class AppState extends ChangeNotifier {
   }
 
   // --- Cambio / cessione tour (BR-011A) ---
-  void proposeAssignment(Tour t, Guide to) {
-    assignments.add(Assignment(
-      id: 'a${_seq++}',
-      tourId: t.id,
-      fromGuideId: t.guideId,
-      toGuideId: to.id,
-    ));
-    notifications
-        .add('Email a ${to.email}: ti è stato proposto il tour "${t.title}".');
+  Future<void> proposeAssignment(Tour t, Guide to) async {
+    final json = await api
+        .post('/assignments', {'tourId': t.id, 'toGuideId': to.id}) as Map<String, dynamic>;
+    assignments.insert(0, Assignment.fromJson(json));
     notifyListeners();
   }
 
   /// La destinataria può solo accettare o rifiutare, mai riassegnare (BR-011A.1).
-  void respond(Assignment a, bool accept) {
-    a.status = accept ? AssignmentStatus.accettato : AssignmentStatus.rifiutato;
-    final owner = guideById(a.fromGuideId);
-    final to = guideById(a.toGuideId);
-    final tour = tourById(a.tourId);
-    notifications.add(
-        'Email/WhatsApp a ${owner?.email}: ${to?.name} ha ${accept ? 'accettato' : 'rifiutato'} "${tour?.title}" (${fmtDate(tour!.start)}).');
-    notifyListeners();
+  Future<void> respond(Assignment a, bool accept) async {
+    final json = await api
+        .post('/assignments/${a.id}/respond', {'accept': accept}) as Map<String, dynamic>;
+    _replaceAssignment(Assignment.fromJson(json));
   }
 
-  void cancelAssignment(Assignment a) {
-    a.status = AssignmentStatus.annullato;
+  Future<void> cancelAssignment(Assignment a) async {
+    final json =
+        await api.post('/assignments/${a.id}/cancel') as Map<String, dynamic>;
+    _replaceAssignment(Assignment.fromJson(json));
+  }
+
+  void _replaceAssignment(Assignment updated) {
+    final i = assignments.indexWhere((x) => x.id == updated.id);
+    if (i >= 0) {
+      assignments[i] = updated;
+    } else {
+      assignments.add(updated);
+    }
     notifyListeners();
   }
 }
