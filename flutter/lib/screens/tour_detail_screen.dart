@@ -1,0 +1,310 @@
+import 'package:flutter/material.dart';
+
+import '../models.dart';
+import '../state.dart';
+import '../widgets.dart';
+import 'whatsapp_optin.dart';
+
+void openTour(BuildContext context, Tour t, {bool fromQr = false}) {
+  appState.recordVisit(t);
+  Navigator.of(context).push(
+    MaterialPageRoute(builder: (_) => TourDetailScreen(tour: t)),
+  );
+}
+
+class TourDetailScreen extends StatelessWidget {
+  const TourDetailScreen({super.key, required this.tour});
+  final Tour tour;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: appState,
+      builder: (context, _) => _content(context),
+    );
+  }
+
+  /// Preferiti e carrello richiedono un account turista.
+  bool _needsTourist(BuildContext context) {
+    if (appState.isTourist) return false;
+    snack(
+        context,
+        appState.currentUser == null
+            ? 'Accedi o registrati (scheda Account) per usare preferiti e carrello.'
+            : 'Preferiti e carrello sono riservati agli account turista.');
+    return true;
+  }
+
+  Widget _content(BuildContext context) {
+    final guide = appState.guideById(tour.guideId);
+    final fav = appState.isFavorite(tour.id);
+    final inCart = appState.inCart(tour.id);
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            tooltip: fav ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti',
+            icon: Icon(fav ? Icons.favorite : Icons.favorite_border,
+                color: fav ? Colors.red : null),
+            onPressed: () {
+              if (_needsTourist(context)) return;
+              appState.toggleFavorite(tour.id);
+            },
+          ),
+        ],
+      ),
+      body: PageBody(
+        maxWidth: 860,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE6D3B3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(categoryIcon(tour.category),
+                  size: 84, color: Colors.white.withValues(alpha: 0.9)),
+            ),
+            const SizedBox(height: 22),
+            Text('${tour.category} · ROMA'.toUpperCase(),
+                style: const TextStyle(
+                    fontSize: 12,
+                    letterSpacing: 1,
+                    fontWeight: FontWeight.w700,
+                    color: kMuted)),
+            const SizedBox(height: 6),
+            Text(tour.title,
+                style: const TextStyle(
+                    fontSize: 30,
+                    height: 1.1,
+                    fontWeight: FontWeight.w800,
+                    color: kInk)),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 20,
+              runSpacing: 8,
+              children: [
+                _Fact(Icons.event, fmtDate(tour.start)),
+                _Fact(Icons.schedule, tour.duration),
+                _Fact(Icons.language, tour.language),
+                _Fact(Icons.euro, fmtPrice(tour.price)),
+                _Fact(Icons.event_seat_outlined, '${tour.seats} posti'),
+              ],
+            ),
+            const SizedBox(height: 14),
+            _Fact(Icons.place_outlined, 'Ritrovo: ${tour.meetingPoint}'),
+            const SizedBox(height: 20),
+            Text(tour.description,
+                style: const TextStyle(fontSize: 16, height: 1.5)),
+            if (tour.isPackage) ...[
+              const SizedBox(height: 16),
+              InfoBanner(
+                  'Pacchetto completo organizzato da ${guide?.name}. Include: ${tour.accessories.join(', ')}.'),
+            ],
+            const SizedBox(height: 22),
+            Card(
+              margin: EdgeInsets.zero,
+              elevation: 0,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: const BorderSide(color: Color(0xFFE0E8E3)),
+              ),
+              child: ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFE5EFEC),
+                  child: Icon(Icons.person_outline, color: kPrimary),
+                ),
+                title: Text(guide?.name ?? '',
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                subtitle: Text(
+                    '${guide?.role.label}${guide?.verified == true ? ' · verificato' : ''}'
+                    '\n${guide?.languages.join(', ')}'),
+                isThreeLine: true,
+              ),
+            ),
+            const SizedBox(height: 28),
+            OutlinedButton.icon(
+              onPressed: inCart
+                  ? null
+                  : () {
+                      if (_needsTourist(context)) return;
+                      appState.addToCart(tour.id);
+                      snack(context, 'Aggiunto al carrello');
+                    },
+              icon:
+                  Icon(inCart ? Icons.check : Icons.add_shopping_cart_outlined),
+              label: Text(inCart ? 'Nel carrello' : 'Aggiungi al carrello'),
+            ),
+            const SizedBox(height: 20),
+            BookingForm(tour: tour),
+            const SizedBox(height: 28),
+            WhatsAppOptInCard(source: 'Scheda tour: ${tour.title}'),
+            const PlatformDisclaimer(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Fact extends StatelessWidget {
+  const _Fact(this.icon, this.text);
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: kPrimary),
+          const SizedBox(width: 6),
+          Flexible(
+              child: Text(text,
+                  style: const TextStyle(fontWeight: FontWeight.w600))),
+        ],
+      );
+}
+
+/// Richiesta di prenotazione non vincolante (BR-006): la conferma è della guida.
+class BookingForm extends StatefulWidget {
+  const BookingForm({super.key, required this.tour});
+  final Tour tour;
+
+  @override
+  State<BookingForm> createState() => _BookingFormState();
+}
+
+class _BookingFormState extends State<BookingForm> {
+  final _key = GlobalKey<FormState>();
+  late final _name = TextEditingController(
+      text: appState.isTourist ? appState.currentUser!.name : '');
+  late final _email = TextEditingController(
+      text: appState.isTourist ? appState.currentUser!.email : '');
+  final _phone = TextEditingController();
+  final _message = TextEditingController();
+  int _people = 2;
+  bool _privacy = false;
+  bool _sent = false;
+
+  @override
+  void dispose() {
+    for (final c in [_name, _email, _phone, _message]) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  void _submit() {
+    if (!_key.currentState!.validate()) return;
+    if (!_privacy) {
+      snack(context, 'Per inviare la richiesta serve il consenso privacy.');
+      return;
+    }
+    appState.addRequest(BookingRequest(
+      tourId: widget.tour.id,
+      name: _name.text.trim(),
+      email: _email.text.trim(),
+      phone: _phone.text.trim(),
+      people: _people,
+      message: _message.text.trim(),
+      createdAt: DateTime.now(),
+      userId: appState.isTourist ? appState.currentUser!.id : null,
+    ));
+    setState(() => _sent = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_sent) {
+      return const InfoBanner(
+          'Richiesta inviata! La guida ti contatterà per confermare disponibilità e pagamento. '
+          'Questa richiesta non è una prenotazione vincolante.');
+    }
+    return Form(
+      key: _key,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionHeading(title: 'Richiedi informazioni / prenota'),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _name,
+            decoration: const InputDecoration(
+                labelText: 'Nome e cognome', border: OutlineInputBorder()),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Obbligatorio' : null,
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _email,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+                labelText: 'Email', border: OutlineInputBorder()),
+            validator: (v) =>
+                (v == null || !v.contains('@')) ? 'Email non valida' : null,
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _phone,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(
+                labelText: 'Telefono (facoltativo)',
+                border: OutlineInputBorder()),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Text('Persone'),
+              const SizedBox(width: 12),
+              IconButton.outlined(
+                onPressed: _people > 1 ? () => setState(() => _people--) : null,
+                icon: const Icon(Icons.remove),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text('$_people',
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w700)),
+              ),
+              IconButton.outlined(
+                onPressed: () => setState(() => _people++),
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _message,
+            maxLines: 3,
+            decoration: const InputDecoration(
+                labelText: 'Messaggio (facoltativo)',
+                border: OutlineInputBorder()),
+          ),
+          CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: _privacy,
+            onChanged: (v) => setState(() => _privacy = v ?? false),
+            title: const Text(
+                'Ho letto l’informativa privacy e acconsento al trattamento dei dati '
+                'per essere ricontattato dalla guida.',
+                style: TextStyle(fontSize: 13)),
+          ),
+          const SizedBox(height: 8),
+          FilledButton(
+            onPressed: _submit,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text('Invia richiesta'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
