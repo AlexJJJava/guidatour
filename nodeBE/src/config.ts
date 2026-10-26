@@ -1,9 +1,9 @@
 // La anon key è pensata per essere pubblica: la sicurezza è garantita dalle
 // Row Level Security policy di Supabase (supabase/schema.sql), non dalla
 // segretezza di questa chiave.
-// TODO: sostituire con URL e anon key del progetto Supabase di GuidaTour.
-export const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co'
-export const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY'
+export const SUPABASE_URL = 'https://oetmzmnysdblzulxhywt.supabase.co'
+export const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ldG16bW55c2RibHp1bHhoeXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMDkzMjAsImV4cCI6MjEwODU4NTMyMH0.sZ7d66UvjNofidouXWEyyA-5vWoWngQYzHB7coV67d8'
 
 // Se ALLOWED_ORIGIN è impostata (es. in produzione), CORS viene ristretto
 // a quel dominio. Senza impostarla (es. in sviluppo locale) resta aperta a '*'.
