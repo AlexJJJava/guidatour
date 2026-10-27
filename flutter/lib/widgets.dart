@@ -58,7 +58,7 @@ class SectionHeading extends StatelessWidget {
 
 class ResponsiveGrid extends StatelessWidget {
   const ResponsiveGrid(
-      {super.key, required this.children, this.itemHeight = 116});
+      {super.key, required this.children, this.itemHeight = 136});
   final List<Widget> children;
   final double itemHeight;
 
@@ -145,7 +145,8 @@ class TourCard extends StatelessWidget {
             Expanded(
               flex: 7,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,40 +157,40 @@ class TourCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          fontSize: 9,
-                          letterSpacing: 0.6,
+                          fontSize: 11,
+                          letterSpacing: 0.5,
                           fontWeight: FontWeight.w700,
                           color: kMuted),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     Text(tour.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            fontSize: 15,
-                            height: 1.1,
+                            fontSize: 18,
+                            height: 1.15,
                             fontWeight: FontWeight.w800,
                             color: kInk)),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
                       '${guide?.name ?? ''} · $roleText',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11, color: kMuted),
+                      style: const TextStyle(fontSize: 13, color: kMuted),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.schedule, size: 13, color: kMuted),
+                        const Icon(Icons.schedule, size: 15, color: kMuted),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(fmtDate(tour.start),
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 11)),
+                              style: const TextStyle(fontSize: 13)),
                         ),
                         Text(fmtPrice(tour.price),
                             style: const TextStyle(
-                                fontSize: 13,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w800,
                                 color: kPrimary)),
                       ],
