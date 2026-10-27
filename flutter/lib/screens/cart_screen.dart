@@ -47,10 +47,8 @@ class _CartBodyState extends State<_CartBody> {
     final items = appState.cart;
     if (items.isEmpty) {
       return Center(
-          child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(t.cartEmpty),
-      ));
+          child: EmptyState(
+              icon: Icons.shopping_cart_outlined, message: t.cartEmpty));
     }
     return PageBody(
       maxWidth: 900,
@@ -112,12 +110,6 @@ class _CartBodyState extends State<_CartBody> {
     final tour = appState.tourById(item.tourId);
     if (tour == null) return const SizedBox.shrink();
     return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: const BorderSide(color: Color(0xFFE0E8E3)),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(

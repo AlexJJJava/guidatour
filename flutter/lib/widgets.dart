@@ -9,6 +9,9 @@ const kPrimary = Color(0xFF0F766E);
 const kInk = Color(0xFF183A36);
 const kMuted = Color(0xFF6D817C);
 
+/// Raggio d'angolo condiviso da card e contenitori arrotondati.
+const kRadius = 14.0;
+
 /// Centra il contenuto e limita la larghezza (browser/tablet).
 class PageBody extends StatelessWidget {
   const PageBody({super.key, required this.child, this.maxWidth = 1240});
@@ -88,6 +91,19 @@ const _categoryIcons = {
 
 IconData categoryIcon(String c) => _categoryIcons[c] ?? Icons.explore_outlined;
 
+/// Un colore d'accento diverso per categoria: rende le liste più vive senza
+/// bisogno di immagini.
+const _categoryColors = {
+  'Visita guidata': Color(0xFFCC8B5C),
+  'Tour a piedi': Color(0xFF6FA287),
+  'Enogastronomico': Color(0xFFD9A441),
+  'Bambini e famiglie': Color(0xFF5B9BB0),
+  'Serale': Color(0xFF6C66A8),
+  'Accompagnamento': Color(0xFFB08968),
+};
+
+Color categoryColor(String c) => _categoryColors[c] ?? kPrimary;
+
 class TourCard extends StatelessWidget {
   const TourCard({super.key, required this.tour, required this.onTap});
   final Tour tour;
@@ -100,23 +116,29 @@ class TourCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: const BorderSide(color: Color(0xFFE0E8E3)),
-      ),
       child: InkWell(
         onTap: onTap,
         child: Row(
           children: [
             Expanded(
               flex: 3,
-              child: Container(
-                color: const Color(0xFFE6D3B3),
-                child: Center(
-                  child: Icon(categoryIcon(tour.category),
-                      size: 34, color: Colors.white.withValues(alpha: 0.9)),
+              child: Hero(
+                tag: 'tour-color-${tour.id}',
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        categoryColor(tour.category),
+                        categoryColor(tour.category).withValues(alpha: 0.75),
+                      ],
+                    ),
+                  ),
+                  child: Center(
+                    child: Icon(categoryIcon(tour.category),
+                        size: 34, color: Colors.white.withValues(alpha: 0.9)),
+                  ),
                 ),
               ),
             ),
@@ -211,6 +233,40 @@ class InfoBanner extends StatelessWidget {
   }
 }
 
+/// Stato vuoto curato (icona + messaggio) al posto di un semplice testo.
+class EmptyState extends StatelessWidget {
+  const EmptyState({super.key, required this.icon, required this.message});
+  final IconData icon;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 40),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: kPrimary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 30, color: kPrimary),
+            ),
+            const SizedBox(height: 14),
+            Text(message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: kMuted)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Disclaimer sul ruolo della piattaforma nell'MVP (BRD §15.1).
 class PlatformDisclaimer extends StatelessWidget {
   const PlatformDisclaimer({super.key});
@@ -223,6 +279,48 @@ class PlatformDisclaimer extends StatelessWidget {
           style: const TextStyle(fontSize: 12, color: kMuted, height: 1.4),
         ),
       );
+}
+
+/// Selettore della città: filtra i tour mostrati in tutta l'app (come un
+/// marketplace di tour tipo GetYourGuide).
+class CityPicker extends StatelessWidget {
+  const CityPicker({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: appState,
+      builder: (context, _) {
+        return PopupMenuButton<String>(
+          tooltip: l10n(context).fieldCity,
+          initialValue: appState.city,
+          onSelected: (c) => appState.setCity(c),
+          itemBuilder: (context) => [
+            for (final c in tourCities)
+              PopupMenuItem(value: c, child: Text(cityLabel(context, c))),
+          ],
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE1F0EC),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.location_on, size: 18, color: kPrimary),
+                const SizedBox(width: 6),
+                Text(cityLabel(context, appState.city),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, color: kInk)),
+                const Icon(Icons.expand_more, size: 18, color: kMuted),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 /// Selettore di lingua (IT/EN/ES), sempre visibile in alto a destra.

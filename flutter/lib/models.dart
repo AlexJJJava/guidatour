@@ -77,10 +77,21 @@ const tourCategories = [
 
 const tourLanguages = ['Italiano', 'English', 'Español', 'Français', 'Deutsch'];
 
+const tourCities = [
+  'Roma',
+  'Milano',
+  'Firenze',
+  'Venezia',
+  'Napoli',
+  'Bologna',
+  'Torino',
+];
+
 class Tour {
   Tour({
     required this.id,
     required this.title,
+    required this.city,
     required this.category,
     required this.language,
     required this.duration,
@@ -96,6 +107,7 @@ class Tour {
   });
   final String id;
   final String title;
+  final String city;
   final String category;
   final String language;
   final String duration;
@@ -115,6 +127,7 @@ class Tour {
   factory Tour.fromJson(Map<String, dynamic> j) => Tour(
         id: j['id'] as String,
         title: j['title'] as String? ?? '',
+        city: j['city'] as String? ?? 'Roma',
         category: j['category'] as String? ?? '',
         language: j['language'] as String? ?? '',
         duration: j['duration'] as String? ?? '',
@@ -237,6 +250,30 @@ class Assignment {
           (s) => s.name == (j['status'] as String?),
           orElse: () => AssignmentStatus.proposto,
         ),
+      );
+}
+
+class AppNotification {
+  AppNotification({
+    required this.id,
+    required this.message,
+    required this.createdAt,
+    this.readAt,
+  });
+  final String id;
+  final String message;
+  final DateTime createdAt;
+  DateTime? readAt;
+
+  bool get isRead => readAt != null;
+
+  factory AppNotification.fromJson(Map<String, dynamic> j) => AppNotification(
+        id: j['id'] as String,
+        message: j['message'] as String? ?? '',
+        createdAt: DateTime.parse(j['createdAt'] as String).toLocal(),
+        readAt: j['readAt'] == null
+            ? null
+            : DateTime.parse(j['readAt'] as String).toLocal(),
       );
 }
 

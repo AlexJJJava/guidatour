@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'api_client.dart';
 import 'models.dart';
+
+const _cityPrefKey = 'city';
 
 /// Stato applicativo: dati pubblici cache-ati localmente, dati dell'utente
 /// caricati dal backend dopo il login (Supabase Auth + API GuidaTour).
@@ -38,9 +41,12 @@ class AppState extends ChangeNotifier {
   List<BookingRequest> myRequests = [];
   List<WhatsAppConsent> consents = [];
   List<Assignment> assignments = [];
-  List<String> notifications = [];
+  List<AppNotification> notifications = [];
   Guide? currentUser;
   bool ready = false;
+
+  /// Città selezionata in home: filtra i tour mostrati in tutta l'app.
+  String city = 'Roma';
 
   static const whatsappConsentText =
       'Acconsento a ricevere su WhatsApp la lista aggiornata di tour ed '
@@ -49,14 +55,25 @@ class AppState extends ChangeNotifier {
 
   /// Da chiamare una volta all'avvio dell'app.
   Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    city = prefs.getString(_cityPrefKey) ?? 'Roma';
     await Future.wait([_loadTours(), _loadGuides()]);
     ready = true;
     notifyListeners();
   }
 
+  Future<void> setCity(String newCity) async {
+    if (newCity == city) return;
+    city = newCity;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_cityPrefKey, newCity);
+    await _loadTours();
+  }
+
   Future<void> _loadTours() async {
     try {
-      final json = await api.get('/tours') as Map;
+      final json = await api.get('/tours', query: {'city': city}) as Map;
       final list = (json['tours'] as List)
           .map((j) => Tour.fromJson(j as Map<String, dynamic>))
           .toList();
@@ -78,6 +95,14 @@ class AppState extends ChangeNotifier {
       tours[i] = t;
     } else {
       tours.add(t);
+    }
+    if (t.guideId == currentUser?.id) {
+      final mi = myTours.indexWhere((x) => x.id == t.id);
+      if (mi >= 0) {
+        myTours[mi] = t;
+      } else {
+        myTours.add(t);
+      }
     }
   }
 
@@ -149,7 +174,20 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Tutti i tour del professionista, in qualunque città (indipendente dal
+  /// filtro città della home, a differenza di [tours]).
+  List<Tour> myTours = [];
+
   Future<void> _loadProfessionalData() async {
+    try {
+      final toursJson = await api
+          .get('/tours', query: {'guideId': currentUser!.id, 'includePast': 'true'}) as Map;
+      myTours = (toursJson['tours'] as List)
+          .map((j) => Tour.fromJson(j as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      myTours = [];
+    }
     try {
       final reqJson = await api.get('/requests/received') as Map;
       requests = (reqJson['requests'] as List)
@@ -161,8 +199,7 @@ class AppState extends ChangeNotifier {
     try {
       final notifJson = await api.get('/me/notifications') as Map;
       notifications = (notifJson['notifications'] as List)
-          .cast<Map<String, dynamic>>()
-          .map((j) => j['message'] as String)
+          .map((j) => AppNotification.fromJson(j as Map<String, dynamic>))
           .toList();
     } catch (_) {
       notifications = [];
@@ -192,6 +229,7 @@ class AppState extends ChangeNotifier {
     currentUser = null;
     favoriteTours = [];
     cart = [];
+    myTours = [];
     requests = [];
     myRequests = [];
     consents = [];
@@ -255,6 +293,7 @@ class AppState extends ChangeNotifier {
   // --- Tour ---
   Future<Tour> addTour({
     required String title,
+    required String city,
     required String category,
     required String language,
     required String duration,
@@ -267,6 +306,7 @@ class AppState extends ChangeNotifier {
   }) async {
     final json = await api.post('/tours', {
       'title': title,
+      'city': city,
       'category': category,
       'language': language,
       'duration': duration,
@@ -281,6 +321,76 @@ class AppState extends ChangeNotifier {
     _cacheTour(tour);
     notifyListeners();
     return tour;
+  }
+
+  Future<Tour> updateTour(
+    String id, {
+    required String title,
+    required String city,
+    required String category,
+    required String language,
+    required String duration,
+    required DateTime start,
+    required double price,
+    required String meetingPoint,
+    required String description,
+    required int seats,
+    required List<String> accessories,
+  }) async {
+    final json = await api.patch('/tours/$id', {
+      'title': title,
+      'city': city,
+      'category': category,
+      'language': language,
+      'duration': duration,
+      'start': start.toUtc().toIso8601String(),
+      'price': price,
+      'meetingPoint': meetingPoint,
+      'description': description,
+      'seats': seats,
+      'accessories': accessories,
+    }) as Map<String, dynamic>;
+    final tour = Tour.fromJson(json);
+    _cacheTour(tour);
+    notifyListeners();
+    return tour;
+  }
+
+  Future<void> deleteTour(String id) async {
+    await api.delete('/tours/$id');
+    tours.removeWhere((t) => t.id == id);
+    myTours.removeWhere((t) => t.id == id);
+    notifyListeners();
+  }
+
+  Future<void> updateProfile({
+    required String name,
+    required String bio,
+    required List<String> languages,
+  }) async {
+    final json = await api.patch('/me', {
+      'name': name,
+      'bio': bio,
+      'languages': languages,
+    }) as Map<String, dynamic>;
+    currentUser = Guide.fromProfileJson(json);
+    notifyListeners();
+  }
+
+  Future<void> markNotificationRead(AppNotification n) async {
+    if (n.isRead) return;
+    await api.post('/me/notifications/${n.id}/read');
+    n.readAt = DateTime.now();
+    notifyListeners();
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await api.post('/me/notifications/read');
+    final now = DateTime.now();
+    for (final n in notifications) {
+      n.readAt ??= now;
+    }
+    notifyListeners();
   }
 
   Future<void> recordVisit(Tour t) async {
@@ -390,7 +500,7 @@ class AppState extends ChangeNotifier {
       .fold(0, (sum, r) => sum + r.people);
 
   List<String> overbookingAlerts(String guideId) {
-    final mine = tours.where((t) => t.guideId == guideId).toList();
+    final mine = myTours.where((t) => t.guideId == guideId).toList();
     final alerts = <String>[];
     for (final t in mine) {
       final n = requestedPeople(t);

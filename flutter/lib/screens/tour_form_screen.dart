@@ -22,7 +22,10 @@ const _culturalKeywords = [
 ];
 
 class TourFormScreen extends StatefulWidget {
-  const TourFormScreen({super.key});
+  const TourFormScreen({super.key, this.existing});
+
+  /// Se valorizzato, il form modifica questo tour invece di crearne uno nuovo.
+  final Tour? existing;
 
   @override
   State<TourFormScreen> createState() => _TourFormScreenState();
@@ -30,24 +33,35 @@ class TourFormScreen extends StatefulWidget {
 
 class _TourFormScreenState extends State<TourFormScreen> {
   final _key = GlobalKey<FormState>();
-  final _title = TextEditingController();
-  final _duration = TextEditingController(text: '2 ore');
-  final _price = TextEditingController();
-  final _meeting = TextEditingController();
-  final _description = TextEditingController();
-  final _seats = TextEditingController(text: '10');
-  String _category = tourCategories.first;
-  String _language = tourLanguages.first;
-  DateTime? _start;
-  final Set<String> _accessories = {};
+  late final _title = TextEditingController(text: widget.existing?.title);
+  late final _duration =
+      TextEditingController(text: widget.existing?.duration ?? '2 ore');
+  late final _price =
+      TextEditingController(text: widget.existing?.price.toString());
+  late final _meeting =
+      TextEditingController(text: widget.existing?.meetingPoint);
+  late final _description =
+      TextEditingController(text: widget.existing?.description);
+  late final _seats =
+      TextEditingController(text: (widget.existing?.seats ?? 10).toString());
+  late String _city = widget.existing?.city ?? appState.city;
+  late String _category = widget.existing?.category ?? tourCategories.first;
+  late String _language = widget.existing?.language ?? tourLanguages.first;
+  late DateTime? _start = widget.existing?.start;
+  late final Set<String> _accessories = {...?widget.existing?.accessories};
   bool _declaration = false;
+
+  bool get _isEdit => widget.existing != null;
 
   Guide get _user => appState.currentUser!;
 
   @override
   void initState() {
     super.initState();
-    if (_user.role == Role.accompagnatore) _category = 'Accompagnamento';
+    if (_isEdit) _declaration = true;
+    if (!_isEdit && _user.role == Role.accompagnatore) {
+      _category = 'Accompagnamento';
+    }
   }
 
   @override
@@ -107,8 +121,28 @@ class _TourFormScreenState extends State<TourFormScreen> {
     }
     setState(() => _submitting = true);
     try {
+      if (_isEdit) {
+        await appState.updateTour(
+          widget.existing!.id,
+          title: _title.text.trim(),
+          city: _city,
+          category: _category,
+          language: _language,
+          duration: _duration.text.trim(),
+          start: _start!,
+          price: double.parse(_price.text.replaceAll(',', '.')),
+          meetingPoint: _meeting.text.trim(),
+          description: _description.text.trim(),
+          seats: int.parse(_seats.text),
+          accessories: _accessories.toList(),
+        );
+        if (!mounted) return;
+        Navigator.of(context).pop(true);
+        return;
+      }
       final tour = await appState.addTour(
         title: _title.text.trim(),
+        city: _city,
         category: _category,
         language: _language,
         duration: _duration.text.trim(),
@@ -157,7 +191,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
     String? required(String? v) =>
         (v == null || v.trim().isEmpty) ? t.validationRequired : null;
     return Scaffold(
-      appBar: AppBar(title: Text(t.newTour)),
+      appBar: AppBar(title: Text(_isEdit ? t.editTour : t.newTour)),
       body: PageBody(
         maxWidth: 680,
         child: Form(
@@ -173,6 +207,17 @@ class _TourFormScreenState extends State<TourFormScreen> {
                 decoration: InputDecoration(
                     labelText: t.fieldTourTitle, border: const OutlineInputBorder()),
                 validator: required,
+              ),
+              const SizedBox(height: 14),
+              DropdownButtonFormField<String>(
+                initialValue: _city,
+                decoration: InputDecoration(
+                    labelText: t.fieldCity, border: const OutlineInputBorder()),
+                items: [
+                  for (final c in tourCities)
+                    DropdownMenuItem(value: c, child: Text(cityLabel(context, c))),
+                ],
+                onChanged: (v) => setState(() => _city = v!),
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
@@ -296,7 +341,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: Colors.white),
                         )
-                      : Text(t.formSubmit),
+                      : Text(_isEdit ? t.formSubmitEdit : t.formSubmit),
                 ),
               ),
             ],

@@ -33,7 +33,8 @@ class PosterScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Text('GUIDATOUR · ${t.cityRome}',
+                  Text(
+                      'GUIDATOUR · ${cityLabel(context, tour.city).toUpperCase()}',
                       style: const TextStyle(
                           letterSpacing: 2,
                           fontSize: 12,

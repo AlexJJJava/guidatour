@@ -36,10 +36,8 @@ class FavoritesScreen extends StatelessWidget {
                       color: kInk)),
               const SizedBox(height: 20),
               if (favs.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: Center(child: Text(t.favoritesEmpty)),
-                )
+                EmptyState(
+                    icon: Icons.favorite_border, message: t.favoritesEmpty)
               else
                 ResponsiveGrid(children: [
                   for (final tour in favs)

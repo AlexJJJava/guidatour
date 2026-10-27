@@ -45,10 +45,7 @@ class _SentBookings extends StatelessWidget {
                   fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
           const SizedBox(height: 20),
           if (reqs.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40),
-              child: Center(child: Text(t.historyEmpty)),
-            )
+            EmptyState(icon: Icons.event_busy, message: t.historyEmpty)
           else
             for (final r in reqs)
               Builder(builder: (context) {
@@ -85,7 +82,7 @@ class _ReceivedBookings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
-    final reqs = appState.requests.reversed.toList();
+    final reqs = appState.requests;
     return PageBody(
       maxWidth: 900,
       child: Column(
@@ -95,7 +92,8 @@ class _ReceivedBookings extends StatelessWidget {
               style: const TextStyle(
                   fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
           const SizedBox(height: 20),
-          if (reqs.isEmpty) Text(t.noRequestsReceived),
+          if (reqs.isEmpty)
+            EmptyState(icon: Icons.mail_outline, message: t.noRequestsReceived),
           for (final r in reqs)
             ListTile(
               contentPadding: EdgeInsets.zero,

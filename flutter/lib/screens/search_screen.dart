@@ -49,7 +49,7 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(t.searchTitle,
+              Text(t.searchTitle(cityLabel(context, appState.city)),
                   style: const TextStyle(
                       fontSize: 30, fontWeight: FontWeight.w800, color: kInk)),
               const SizedBox(height: 16),
@@ -91,10 +91,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   style: const TextStyle(color: kMuted)),
               const SizedBox(height: 12),
               if (results.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: Center(child: Text(t.searchNoResults)),
-                )
+                EmptyState(icon: Icons.search_off, message: t.searchNoResults)
               else
                 ResponsiveGrid(children: [
                   for (final tour in results)

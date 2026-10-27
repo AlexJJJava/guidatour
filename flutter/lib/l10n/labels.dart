@@ -31,6 +31,20 @@ String categoryLabel(BuildContext context, String category) {
   };
 }
 
+String cityLabel(BuildContext context, String city) {
+  final t = l10n(context);
+  return switch (city) {
+    'Roma' => t.cityRoma,
+    'Milano' => t.cityMilano,
+    'Firenze' => t.cityFirenze,
+    'Venezia' => t.cityVenezia,
+    'Napoli' => t.cityNapoli,
+    'Bologna' => t.cityBologna,
+    'Torino' => t.cityTorino,
+    _ => city,
+  };
+}
+
 String languageLabel(BuildContext context, String language) {
   final t = l10n(context);
   return switch (language) {

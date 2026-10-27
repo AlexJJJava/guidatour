@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -7,13 +8,14 @@ import 'l10n/gen/app_localizations.dart';
 import 'l10n/labels.dart';
 import 'l10n/locale_controller.dart';
 import 'models.dart';
-import 'screens/auth_screen.dart';
+import 'screens/account_screen.dart';
+import 'screens/assignments_screen.dart';
 import 'screens/bookings_screen.dart';
 import 'screens/cart_screen.dart';
-import 'screens/dashboard_screen.dart';
+import 'screens/dashboard_overview_screen.dart';
 import 'screens/favorites_screen.dart';
+import 'screens/my_tours_screen.dart';
 import 'screens/search_screen.dart';
-import 'screens/tourist_account_screen.dart';
 import 'screens/tour_detail_screen.dart';
 import 'screens/whatsapp_optin.dart';
 import 'state.dart';
@@ -49,6 +51,36 @@ class GuidaTourApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: kPrimary),
             scaffoldBackgroundColor: const Color(0xFFF7F8F4),
             fontFamily: 'Arial',
+            // Transizioni leggere e coerenti tra le pagine su tutte le
+            // piattaforme (incluse nel framework, nessun pacchetto in più).
+            pageTransitionsTheme: const PageTransitionsTheme(builders: {
+              TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+              TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(),
+              TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
+            }),
+            cardTheme: CardThemeData(
+              elevation: 2,
+              shadowColor: kInk.withValues(alpha: 0.12),
+              color: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(kRadius),
+              ),
+            ),
+            filledButtonTheme: FilledButtonThemeData(
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
           ),
           home: const _Startup(),
         );
@@ -106,96 +138,162 @@ class AppShell extends StatefulWidget {
   State<AppShell> createState() => _AppShellState();
 }
 
+/// Una voce del menu principale: etichetta, icone e la pagina che mostra.
+typedef _NavItem = (String label, IconData icon, IconData selectedIcon, Widget page);
+
 class _AppShellState extends State<AppShell> {
   int _index = 0;
 
+  /// 'guest' | 'tourist' | 'pro': quando cambia (login/logout/cambio ruolo)
+  /// il menu cambia voci, quindi si torna alla prima.
+  String? _lastKind;
+
   void _select(int i) => setState(() => _index = i);
+
+  List<_NavItem> _navItems(BuildContext context) {
+    final t = l10n(context);
+    final user = appState.currentUser;
+    final items = <_NavItem>[];
+    items.add(
+      (
+        t.navDiscover,
+        Icons.explore_outlined,
+        Icons.explore,
+        HomeScreen(
+            onOpenSearch: () => _select(1),
+            onOpenAccount: () => _select(items.length - 1)),
+      ),
+    );
+    items.add(
+      (t.navSearch, Icons.search, Icons.search, const SearchScreen()),
+    );
+    if (user != null && user.role.isProfessional) {
+      items.addAll([
+        (
+          t.dashTabOverview,
+          Icons.dashboard_outlined,
+          Icons.dashboard,
+          const DashboardOverviewScreen(),
+        ),
+        (
+          t.dashTabMyTours,
+          Icons.map_outlined,
+          Icons.map,
+          const MyToursScreen(),
+        ),
+        (
+          t.dashTabAssignments,
+          Icons.swap_horiz_outlined,
+          Icons.swap_horiz,
+          const AssignmentsScreen(),
+        ),
+        (
+          t.navBookings,
+          Icons.event_note_outlined,
+          Icons.event_note,
+          const BookingsScreen(),
+        ),
+      ]);
+    } else {
+      items.addAll([
+        (
+          t.navFavorites,
+          Icons.favorite_border,
+          Icons.favorite,
+          const FavoritesScreen(),
+        ),
+        (
+          t.navCart,
+          Icons.shopping_cart_outlined,
+          Icons.shopping_cart,
+          const CartScreen(),
+        ),
+        (
+          t.navBookings,
+          Icons.event_note_outlined,
+          Icons.event_note,
+          const BookingsScreen(),
+        ),
+      ]);
+    }
+    items.add(
+        (t.navAccount, Icons.person_outline, Icons.person, const AccountScreen()));
+    return items;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final t = l10n(context);
-    final tabs = [
-      (t.navDiscover, Icons.explore_outlined, Icons.explore),
-      (t.navSearch, Icons.search, Icons.search),
-      (t.navFavorites, Icons.favorite_border, Icons.favorite),
-      (t.navCart, Icons.shopping_cart_outlined, Icons.shopping_cart),
-      (t.navBookings, Icons.event_note_outlined, Icons.event_note),
-      (t.navAccount, Icons.person_outline, Icons.person),
-    ];
-    final pages = [
-      HomeScreen(
-          onOpenSearch: () => _select(1), onOpenAccount: () => _select(5)),
-      const SearchScreen(),
-      const FavoritesScreen(),
-      const CartScreen(),
-      const BookingsScreen(),
-      ListenableBuilder(
-        listenable: appState,
-        builder: (_, __) {
-          final user = appState.currentUser;
-          if (user == null) return const AuthScreen();
-          return user.role.isProfessional
-              ? const DashboardScreen()
-              : const TouristAccountScreen();
-        },
-      ),
-    ];
-    return LayoutBuilder(builder: (context, constraints) {
-      final isDesktop = constraints.maxWidth >= 900;
-      return Scaffold(
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Row(
+    return ListenableBuilder(
+      listenable: appState,
+      builder: (context, _) {
+        final user = appState.currentUser;
+        final kind =
+            user == null ? 'guest' : (user.role.isProfessional ? 'pro' : 'tourist');
+        if (kind != _lastKind) {
+          _lastKind = kind;
+          _index = 0;
+        }
+        final items = _navItems(context);
+        if (_index >= items.length) _index = 0;
+        return LayoutBuilder(builder: (context, constraints) {
+          final isDesktop = constraints.maxWidth >= 900;
+          return Scaffold(
+            body: SafeArea(
+              child: Stack(
                 children: [
-                  if (isDesktop)
-                    NavigationRail(
-                      extended: true,
-                      minExtendedWidth: 220,
-                      backgroundColor: Colors.white,
-                      selectedIndex: _index,
-                      onDestinationSelected: _select,
-                      leading: const Padding(
-                        padding: EdgeInsets.fromLTRB(0, 24, 0, 32),
-                        child: Text('guidatour',
-                            style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -1.1,
-                                color: kPrimary)),
-                      ),
-                      destinations: [
-                        for (final tab in tabs)
-                          NavigationRailDestination(
-                            icon: Icon(tab.$2),
-                            selectedIcon: Icon(tab.$3),
-                            label: Text(tab.$1),
+                  Row(
+                    children: [
+                      if (isDesktop)
+                        NavigationRail(
+                          extended: true,
+                          minExtendedWidth: 220,
+                          backgroundColor: Colors.white,
+                          selectedIndex: _index,
+                          onDestinationSelected: _select,
+                          leading: const Padding(
+                            padding: EdgeInsets.fromLTRB(0, 24, 0, 32),
+                            child: Text('guidatour',
+                                style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -1.1,
+                                    color: kPrimary)),
                           ),
-                      ],
-                    ),
-                  Expanded(child: pages[_index]),
+                          destinations: [
+                            for (final item in items)
+                              NavigationRailDestination(
+                                icon: Icon(item.$2),
+                                selectedIcon: Icon(item.$3),
+                                label: Text(item.$1),
+                              ),
+                          ],
+                        ),
+                      Expanded(child: items[_index].$4),
+                    ],
+                  ),
+                  const Positioned(
+                      top: 10, right: 12, child: LanguagePicker()),
                 ],
               ),
-              const Positioned(top: 10, right: 12, child: LanguagePicker()),
-            ],
-          ),
-        ),
-        bottomNavigationBar: isDesktop
-            ? null
-            : NavigationBar(
-                selectedIndex: _index,
-                onDestinationSelected: _select,
-                destinations: [
-                  for (final tab in tabs)
-                    NavigationDestination(
-                      icon: Icon(tab.$2),
-                      selectedIcon: Icon(tab.$3),
-                      label: tab.$1,
-                    ),
-                ],
-              ),
-      );
-    });
+            ),
+            bottomNavigationBar: isDesktop
+                ? null
+                : NavigationBar(
+                    selectedIndex: _index,
+                    onDestinationSelected: _select,
+                    destinations: [
+                      for (final item in items)
+                        NavigationDestination(
+                          icon: Icon(item.$2),
+                          selectedIcon: Icon(item.$3),
+                          label: item.$1,
+                        ),
+                    ],
+                  ),
+          );
+        });
+      },
+    );
   }
 }
 
@@ -242,7 +340,9 @@ class HomeScreen extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 12),
+              const CityPicker(),
+              const SizedBox(height: 16),
               _hero(context, isDesktop),
               const SizedBox(height: 28),
               Wrap(
@@ -270,7 +370,8 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               SectionHeading(
-                  title: t.homeUpcomingTitle,
+                  title:
+                      t.homeUpcomingTitle(cityLabel(context, appState.city)),
                   action: t.seeAll,
                   onAction: onOpenSearch),
               const SizedBox(height: 16),

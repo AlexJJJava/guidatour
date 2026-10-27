@@ -67,19 +67,29 @@ class TourDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE6D3B3),
-                borderRadius: BorderRadius.circular(8),
+            Hero(
+              tag: 'tour-color-${tour.id}',
+              child: Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(kRadius),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      categoryColor(tour.category),
+                      categoryColor(tour.category).withValues(alpha: 0.75),
+                    ],
+                  ),
+                ),
+                child: Icon(categoryIcon(tour.category),
+                    size: 84, color: Colors.white.withValues(alpha: 0.9)),
               ),
-              child: Icon(categoryIcon(tour.category),
-                  size: 84, color: Colors.white.withValues(alpha: 0.9)),
             ),
             const SizedBox(height: 22),
             Text(
-                '${categoryLabel(context, tour.category)} · ${t.cityRome}'
+                '${categoryLabel(context, tour.category)} · ${cityLabel(context, tour.city)}'
                     .toUpperCase(),
                 style: const TextStyle(
                     fontSize: 12,
@@ -108,7 +118,7 @@ class TourDetailScreen extends StatelessWidget {
             const SizedBox(height: 14),
             _Fact(Icons.place_outlined, t.detailMeetingPoint(tour.meetingPoint)),
             const SizedBox(height: 20),
-            TourMeetingPointMap(meetingPoint: tour.meetingPoint),
+            TourMeetingPointMap(meetingPoint: tour.meetingPoint, city: tour.city),
             const SizedBox(height: 20),
             Text(tour.description,
                 style: const TextStyle(fontSize: 16, height: 1.5)),
@@ -120,12 +130,6 @@ class TourDetailScreen extends StatelessWidget {
             const SizedBox(height: 22),
             Card(
               margin: EdgeInsets.zero,
-              elevation: 0,
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(color: Color(0xFFE0E8E3)),
-              ),
               child: ListTile(
                 leading: const CircleAvatar(
                   backgroundColor: Color(0xFFE5EFEC),

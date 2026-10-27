@@ -5,6 +5,15 @@ import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
 
+/// Account demo per velocizzare i test manuali: TOGLIERE prima del lancio
+/// reale (o quando la registrazione vera sostituisce questi dati finti).
+const _demoAccounts = [
+  ('Turista', 'alessio.damico+turista1@gmail.com'),
+  ('Guida', 'alessio.damico+guida1@gmail.com'),
+  ('Tour operator', 'alessio.damico+operator1@gmail.com'),
+];
+const _demoPassword = 'GuidaTour2026!';
+
 /// Accesso / registrazione con email e password (Supabase Auth).
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -49,6 +58,14 @@ class _AuthScreenState extends State<AuthScreen> {
     if (msg != null) snack(context, msg);
   }
 
+  Future<void> _quickLogin(String email) async {
+    setState(() => _busy = true);
+    final msg = await appState.loginWithPassword(email, _demoPassword);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (msg != null) snack(context, msg);
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
@@ -64,6 +81,36 @@ class _AuthScreenState extends State<AuthScreen> {
                     fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
             const SizedBox(height: 8),
             Text(t.authIntro, style: const TextStyle(color: kMuted)),
+            if (!_register) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF1D6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Solo per test — accesso rapido',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final (label, email) in _demoAccounts)
+                          OutlinedButton(
+                            onPressed: _busy ? null : () => _quickLogin(email),
+                            child: Text(label),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
             _ComingSoonSocialButton(label: t.authGoogle),
             const SizedBox(height: 8),

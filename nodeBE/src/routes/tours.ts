@@ -6,6 +6,7 @@ import { requireProfessional } from '../services/profiles.js'
 import { createRequest, listReceived } from '../services/requests.js'
 import {
   ACCESSORY_SERVICES,
+  CITIES,
   TOUR_CATEGORIES,
   TOUR_LANGUAGES,
   createTour,
@@ -19,6 +20,7 @@ import { parseBody, parseQuery } from '../validate.js'
 
 const tourSchema = z.object({
   title: z.string().trim().min(3).max(120),
+  city: z.enum(CITIES),
   category: z.enum(TOUR_CATEGORIES),
   language: z.enum(TOUR_LANGUAGES),
   duration: z.string().trim().min(1).max(40),
@@ -32,6 +34,7 @@ const tourSchema = z.object({
 
 const listQuery = z.object({
   q: z.string().max(100).optional(),
+  city: z.string().optional(),
   category: z.string().optional(),
   language: z.string().optional(),
   guideId: z.uuid().optional(),
@@ -54,6 +57,7 @@ export const tours = new Hono<AppEnv>()
 // Valori ammessi nei form dell'app.
 tours.get('/options', (c) =>
   c.json({
+    cities: CITIES,
     categories: TOUR_CATEGORIES,
     languages: TOUR_LANGUAGES,
     accessories: ACCESSORY_SERVICES,

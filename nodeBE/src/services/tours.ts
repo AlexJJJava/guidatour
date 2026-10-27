@@ -24,6 +24,9 @@ export const TOUR_CATEGORIES = [
 
 export const TOUR_LANGUAGES = ['Italiano', 'English', 'Español', 'Français', 'Deutsch']
 
+// Città in cui l'app propone tour (selezione in home, come GetYourGuide).
+export const CITIES = ['Roma', 'Milano', 'Firenze', 'Venezia', 'Napoli', 'Bologna', 'Torino']
+
 // Parole che indicano visite specialistiche su beni culturali (BRD §13.4).
 const CULTURAL_KEYWORDS = [
   'museo',
@@ -41,6 +44,7 @@ const CULTURAL_KEYWORDS = [
 
 export interface TourInput {
   title: string
+  city: string
   category: string
   language: string
   duration: string
@@ -65,6 +69,7 @@ export type TourRow = {
   id: string
   guide_id: string
   title: string
+  city: string
   category: string
   language: string
   duration: string
@@ -82,6 +87,7 @@ export const toTour = (r: TourRow): Tour => ({
   id: r.id,
   guideId: r.guide_id,
   title: r.title,
+  city: r.city,
   category: r.category,
   language: r.language,
   duration: r.duration,
@@ -99,6 +105,7 @@ export const toTour = (r: TourRow): Tour => ({
 
 const toRow = (t: Partial<TourInput>) => ({
   title: t.title,
+  city: t.city,
   category: t.category,
   language: t.language,
   duration: t.duration,
@@ -158,6 +165,7 @@ function slugify(title: string): string {
 
 export interface TourFilters {
   q?: string
+  city?: string
   category?: string
   language?: string
   guideId?: string
@@ -170,6 +178,7 @@ export interface TourFilters {
 
 export async function listTours(db: Db, f: TourFilters): Promise<Tour[]> {
   let query = db.from('tours').select('*').order('start_at').limit(f.limit ?? 100)
+  if (f.city) query = query.eq('city', f.city)
   if (f.category) query = query.eq('category', f.category)
   if (f.language) query = query.eq('language', f.language)
   if (f.guideId) query = query.eq('guide_id', f.guideId)

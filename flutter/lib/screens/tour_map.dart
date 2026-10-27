@@ -14,8 +14,10 @@ import '../widgets.dart';
 /// senza API key — e mostra un pin su una mappa incorporata. Offre sempre
 /// anche un link per aprire la posizione in Google Maps.
 class TourMeetingPointMap extends StatefulWidget {
-  const TourMeetingPointMap({super.key, required this.meetingPoint});
+  const TourMeetingPointMap(
+      {super.key, required this.meetingPoint, required this.city});
   final String meetingPoint;
+  final String city;
 
   @override
   State<TourMeetingPointMap> createState() => _TourMeetingPointMapState();
@@ -34,11 +36,12 @@ const _fillerWords = [
 ];
 
 class _TourMeetingPointMapState extends State<TourMeetingPointMap> {
-  late final Future<LatLng?> _future = _geocode(widget.meetingPoint);
+  late final Future<LatLng?> _future =
+      _geocode(widget.meetingPoint, widget.city);
 
   /// Prova prima con l'indirizzo completo, poi con varianti via via più
   /// semplificate, finché Nominatim non trova un risultato.
-  static Future<LatLng?> _geocode(String meetingPoint) async {
+  static Future<LatLng?> _geocode(String meetingPoint, String city) async {
     final segments = meetingPoint.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty);
     final withoutFillers = meetingPoint
         .split(RegExp(r'[\s,]+'))
@@ -51,7 +54,7 @@ class _TourMeetingPointMapState extends State<TourMeetingPointMap> {
       if (withoutFillers.isNotEmpty) withoutFillers,
     };
     for (final candidate in candidates) {
-      final point = await _geocodeOnce('$candidate, Roma, Italia');
+      final point = await _geocodeOnce('$candidate, $city, Italia');
       if (point != null) return point;
     }
     return null;
@@ -81,7 +84,7 @@ class _TourMeetingPointMapState extends State<TourMeetingPointMap> {
     final uri = Uri.parse('https://www.google.com/maps/search/').replace(
       queryParameters: {
         'api': '1',
-        'query': '${widget.meetingPoint}, Roma, Italia',
+        'query': '${widget.meetingPoint}, ${widget.city}, Italia',
       },
     );
     await launchUrl(uri, mode: LaunchMode.externalApplication);

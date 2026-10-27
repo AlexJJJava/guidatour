@@ -80,6 +80,7 @@ create table public.tours (
   id text primary key,
   guide_id uuid not null references public.profiles (id) on delete cascade,
   title text not null check (char_length(title) between 3 and 120),
+  city text not null default 'Roma',
   category text not null,
   language text not null,
   duration text not null,
@@ -96,6 +97,7 @@ create table public.tours (
 
 create index tours_start_at_idx on public.tours (start_at);
 create index tours_guide_id_idx on public.tours (guide_id);
+create index tours_city_idx on public.tours (city);
 
 alter table public.tours enable row level security;
 
