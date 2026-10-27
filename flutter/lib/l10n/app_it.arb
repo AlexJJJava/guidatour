@@ -66,7 +66,7 @@
   "homeUpcomingTitle": "Prossimi tour a {city}",
   "@homeUpcomingTitle": {"placeholders": {"city": {"type": "String"}}},
   "operatorBannerTitle": "Sei una guida o un operatore?",
-  "operatorBannerBody": "Pubblica il tuo tour in pochi minuti: pagina pubblica, QR code e locandina. Vai su “Area guide”.",
+  "operatorBannerBody": "Pubblica il tuo tour in pochi minuti: pagina pubblica, QR code e locandina. Accedi o registrati per iniziare.",
 
   "authAcceptTerms": "Accetta i termini d’uso per registrarti.",
   "authCreateAccountTitle": "Crea il tuo account",

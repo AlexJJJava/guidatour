@@ -139,7 +139,12 @@ class AppShell extends StatefulWidget {
 }
 
 /// Una voce del menu principale: etichetta, icone e la pagina che mostra.
-typedef _NavItem = (String label, IconData icon, IconData selectedIcon, Widget page);
+typedef _NavItem = (
+  String label,
+  IconData icon,
+  IconData selectedIcon,
+  Widget page
+);
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
@@ -216,8 +221,12 @@ class _AppShellState extends State<AppShell> {
         ),
       ]);
     }
-    items.add(
-        (t.navAccount, Icons.person_outline, Icons.person, const AccountScreen()));
+    items.add((
+      t.navAccount,
+      Icons.person_outline,
+      Icons.person,
+      const AccountScreen()
+    ));
     return items;
   }
 
@@ -227,8 +236,9 @@ class _AppShellState extends State<AppShell> {
       listenable: appState,
       builder: (context, _) {
         final user = appState.currentUser;
-        final kind =
-            user == null ? 'guest' : (user.role.isProfessional ? 'pro' : 'tourist');
+        final kind = user == null
+            ? 'guest'
+            : (user.role.isProfessional ? 'pro' : 'tourist');
         if (kind != _lastKind) {
           _lastKind = kind;
           _index = 0;
@@ -271,8 +281,7 @@ class _AppShellState extends State<AppShell> {
                       Expanded(child: items[_index].$4),
                     ],
                   ),
-                  const Positioned(
-                      top: 10, right: 12, child: LanguagePicker()),
+                  const Positioned(top: 10, right: 12, child: LanguagePicker()),
                 ],
               ),
             ),
@@ -368,8 +377,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               SectionHeading(
-                  title:
-                      t.homeUpcomingTitle(cityLabel(context, appState.city)),
+                  title: t.homeUpcomingTitle(cityLabel(context, appState.city)),
                   action: t.seeAll,
                   onAction: onOpenSearch),
               const SizedBox(height: 16),
@@ -379,8 +387,11 @@ class HomeScreen extends StatelessWidget {
               ]),
               const SizedBox(height: 36),
               const WhatsAppOptInCard(source: 'Home'),
-              const SizedBox(height: 28),
-              _operatorBanner(t),
+              if (appState.currentUser == null ||
+                  !appState.currentUser!.role.isProfessional) ...[
+                const SizedBox(height: 28),
+                _operatorBanner(context, t),
+              ],
               const PlatformDisclaimer(),
             ],
           ),
@@ -418,25 +429,29 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _operatorBanner(AppLocalizations t) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0E9D9),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(t.operatorBannerTitle,
-              style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF3C3427))),
-          const SizedBox(height: 6),
-          Text(t.operatorBannerBody,
-              style: const TextStyle(color: Color(0xFF625846))),
-        ],
+  Widget _operatorBanner(BuildContext context, AppLocalizations t) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(kRadius),
+      onTap: onOpenAccount,
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0E9D9),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(t.operatorBannerTitle,
+                style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF3C3427))),
+            const SizedBox(height: 6),
+            Text(t.operatorBannerBody,
+                style: const TextStyle(color: Color(0xFF625846))),
+          ],
+        ),
       ),
     );
   }
