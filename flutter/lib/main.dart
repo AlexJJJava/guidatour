@@ -412,15 +412,7 @@ class HomeScreen extends StatelessWidget {
           Text(t.homeHeroSubtitle,
               style: const TextStyle(color: Color(0xFFD7E9E3), fontSize: 16)),
           const SizedBox(height: 18),
-          const CityPicker(),
-          const SizedBox(height: 14),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-                backgroundColor: Colors.white, foregroundColor: kPrimary),
-            onPressed: onOpenSearch,
-            icon: const Icon(Icons.search),
-            label: Text(t.homeSearchCta),
-          ),
+          const _HeroSearchBar(),
         ],
       ),
     );
@@ -446,6 +438,70 @@ class HomeScreen extends StatelessWidget {
               style: const TextStyle(color: Color(0xFF625846))),
         ],
       ),
+    );
+  }
+}
+
+/// Città e ricerca affiancate nel riquadro verde della home.
+class _HeroSearchBar extends StatefulWidget {
+  const _HeroSearchBar();
+
+  @override
+  State<_HeroSearchBar> createState() => _HeroSearchBarState();
+}
+
+class _HeroSearchBarState extends State<_HeroSearchBar> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _go(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          appBar: AppBar(backgroundColor: Colors.transparent),
+          body: SearchScreen(initialQuery: _controller.text.trim()),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = l10n(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const CityPicker(),
+        const SizedBox(width: 10),
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            onSubmitted: (_) => _go(context),
+            style: const TextStyle(color: kInk),
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: t.searchHint,
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide.none,
+              ),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.search, color: kPrimary),
+                onPressed: () => _go(context),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
