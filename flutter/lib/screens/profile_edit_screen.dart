@@ -18,6 +18,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   late final _name = TextEditingController(text: _user.name);
   late final _bio = TextEditingController(text: _user.bio);
   late final Set<String> _languages = {..._user.languages};
+  late String _city = _user.city;
   bool _saving = false;
 
   @override
@@ -40,6 +41,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         name: _name.text.trim(),
         bio: _bio.text.trim(),
         languages: _languages.toList(),
+        city: _user.role.isProfessional ? _city : null,
       );
       if (!mounted) return;
       snack(context, t.profileSaved);
@@ -78,6 +80,21 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 decoration: InputDecoration(
                     labelText: t.fieldBio, border: const OutlineInputBorder()),
               ),
+              if (_user.role.isProfessional) ...[
+                const SizedBox(height: 14),
+                DropdownButtonFormField<String>(
+                  initialValue: _city,
+                  decoration: InputDecoration(
+                      labelText: t.fieldCity,
+                      border: const OutlineInputBorder()),
+                  items: [
+                    for (final c in tourCities)
+                      DropdownMenuItem(
+                          value: c, child: Text(cityLabel(context, c))),
+                  ],
+                  onChanged: (v) => setState(() => _city = v!),
+                ),
+              ],
               const SizedBox(height: 18),
               Text(t.fieldLanguagesSpoken,
                   style: const TextStyle(fontWeight: FontWeight.w700)),

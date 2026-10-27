@@ -367,11 +367,13 @@ class AppState extends ChangeNotifier {
     required String name,
     required String bio,
     required List<String> languages,
+    String? city,
   }) async {
     final json = await api.patch('/me', {
       'name': name,
       'bio': bio,
       'languages': languages,
+      if (city != null) 'city': city,
     }) as Map<String, dynamic>;
     currentUser = Guide.fromProfileJson(json);
     notifyListeners();

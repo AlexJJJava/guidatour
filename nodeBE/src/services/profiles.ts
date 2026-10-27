@@ -14,6 +14,7 @@ export interface Profile {
   isAdmin: boolean
   languages: string[]
   bio: string
+  city: string
 }
 
 // Profilo visibile a tutti: niente email né flag amministrativi.
@@ -24,6 +25,7 @@ export interface PublicProfile {
   verified: boolean
   languages: string[]
   bio: string
+  city: string
 }
 
 type ProfileRow = {
@@ -36,9 +38,10 @@ type ProfileRow = {
   is_admin: boolean
   languages: string[]
   bio: string
+  city: string
 }
 
-const PUBLIC_PROFILE_COLUMNS = 'id, name, role, verified, languages, bio'
+const PUBLIC_PROFILE_COLUMNS = 'id, name, role, verified, languages, bio, city'
 
 const toProfile = (r: ProfileRow): Profile => ({
   id: r.id,
@@ -50,6 +53,7 @@ const toProfile = (r: ProfileRow): Profile => ({
   isAdmin: r.is_admin,
   languages: r.languages,
   bio: r.bio,
+  city: r.city,
 })
 
 export const isProfessional = (p: { role: Role }) => p.role !== 'turista'
@@ -75,7 +79,7 @@ export async function requireProfessional(db: Db, userId: string): Promise<Profi
 export async function updateMyProfile(
   db: Db,
   userId: string,
-  patch: { name?: string; bio?: string; languages?: string[] },
+  patch: { name?: string; bio?: string; languages?: string[]; city?: string },
 ): Promise<Profile> {
   const row = unwrap(
     await db.from('profiles').update(patch).eq('id', userId).select('*').single<ProfileRow>(),

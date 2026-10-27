@@ -44,7 +44,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
       TextEditingController(text: widget.existing?.description);
   late final _seats =
       TextEditingController(text: (widget.existing?.seats ?? 10).toString());
-  late String _city = widget.existing?.city ?? appState.city;
+  late String _city = widget.existing?.city ?? _user.city;
   late String _category = widget.existing?.category ?? tourCategories.first;
   late String _language = widget.existing?.language ?? tourLanguages.first;
   late DateTime? _start = widget.existing?.start;

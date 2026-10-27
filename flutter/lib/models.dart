@@ -19,6 +19,7 @@ class Guide {
     this.bio = '',
     this.provider = 'email',
     this.isAdmin = false,
+    this.city = 'Roma',
   });
   final String id;
   final String name;
@@ -29,6 +30,7 @@ class Guide {
   final List<String> languages;
   final String bio;
   final bool isAdmin;
+  final String city;
 
   /// Dal profilo pubblico (`GET /guides`, `/tours/:id`): niente email.
   factory Guide.fromPublicJson(Map<String, dynamic> j) => Guide(
@@ -40,6 +42,7 @@ class Guide {
         languages:
             (j['languages'] as List?)?.cast<String>() ?? const ['Italiano'],
         bio: j['bio'] as String? ?? '',
+        city: j['city'] as String? ?? 'Roma',
       );
 
   /// Dal proprio profilo (`GET /me`): dati completi.
@@ -54,6 +57,7 @@ class Guide {
         bio: j['bio'] as String? ?? '',
         provider: j['provider'] as String? ?? 'email',
         isAdmin: j['isAdmin'] as bool? ?? false,
+        city: j['city'] as String? ?? 'Roma',
       );
 }
 

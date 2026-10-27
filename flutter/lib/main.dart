@@ -340,9 +340,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 12),
-              const CityPicker(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 28),
               _hero(context, isDesktop),
               const SizedBox(height: 28),
               Wrap(
@@ -413,7 +411,9 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 10),
           Text(t.homeHeroSubtitle,
               style: const TextStyle(color: Color(0xFFD7E9E3), fontSize: 16)),
-          const SizedBox(height: 22),
+          const SizedBox(height: 18),
+          const CityPicker(),
+          const SizedBox(height: 14),
           FilledButton.icon(
             style: FilledButton.styleFrom(
                 backgroundColor: Colors.white, foregroundColor: kPrimary),

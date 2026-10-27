@@ -19,6 +19,7 @@ create table public.profiles (
   is_admin boolean not null default false,
   languages text[] not null default '{Italiano}',
   bio text not null default '',
+  city text not null default 'Roma',
   created_at timestamptz not null default now()
 );
 
@@ -68,7 +69,7 @@ grant update (name, bio, languages) on public.profiles to authenticated;
 -- e l'elenco colleghi per la cessione. Gira con i permessi del proprietario
 -- (bypassa RLS) di proposito, esponendo solo queste colonne.
 create view public.public_profiles as
-  select id, name, role, verified, languages, bio
+  select id, name, role, verified, languages, bio, city
   from public.profiles
   where role <> 'turista';
 

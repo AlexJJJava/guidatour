@@ -14,7 +14,7 @@ import {
   removeFromCart,
   setCartPeople,
 } from '../services/tourist.js'
-import { TOUR_LANGUAGES } from '../services/tours.js'
+import { CITIES, TOUR_LANGUAGES } from '../services/tours.js'
 import { getDashboard } from '../services/dashboard.js'
 import { parseBody, parseQuery } from '../validate.js'
 
@@ -22,6 +22,7 @@ const profilePatch = z.object({
   name: z.string().trim().min(2).max(100).optional(),
   bio: z.string().trim().max(2000).optional(),
   languages: z.array(z.enum(TOUR_LANGUAGES)).min(1).max(10).optional(),
+  city: z.enum(CITIES).optional(),
 })
 
 const people = z.int().min(1).max(100)
