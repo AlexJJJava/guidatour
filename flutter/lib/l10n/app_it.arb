@@ -431,23 +431,9 @@
   "accessoryBigliettiIngressi": "Biglietti / ingressi",
   "accessoryHotel": "Hotel",
   "accessoryEsperienzaFood": "Esperienza food",
-  "homeHeroLine1": "Scopri {city}",
-  "@homeHeroLine1": {
-    "placeholders": {
-      "city": {
-        "type": "String"
-      }
-    }
-  },
+  "homeHeroLine1": "Scopri l’Italia",
   "homeHeroLine2": "con guide locali esperte",
-  "homeHeroScript": "Vivi la vera {city} con chi la conosce davvero",
-  "@homeHeroScript": {
-    "placeholders": {
-      "city": {
-        "type": "String"
-      }
-    }
-  },
+  "homeHeroScript": "Vivi la vera Italia con chi la conosce davvero",
   "heroTourType": "Tipo di tour",
   "heroAllTours": "Tutti i tour",
   "heroWhat": "Cosa cerchi",
@@ -485,14 +471,7 @@
   "proButton": "Inizia ora",
   "guidesEyebrow": "Le nostre guide",
   "guidesTitle": "Professionisti con una grande passione",
-  "ctaTitle": "Pronto a vivere {city}?",
-  "@ctaTitle": {
-    "placeholders": {
-      "city": {
-        "type": "String"
-      }
-    }
-  },
+  "ctaTitle": "Pronto a partire?",
   "ctaBody": "Scegli il tuo tour e lasciati guidare in un’esperienza che ricorderai per sempre.",
   "ctaButton": "Prenota un tour",
   "footerTagline": "Tour ed esperienze autentiche",

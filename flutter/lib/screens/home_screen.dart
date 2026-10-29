@@ -243,7 +243,6 @@ class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
-    final city = cityLabel(context, appState.city);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -284,7 +283,7 @@ class _Hero extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(t.homeHeroLine1(city),
+                          Text(t.homeHeroLine1,
                               style: TextStyle(
                                   fontFamily: kSerif,
                                   fontSize: wide ? 46 : 30,
@@ -347,7 +346,7 @@ class _Hero extends StatelessWidget {
                       angle: -0.2,
                       child: SizedBox(
                         width: 240,
-                        child: Text(t.homeHeroScript(city),
+                        child: Text(t.homeHeroScript,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                                 fontFamily: 'Caveat',
@@ -820,11 +819,10 @@ class _CtaBand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
-    final city = cityLabel(context, appState.city);
     final text = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(t.ctaTitle(city),
+        Text(t.ctaTitle,
             style: TextStyle(
                 fontFamily: kSerif,
                 fontSize: wide ? 32 : 24,
