@@ -100,12 +100,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 KeyedSubtree(
                     key: _toursKey,
                     child: _Section(
-                        color: Colors.white, child: _tours(context, wide))),
+                        color: kSurface, child: _tours(context, wide))),
                 _Section(color: kCream, child: _categories(context, wide)),
                 if (user == null || !user.role.isProfessional)
                   _ProSection(wide: wide, onStart: onOpenAccount),
                 if (appState.guides.isNotEmpty)
-                  _Section(color: Colors.white, child: _guides(context, wide)),
+                  _Section(color: kSurface, child: _guides(context, wide)),
                 const _Section(
                     color: kCream, child: WhatsAppOptInCard(source: 'Home')),
                 _CtaBand(wide: wide, onBook: onOpenSearch),
@@ -250,6 +250,7 @@ class _Hero extends StatelessWidget {
         color: kNight,
         image: DecorationImage(
           image: AssetImage(_heroFor(appState.city)),
+          colorFilter: photoFilter(_heroFor(appState.city)),
           fit: BoxFit.cover,
           alignment: const Alignment(0.4, 0),
         ),
@@ -457,7 +458,7 @@ class _HeroSearchPanelState extends State<_HeroSearchPanel> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kSurface,
         borderRadius: BorderRadius.circular(kRadius),
         boxShadow: [
           BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 24)
@@ -585,15 +586,16 @@ class _CategoryBubble extends StatelessWidget {
             height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 4),
+              border: Border.all(color: kLine, width: 4),
               boxShadow: [
                 BoxShadow(
-                    color: kInk.withValues(alpha: 0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 14,
                     offset: const Offset(0, 4)),
               ],
               image: DecorationImage(
                   image: AssetImage(categoryImage(category)),
+                  colorFilter: photoFilter(categoryImage(category)),
                   fit: BoxFit.cover),
             ),
           ),
@@ -648,11 +650,14 @@ class _ProSection extends StatelessWidget {
         _Feature(Icons.swap_horiz, t.proFeatureAssign),
       ],
     );
-    const image =
-        Image(image: AssetImage('assets/images/pro.jpg'), fit: BoxFit.cover);
+    const image = Image(
+        image: AssetImage('assets/images/pro.jpg'),
+        fit: BoxFit.cover,
+        color: kPhotoShade,
+        colorBlendMode: BlendMode.srcATop);
     if (!wide) {
       return Container(
-        color: const Color(0xFFFDFAF5),
+        color: kSurface,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -669,7 +674,7 @@ class _ProSection extends StatelessWidget {
       );
     }
     return Container(
-      color: const Color(0xFFFDFAF5),
+      color: kSurface,
       height: 280,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -736,12 +741,12 @@ class _GuideCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kSurface,
         borderRadius: BorderRadius.circular(kRadius),
         border: Border.all(color: kLine),
         boxShadow: [
           BoxShadow(
-              color: kInk.withValues(alpha: 0.05),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 4)),
         ],
@@ -843,6 +848,7 @@ class _CtaBand extends StatelessWidget {
         color: kNight,
         image: DecorationImage(
           image: AssetImage('assets/images/cta.jpg'),
+          colorFilter: ColorFilter.mode(kPhotoShade, BlendMode.srcATop),
           fit: BoxFit.cover,
           alignment: Alignment(0, 0.1),
         ),

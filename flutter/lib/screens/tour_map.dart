@@ -108,14 +108,14 @@ class _TourMeetingPointMapState extends State<TourMeetingPointMap> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return const ColoredBox(
-                    color: Color(0xFFF6EEDF),
+                    color: kSand,
                     child: Center(child: CircularProgressIndicator()),
                   );
                 }
                 final point = snapshot.data;
                 if (point == null) {
                   return ColoredBox(
-                    color: const Color(0xFFF6EEDF),
+                    color: kSand,
                     child: Center(
                       child: Padding(
                         padding: const EdgeInsets.all(16),

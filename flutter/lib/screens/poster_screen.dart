@@ -7,6 +7,9 @@ import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
 
+/// La locandina resta chiara (si stampa) anche con il tema scuro dell'app.
+const _paperInk = Color(0xFF1E2A33);
+
 /// Anteprima locandina con QR code (BR-004, BR-005).
 class PosterScreen extends StatelessWidget {
   const PosterScreen({super.key, required this.tour});
@@ -31,46 +34,52 @@ class PosterScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: const Color(0xFFEAE2D3)),
               ),
-              child: Column(
-                children: [
-                  Text(
-                      'GUIDATOUR · ${cityLabel(context, tour.city).toUpperCase()}',
-                      style: const TextStyle(
-                          letterSpacing: 2,
-                          fontSize: 12,
-                          color: kPrimary,
-                          fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 14),
-                  Text(tour.title,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 28,
-                          height: 1.1,
-                          fontWeight: FontWeight.w800,
-                          color: kInk)),
-                  const SizedBox(height: 10),
-                  Text(
-                      '${fmtDate(tour.start)} · ${tour.duration} · ${languageLabel(context, tour.language)}',
-                      textAlign: TextAlign.center),
-                  Text(t.detailMeetingPoint(tour.meetingPoint),
-                      textAlign: TextAlign.center),
-                  const SizedBox(height: 18),
-                  QrImageView(data: link, size: 200),
-                  const SizedBox(height: 10),
-                  Text(fmtPrice(tour.price),
-                      style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: kPrimary)),
-                  const SizedBox(height: 6),
-                  Text(
-                      t.posterByGuide(guide?.name ?? '',
-                          guide == null ? '' : roleLabel(context, guide.role)),
-                      style: const TextStyle(color: kMuted)),
-                  const SizedBox(height: 6),
-                  Text(t.posterScanHint,
-                      style: const TextStyle(fontSize: 12, color: kMuted)),
-                ],
+              child: DefaultTextStyle.merge(
+                style: const TextStyle(color: _paperInk),
+                child: Column(
+                  children: [
+                    Text(
+                        'GUIDATOUR · ${cityLabel(context, tour.city).toUpperCase()}',
+                        style: const TextStyle(
+                            letterSpacing: 2,
+                            fontSize: 12,
+                            color: kPrimary,
+                            fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 14),
+                    Text(tour.title,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 28,
+                            height: 1.1,
+                            fontWeight: FontWeight.w800,
+                            color: _paperInk)),
+                    const SizedBox(height: 10),
+                    Text(
+                        '${fmtDate(tour.start)} · ${tour.duration} · ${languageLabel(context, tour.language)}',
+                        textAlign: TextAlign.center),
+                    Text(t.detailMeetingPoint(tour.meetingPoint),
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 18),
+                    QrImageView(data: link, size: 200),
+                    const SizedBox(height: 10),
+                    Text(fmtPrice(tour.price),
+                        style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: kPrimary)),
+                    const SizedBox(height: 6),
+                    Text(
+                        t.posterByGuide(
+                            guide?.name ?? '',
+                            guide == null
+                                ? ''
+                                : roleLabel(context, guide.role)),
+                        style: const TextStyle(color: kMuted)),
+                    const SizedBox(height: 6),
+                    Text(t.posterScanHint,
+                        style: const TextStyle(fontSize: 12, color: kMuted)),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),

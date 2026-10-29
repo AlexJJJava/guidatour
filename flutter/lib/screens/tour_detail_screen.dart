@@ -72,7 +72,11 @@ class TourDetailScreen extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(kRadius),
                 child: Image.asset(categoryImage(tour.category),
-                    height: 280, width: double.infinity, fit: BoxFit.cover),
+                    height: 280,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    color: photoShade(categoryImage(tour.category)),
+                    colorBlendMode: BlendMode.srcATop),
               ),
             ),
             const SizedBox(height: 22),
@@ -127,7 +131,7 @@ class TourDetailScreen extends StatelessWidget {
               margin: EdgeInsets.zero,
               child: ListTile(
                 leading: const CircleAvatar(
-                  backgroundColor: Color(0xFFF6EEDF),
+                  backgroundColor: kSand,
                   child: Icon(Icons.person_outline, color: kPrimary),
                 ),
                 title: Text(guide?.name ?? '',

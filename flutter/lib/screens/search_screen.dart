@@ -68,10 +68,10 @@ class _SearchScreenState extends State<SearchScreen> {
                           icon: const Icon(Icons.close),
                           onPressed: () => setState(_controller.clear)),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: kSurface,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFFEAE2D3)),
+                    borderSide: const BorderSide(color: kLine),
                   ),
                 ),
               ),
@@ -126,11 +126,11 @@ class _SearchScreenState extends State<SearchScreen> {
           ChoiceChip(
             visualDensity: VisualDensity.compact,
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            backgroundColor: const Color(0xFFF6EEDF),
+            backgroundColor: kSand,
             selectedColor: kPrimary,
             side: BorderSide.none,
             labelStyle:
-                TextStyle(color: selected == values[i] ? Colors.white : kInk),
+                TextStyle(color: selected == values[i] ? kOnGold : kInk),
             selected: selected == values[i],
             label: Text(labels[i]),
             onSelected: (_) => onTap(values[i]),

@@ -50,13 +50,17 @@ class GuidaTourApp extends StatelessWidget {
           ],
           theme: ThemeData(
             useMaterial3: true,
+            brightness: Brightness.dark,
             colorScheme: ColorScheme.fromSeed(
+              brightness: Brightness.dark,
               seedColor: kGold,
               primary: kPrimary,
-              onPrimary: Colors.white,
+              onPrimary: kOnGold,
               secondary: kGold,
-              surface: Colors.white,
+              onSecondary: kOnGold,
+              surface: kSurface,
               onSurface: kInk,
+              outline: kLine,
             ),
             scaffoldBackgroundColor: kCream,
             fontFamily: 'Inter',
@@ -81,8 +85,8 @@ class GuidaTourApp extends StatelessWidget {
             ),
             cardTheme: CardThemeData(
               elevation: 3,
-              shadowColor: kInk.withValues(alpha: 0.14),
-              color: Colors.white,
+              shadowColor: Colors.black,
+              color: kSurface,
               surfaceTintColor: Colors.transparent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(kRadius),
@@ -91,7 +95,7 @@ class GuidaTourApp extends StatelessWidget {
             filledButtonTheme: FilledButtonThemeData(
               style: FilledButton.styleFrom(
                 backgroundColor: kGold,
-                foregroundColor: kInk,
+                foregroundColor: kOnGold,
                 disabledBackgroundColor: kLine,
                 textStyle: const TextStyle(
                     fontFamily: 'Inter',
@@ -113,10 +117,11 @@ class GuidaTourApp extends StatelessWidget {
             chipTheme: const ChipThemeData(
               backgroundColor: kSand,
               selectedColor: kGold,
+              secondaryLabelStyle: TextStyle(color: kOnGold),
               side: BorderSide.none,
             ),
             navigationBarTheme: NavigationBarThemeData(
-              backgroundColor: Colors.white,
+              backgroundColor: kSurface,
               indicatorColor: kSand,
               surfaceTintColor: Colors.transparent,
               iconTheme: WidgetStateProperty.resolveWith((s) => IconThemeData(
@@ -129,6 +134,7 @@ class GuidaTourApp extends StatelessWidget {
                   color: s.contains(WidgetState.selected) ? kInk : kMuted)),
             ),
             dividerTheme: const DividerThemeData(color: kLine),
+            popupMenuTheme: const PopupMenuThemeData(color: kSand),
           ),
           home: const _Startup(),
         );
@@ -249,12 +255,6 @@ class _AppShellState extends State<AppShell> {
           const FavoritesScreen(),
         ),
         (
-          t.navCart,
-          Icons.shopping_cart_outlined,
-          Icons.shopping_cart,
-          const CartScreen(),
-        ),
-        (
           t.navBookings,
           Icons.event_note_outlined,
           Icons.event_note,
@@ -328,7 +328,7 @@ class _AppShellState extends State<AppShell> {
               child: Stack(
                 children: [
                   items[_index].$4!,
-                  const Positioned(top: 10, right: 12, child: LanguagePicker()),
+                  const Positioned(top: 10, right: 12, child: _TopActions()),
                 ],
               ),
             );
@@ -416,6 +416,10 @@ class _TopBar extends StatelessWidget {
             const LanguagePicker(),
             const SizedBox(width: 14),
             GoldButton(t.ctaButton, onPressed: () => onSelect(1)),
+            if (_showsCart()) ...[
+              const SizedBox(width: 12),
+              const CartButton(),
+            ],
           ],
         ),
       ),
@@ -467,8 +471,31 @@ class _MobileTopBar extends StatelessWidget {
           children: [
             BrandLogo(),
             Spacer(),
-            LanguagePicker(),
+            _TopActions(),
           ],
         ),
+      );
+}
+
+/// Il carrello è dei turisti (e di chi non ha ancora fatto l'accesso).
+bool _showsCart() {
+  final user = appState.currentUser;
+  return user == null || !user.role.isProfessional;
+}
+
+/// Lingua e carrello in alto a destra su telefono.
+class _TopActions extends StatelessWidget {
+  const _TopActions();
+
+  @override
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const LanguagePicker(),
+          if (_showsCart()) ...[
+            const SizedBox(width: 8),
+            const CartButton(),
+          ],
+        ],
       );
 }

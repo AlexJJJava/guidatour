@@ -5,22 +5,34 @@ import 'l10n/locale_controller.dart';
 import 'models.dart';
 import 'state.dart';
 
-/// Oro scuro: icone, link e accenti su fondo chiaro.
-const kPrimary = Color(0xFFB4832F);
+/// Tema scuro: pagine nere, testi chiari, accenti oro.
+
+/// Oro per icone, link e accenti.
+const kPrimary = Color(0xFFD9A24A);
 
 /// Oro chiaro dei pulsanti principali.
 const kGold = Color(0xFFF2C36B);
 
+/// Testo sopra i pulsanti oro.
+const kOnGold = Color(0xFF1A1A1A);
+
 /// Oro dei titoli in corsivo sulle foto.
 const kGoldText = Color(0xFFF0C878);
-const kInk = Color(0xFF1E2A33);
-const kMuted = Color(0xFF6B6F76);
-const kCream = Color(0xFFFBF7F0);
-const kSand = Color(0xFFF6EEDF);
-const kLine = Color(0xFFEAE2D3);
 
-/// Blu notte di intestazione e footer.
-const kNight = Color(0xFF1F2A33);
+/// Testo principale (chiaro su fondo scuro).
+const kInk = Color(0xFFF2EEE7);
+const kMuted = Color(0xFFA39E95);
+
+/// Sfondo delle pagine.
+const kCream = Color(0xFF0B0B0B);
+
+/// Card, riquadri e sezioni alternate.
+const kSurface = Color(0xFF161514);
+const kSand = Color(0xFF1F1D1A);
+const kLine = Color(0xFF2E2B27);
+
+/// Intestazione e footer.
+const kNight = Color(0xFF111317);
 
 /// Font dei titoli (Playfair Display, vedi pubspec).
 const kSerif = 'Playfair';
@@ -264,6 +276,18 @@ const _categoryImages = {
   'Accompagnamento': 'assets/images/cat_accompagnamento.jpg',
 };
 
+/// Velo nero sulle foto per il tema scuro (circa un terzo di luce in meno).
+const kPhotoShade = Color(0x52000000);
+
+/// Le foto notturne sono già scure: niente velo.
+Color? photoShade(String asset) =>
+    asset.endsWith('cat_serale.jpg') ? null : kPhotoShade;
+
+ColorFilter? photoFilter(String asset) {
+  final shade = photoShade(asset);
+  return shade == null ? null : ColorFilter.mode(shade, BlendMode.srcATop);
+}
+
 String categoryImage(String c) =>
     _categoryImages[c] ?? 'assets/images/cat_visita.jpg';
 
@@ -295,7 +319,9 @@ class TourCard extends StatelessWidget {
                   Hero(
                     tag: 'tour-color-${tour.id}',
                     child: Image.asset(categoryImage(tour.category),
-                        fit: BoxFit.cover),
+                        fit: BoxFit.cover,
+                        color: photoShade(categoryImage(tour.category)),
+                        colorBlendMode: BlendMode.srcATop),
                   ),
                   Positioned(
                     top: 10,
@@ -427,7 +453,7 @@ class InfoBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = warning ? const Color(0xFFFFF1D6) : const Color(0xFFF6EEDF);
+    final color = warning ? const Color(0xFFFFF1D6) : kSand;
     final fg = warning ? const Color(0xFF7A4B00) : kPrimary;
     return Container(
       width: double.infinity,
@@ -533,7 +559,7 @@ class CityPicker extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF6EEDF),
+                    color: kSand,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -564,7 +590,7 @@ class LanguagePicker extends StatelessWidget {
       valueListenable: localeController,
       builder: (context, locale, _) {
         return Material(
-          color: Colors.white,
+          color: kSurface,
           elevation: 1,
           borderRadius: BorderRadius.circular(20),
           child: PopupMenuButton<Locale>(

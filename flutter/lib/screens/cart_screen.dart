@@ -161,3 +161,32 @@ class _CartBodyState extends State<_CartBody> {
     );
   }
 }
+
+/// Icona del carrello in alto a destra con il numero di tour da richiedere
+/// (al posto della voce di menu). Apre il carrello in una nuova pagina.
+class CartButton extends StatelessWidget {
+  const CartButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: appState,
+      builder: (context, _) {
+        final count = appState.cart.length;
+        return IconButton(
+          tooltip: l10n(context).navCart,
+          style: IconButton.styleFrom(backgroundColor: kSurface),
+          onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) =>
+                Scaffold(appBar: AppBar(), body: const CartScreen()),
+          )),
+          icon: Badge(
+            isLabelVisible: count > 0,
+            label: Text('$count'),
+            child: const Icon(Icons.shopping_cart_outlined, color: kInk),
+          ),
+        );
+      },
+    );
+  }
+}

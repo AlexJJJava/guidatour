@@ -57,7 +57,7 @@ class _WhatsAppOptInCardState extends State<WhatsAppOptInCard> {
   Widget build(BuildContext context) {
     final t = l10n(context);
     return Material(
-      color: const Color(0xFFF6EEDF),
+      color: kSand,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -85,7 +85,7 @@ class _WhatsAppOptInCardState extends State<WhatsAppOptInCard> {
                       labelText: t.fieldWhatsappNumber,
                       hintText: t.whatsappHint,
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: kSurface,
                       border: const OutlineInputBorder(),
                     ),
                   ),

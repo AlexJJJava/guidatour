@@ -18,9 +18,9 @@ class _StatTile extends StatelessWidget {
       width: 150,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kSurface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFEAE2D3)),
+        border: Border.all(color: kLine),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
