@@ -9,6 +9,7 @@ import 'l10n/labels.dart';
 import 'l10n/locale_controller.dart';
 import 'models.dart';
 import 'screens/account_screen.dart';
+import 'screens/approvals_screen.dart';
 import 'screens/assignments_screen.dart';
 import 'screens/bookings_screen.dart';
 import 'screens/cart_screen.dart';
@@ -261,6 +262,14 @@ class _AppShellState extends State<AppShell> {
         ),
       ]);
     }
+    if (user != null && user.isAdmin) {
+      items.add((
+        t.navApprovals,
+        Icons.how_to_reg_outlined,
+        Icons.how_to_reg,
+        const ApprovalsScreen(),
+      ));
+    }
     items.add((
       t.navAccount,
       Icons.person_outline,
@@ -334,8 +343,8 @@ class _AppShellState extends State<AppShell> {
                     destinations: [
                       for (final item in items)
                         NavigationDestination(
-                          icon: Icon(item.$2),
-                          selectedIcon: Icon(item.$3),
+                          icon: _navIcon(item.$2, item.$4),
+                          selectedIcon: _navIcon(item.$3, item.$4),
                           label: item.$1,
                         ),
                     ],
@@ -345,6 +354,14 @@ class _AppShellState extends State<AppShell> {
       },
     );
   }
+}
+
+/// Icona del menu, con il numero di registrazioni da approvare sulla voce
+/// degli admin.
+Widget _navIcon(IconData icon, Widget? page) {
+  final pending = appState.pendingRegistrations;
+  if (page is! ApprovalsScreen || pending == 0) return Icon(icon);
+  return Badge(label: Text('$pending'), child: Icon(icon));
 }
 
 /// Barra di navigazione orizzontale (desktop/browser): trasparente sopra la
@@ -384,7 +401,10 @@ class _TopBar extends StatelessWidget {
                   children: [
                     for (var i = 0; i < items.length; i++)
                       _NavLink(
-                        label: items[i].$1,
+                        label: items[i].$4 is ApprovalsScreen &&
+                                appState.pendingRegistrations > 0
+                            ? '${items[i].$1} (${appState.pendingRegistrations})'
+                            : items[i].$1,
                         selected: i == index,
                         onTap: () => onSelect(i),
                       ),

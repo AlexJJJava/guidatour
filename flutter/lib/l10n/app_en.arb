@@ -258,5 +258,19 @@
   "footerTagline": "Authentic tours and experiences",
   "footerLinks": "Useful links",
   "footerLanguage": "Language",
-  "footerRights": "All rights reserved."
+  "footerRights": "All rights reserved.",
+  "navApprovals": "Approvals",
+  "approvalsTitle": "Registration approvals",
+  "approvalsIntro": "Guides, tour leaders and tour operators can sign in only after you approve them.",
+  "approvalsPending": "Pending",
+  "approvalsApproved": "Approved",
+  "approvalsRejected": "Rejected",
+  "approvalsEmpty": "No registrations in this state.",
+  "approvalsApprove": "Approve",
+  "approvalsReject": "Reject",
+  "approvalsRegisteredOn": "Registered on {date}",
+  "approvalsApprovedDone": "{name} has been approved",
+  "approvalsRejectedDone": "{name} has been rejected",
+  "authPendingApproval": "Your account has not been approved yet. An administrator needs to review your registration: please try again later.",
+  "authRejectedApproval": "Your registration was not approved by an administrator."
 }

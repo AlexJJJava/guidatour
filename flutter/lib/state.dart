@@ -45,6 +45,13 @@ class AppState extends ChangeNotifier {
   Guide? currentUser;
   bool ready = false;
 
+  /// Stato di approvazione dell'ultimo accesso respinto ('in_attesa' o
+  /// 'rifiutato'): la schermata di accesso mostra l'avviso.
+  String? approvalNotice;
+
+  /// Registrazioni professionali in attesa (solo per gli admin).
+  int pendingRegistrations = 0;
+
   /// Città selezionata in home: filtra i tour mostrati in tutta l'app.
   String city = 'Roma';
 
@@ -124,12 +131,24 @@ class AppState extends ChangeNotifier {
   Future<void> _loadMyProfile() async {
     try {
       final json = await api.get('/me') as Map<String, dynamic>;
-      currentUser = Guide.fromProfileJson(json);
+      final profile = Guide.fromProfileJson(json);
+      if (profile.role.isProfessional &&
+          !profile.isApproved &&
+          !profile.isAdmin) {
+        // Non approvato: niente sessione finché un admin non decide.
+        approvalNotice = profile.approvalStatus;
+        currentUser = null;
+        await Supabase.instance.client.auth.signOut();
+        notifyListeners();
+        return;
+      }
+      currentUser = profile;
     } catch (_) {
       currentUser = null;
       notifyListeners();
       return;
     }
+    if (currentUser!.isAdmin) unawaited(refreshPendingRegistrations());
     if (currentUser!.role.isProfessional) {
       await _loadProfessionalData();
     } else {
@@ -180,8 +199,8 @@ class AppState extends ChangeNotifier {
 
   Future<void> _loadProfessionalData() async {
     try {
-      final toursJson = await api
-          .get('/tours', query: {'guideId': currentUser!.id, 'includePast': 'true'}) as Map;
+      final toursJson = await api.get('/tours',
+          query: {'guideId': currentUser!.id, 'includePast': 'true'}) as Map;
       myTours = (toursJson['tours'] as List)
           .map((j) => Tour.fromJson(j as Map<String, dynamic>))
           .toList();
@@ -227,6 +246,7 @@ class AppState extends ChangeNotifier {
 
   void _clearUserData() {
     currentUser = null;
+    pendingRegistrations = 0;
     favoriteTours = [];
     cart = [];
     myTours = [];
@@ -256,6 +276,8 @@ class AppState extends ChangeNotifier {
 
   /// Restituisce un messaggio di errore, o null se l'accesso è riuscito.
   Future<String?> loginWithPassword(String email, String password) async {
+    approvalNotice = null;
+    notifyListeners();
     try {
       await Supabase.instance.client.auth
           .signInWithPassword(email: email.trim(), password: password);
@@ -271,6 +293,8 @@ class AppState extends ChangeNotifier {
   /// oppure null se la registrazione ha avviato subito una sessione valida.
   Future<String?> registerWithPassword(
       String name, String email, String password, Role role) async {
+    approvalNotice = null;
+    notifyListeners();
     try {
       final res = await Supabase.instance.client.auth.signUp(
         email: email.trim(),
@@ -278,7 +302,9 @@ class AppState extends ChangeNotifier {
         data: {'name': name.trim(), 'role': role.name},
       );
       if (res.session == null) {
-        return 'Account creato: controlla la tua email per confermarlo prima di accedere.';
+        return role.isProfessional
+            ? 'Account creato: controlla la tua email per confermarlo. Prima di poter accedere, un amministratore dovrà approvare la registrazione.'
+            : 'Account creato: controlla la tua email per confermarlo prima di accedere.';
       }
       return null;
     } on AuthException catch (e) {
@@ -289,6 +315,32 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> logout() => Supabase.instance.client.auth.signOut();
+
+  // --- Admin: approvazione registrazioni ---
+
+  /// Registrazioni professionali nello stato indicato.
+  Future<List<Guide>> loadRegistrations(String status) async {
+    final json =
+        await api.get('/admin/registrations', query: {'status': status}) as Map;
+    return (json['registrations'] as List)
+        .map((j) => Guide.fromProfileJson(j as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> refreshPendingRegistrations() async {
+    try {
+      pendingRegistrations = (await loadRegistrations('in_attesa')).length;
+    } catch (_) {
+      pendingRegistrations = 0;
+    }
+    notifyListeners();
+  }
+
+  /// [status]: 'approvato' o 'rifiutato'.
+  Future<void> decideRegistration(String userId, String status) async {
+    await api.post('/admin/registrations/$userId', {'status': status});
+    await Future.wait([refreshPendingRegistrations(), _loadGuides()]);
+  }
 
   // --- Tour ---
   Future<Tour> addTour({
@@ -412,10 +464,10 @@ class AppState extends ChangeNotifier {
 
   // --- Account turista: preferiti, carrello, storico ---
 
-  bool get isTourist => currentUser != null && !currentUser!.role.isProfessional;
+  bool get isTourist =>
+      currentUser != null && !currentUser!.role.isProfessional;
 
-  bool isFavorite(String tourId) =>
-      favoriteTours.any((t) => t.id == tourId);
+  bool isFavorite(String tourId) => favoriteTours.any((t) => t.id == tourId);
 
   Future<void> toggleFavorite(String tourId) async {
     if (isFavorite(tourId)) {
@@ -525,16 +577,18 @@ class AppState extends ChangeNotifier {
 
   // --- Cambio / cessione tour (BR-011A) ---
   Future<void> proposeAssignment(Tour t, Guide to) async {
-    final json = await api
-        .post('/assignments', {'tourId': t.id, 'toGuideId': to.id}) as Map<String, dynamic>;
+    final json =
+        await api.post('/assignments', {'tourId': t.id, 'toGuideId': to.id})
+            as Map<String, dynamic>;
     assignments.insert(0, Assignment.fromJson(json));
     notifyListeners();
   }
 
   /// La destinataria può solo accettare o rifiutare, mai riassegnare (BR-011A.1).
   Future<void> respond(Assignment a, bool accept) async {
-    final json = await api
-        .post('/assignments/${a.id}/respond', {'accept': accept}) as Map<String, dynamic>;
+    final json =
+        await api.post('/assignments/${a.id}/respond', {'accept': accept})
+            as Map<String, dynamic>;
     _replaceAssignment(Assignment.fromJson(json));
   }
 

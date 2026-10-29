@@ -84,6 +84,21 @@ class _AuthScreenState extends State<AuthScreen> {
                     color: kInk)),
             const SizedBox(height: 8),
             Text(t.authIntro, style: const TextStyle(color: kMuted)),
+            ListenableBuilder(
+              listenable: appState,
+              builder: (context, _) {
+                final notice = appState.approvalNotice;
+                if (notice == null) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: InfoBanner(
+                      notice == 'rifiutato'
+                          ? t.authRejectedApproval
+                          : t.authPendingApproval,
+                      warning: true),
+                );
+              },
+            ),
             if (!_register) ...[
               const SizedBox(height: 16),
               Container(

@@ -477,5 +477,40 @@
   "footerTagline": "Tour ed esperienze autentiche",
   "footerLinks": "Link utili",
   "footerLanguage": "Lingua",
-  "footerRights": "Tutti i diritti riservati."
+  "footerRights": "Tutti i diritti riservati.",
+  "navApprovals": "Approvazioni",
+  "approvalsTitle": "Approvazione registrazioni",
+  "approvalsIntro": "Guide, accompagnatori e tour operator possono accedere solo dopo la tua approvazione.",
+  "approvalsPending": "In attesa",
+  "approvalsApproved": "Approvate",
+  "approvalsRejected": "Rifiutate",
+  "approvalsEmpty": "Nessuna registrazione in questo stato.",
+  "approvalsApprove": "Approva",
+  "approvalsReject": "Rifiuta",
+  "approvalsRegisteredOn": "Registrato il {date}",
+  "@approvalsRegisteredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "approvalsApprovedDone": "{name} è stato approvato",
+  "@approvalsApprovedDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "approvalsRejectedDone": "{name} è stato rifiutato",
+  "@approvalsRejectedDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "authPendingApproval": "Il tuo account non è ancora stato approvato. Un amministratore deve verificare la registrazione: riprova più tardi.",
+  "authRejectedApproval": "La tua registrazione non è stata approvata da un amministratore."
 }

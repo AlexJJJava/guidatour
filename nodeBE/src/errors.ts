@@ -25,6 +25,7 @@ export function dbError(error: PostgrestError): HttpError {
     case '23514':
     case '22P02':
       return new HttpError(400, 'Dati non validi')
+    case 'P0002':
     case 'PGRST116':
       return new HttpError(404, 'Elemento non trovato')
     default:

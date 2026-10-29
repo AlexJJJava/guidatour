@@ -258,5 +258,19 @@
   "footerTagline": "Tours y experiencias auténticas",
   "footerLinks": "Enlaces útiles",
   "footerLanguage": "Idioma",
-  "footerRights": "Todos los derechos reservados."
+  "footerRights": "Todos los derechos reservados.",
+  "navApprovals": "Aprobaciones",
+  "approvalsTitle": "Aprobación de registros",
+  "approvalsIntro": "Guías, acompañantes y operadores turísticos solo pueden acceder después de tu aprobación.",
+  "approvalsPending": "Pendientes",
+  "approvalsApproved": "Aprobados",
+  "approvalsRejected": "Rechazados",
+  "approvalsEmpty": "No hay registros en este estado.",
+  "approvalsApprove": "Aprobar",
+  "approvalsReject": "Rechazar",
+  "approvalsRegisteredOn": "Registrado el {date}",
+  "approvalsApprovedDone": "{name} ha sido aprobado",
+  "approvalsRejectedDone": "{name} ha sido rechazado",
+  "authPendingApproval": "Tu cuenta aún no ha sido aprobada. Un administrador debe revisar tu registro: inténtalo más tarde.",
+  "authRejectedApproval": "Tu registro no ha sido aprobado por un administrador."
 }

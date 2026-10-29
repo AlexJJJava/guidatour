@@ -16,6 +16,8 @@ Nessuna suite di test. Node 18+.
 1. Creare il progetto Supabase ed eseguire `supabase/schema.sql` nell'SQL editor (pensato per un database vuoto).
 2. Mettere URL e anon key in `src/config.ts` (la anon key è pubblica: la sicurezza è nelle policy RLS).
 3. `role`, `verified` e `is_admin` dei profili si cambiano solo dalla dashboard Supabase. Alla registrazione il ruolo arriva da `options.data.role` di `signUp` (default `turista`); `verified` parte sempre `false`.
+4. Applicare in ordine le migrazioni di `supabase/migrations/` sui database già esistenti.
+5. Approvazione registrazioni (migrazione 0004): guide, accompagnatori e tour operator nascono con `approval_status = in_attesa` e finché un admin non li approva non sono professionisti per RLS (`is_professional`), non compaiono in `public_profiles` e il backend risponde 403 alle loro rotte da professionista; l'app li disconnette al login mostrando un avviso. I turisti sono `approvato` subito. Il primo admin si nomina dalla dashboard (`update profiles set is_admin = true where email = ...`).
 
 ## Architettura
 
@@ -54,3 +56,4 @@ Con login:
 - `GET /me/notifications?unread=`, `POST /me/notifications/read`, `POST /me/notifications/:id/read`
 - `GET /assignments`, `POST /assignments` `{tourId, toGuideId}`, `POST /assignments/:id/respond` `{accept}`, `/cancel`, `/complete`
 - `GET /consents`, `POST /consents/:id/revoke` — solo admin
+- `GET /admin/registrations?status=in_attesa|approvato|rifiutato`, `POST /admin/registrations/:id` `{status: approvato|rifiutato}` — solo admin

@@ -4,6 +4,7 @@ import { cors } from 'hono/cors'
 import type { AppEnv } from './auth.js'
 import { PORT, SUPABASE_ANON_KEY, allowedOrigin } from './config.js'
 import { HttpError } from './errors.js'
+import { admin } from './routes/admin.js'
 import { assignments } from './routes/assignments.js'
 import { consents } from './routes/consents.js'
 import { guides } from './routes/guides.js'
@@ -30,6 +31,7 @@ app.route('/me', me)
 app.route('/requests', requests)
 app.route('/consents', consents)
 app.route('/assignments', assignments)
+app.route('/admin', admin)
 
 app.notFound((c) => c.json({ error: 'Risorsa non trovata' }, 404))
 

@@ -20,6 +20,8 @@ class Guide {
     this.provider = 'email',
     this.isAdmin = false,
     this.city = 'Roma',
+    this.approvalStatus = 'approvato',
+    this.createdAt,
   });
   final String id;
   final String name;
@@ -31,6 +33,13 @@ class Guide {
   final String bio;
   final bool isAdmin;
   final String city;
+
+  /// 'in_attesa' | 'approvato' | 'rifiutato': guide, accompagnatori e tour
+  /// operator restano in attesa finché un admin non li approva.
+  final String approvalStatus;
+  final DateTime? createdAt;
+
+  bool get isApproved => approvalStatus == 'approvato';
 
   /// Dal profilo pubblico (`GET /guides`, `/tours/:id`): niente email.
   factory Guide.fromPublicJson(Map<String, dynamic> j) => Guide(
@@ -58,6 +67,10 @@ class Guide {
         provider: j['provider'] as String? ?? 'email',
         isAdmin: j['isAdmin'] as bool? ?? false,
         city: j['city'] as String? ?? 'Roma',
+        approvalStatus: j['approvalStatus'] as String? ?? 'approvato',
+        createdAt: j['createdAt'] == null
+            ? null
+            : DateTime.parse(j['createdAt'] as String).toLocal(),
       );
 }
 
