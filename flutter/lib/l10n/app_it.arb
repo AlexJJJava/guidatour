@@ -431,14 +431,6 @@
   "accessoryBigliettiIngressi": "Biglietti / ingressi",
   "accessoryHotel": "Hotel",
   "accessoryEsperienzaFood": "Esperienza food",
-  "homeEyebrow": "Visite guidate a {city}",
-  "@homeEyebrow": {
-    "placeholders": {
-      "city": {
-        "type": "String"
-      }
-    }
-  },
   "homeHeroLine1": "Scopri {city}",
   "@homeHeroLine1": {
     "placeholders": {

@@ -32,7 +32,7 @@ void _openSearch(BuildContext context, {String query = '', String? category}) {
 /// Home a sezioni a tutta larghezza: copertina con ricerca, tour in partenza,
 /// categorie, banner per i professionisti, guide, WhatsApp, invito finale e
 /// footer.
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.header,
@@ -50,27 +50,64 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback onOpenAccount;
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final _scroll = ScrollController();
+
+  /// Prima sezione sotto la copertina: la freccia "scorri giù" porta qui.
+  final _toursKey = GlobalKey();
+
+  Widget get header => widget.header;
+  List<(String, VoidCallback)> get links => widget.links;
+  VoidCallback get onOpenSearch => widget.onOpenSearch;
+  VoidCallback get onOpenAccount => widget.onOpenAccount;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _scrollDown() {
+    final target = _toursKey.currentContext;
+    if (target == null) return;
+    Scrollable.ensureVisible(target,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOutCubic);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: appState,
       builder: (context, _) {
         final wide = MediaQuery.of(context).size.width >= 900;
         final user = appState.currentUser;
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              _Hero(header: header, wide: wide),
-              _Section(color: Colors.white, child: _tours(context, wide)),
-              _Section(color: kCream, child: _categories(context, wide)),
-              if (user == null || !user.role.isProfessional)
-                _ProSection(wide: wide, onStart: onOpenAccount),
-              if (appState.guides.isNotEmpty)
-                _Section(color: Colors.white, child: _guides(context, wide)),
-              const _Section(
-                  color: kCream, child: WhatsAppOptInCard(source: 'Home')),
-              _CtaBand(wide: wide, onBook: onOpenSearch),
-              _Footer(wide: wide, links: links),
-            ],
+        return Scrollbar(
+          controller: _scroll,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: _scroll,
+            child: Column(
+              children: [
+                _Hero(header: header, wide: wide, onScrollDown: _scrollDown),
+                KeyedSubtree(
+                    key: _toursKey,
+                    child: _Section(
+                        color: Colors.white, child: _tours(context, wide))),
+                _Section(color: kCream, child: _categories(context, wide)),
+                if (user == null || !user.role.isProfessional)
+                  _ProSection(wide: wide, onStart: onOpenAccount),
+                if (appState.guides.isNotEmpty)
+                  _Section(color: Colors.white, child: _guides(context, wide)),
+                const _Section(
+                    color: kCream, child: WhatsAppOptInCard(source: 'Home')),
+                _CtaBand(wide: wide, onBook: onOpenSearch),
+                _Footer(wide: wide, links: links),
+              ],
+            ),
           ),
         );
       },
@@ -197,9 +234,11 @@ class _Section extends StatelessWidget {
 }
 
 class _Hero extends StatelessWidget {
-  const _Hero({required this.header, required this.wide});
+  const _Hero(
+      {required this.header, required this.wide, required this.onScrollDown});
   final Widget header;
   final bool wide;
+  final VoidCallback onScrollDown;
 
   @override
   Widget build(BuildContext context) {
@@ -237,16 +276,14 @@ class _Hero extends StatelessWidget {
             Stack(
               children: [
                 Padding(
-                  padding: EdgeInsets.fromLTRB(wide ? 48 : 20, wide ? 40 : 20,
-                      wide ? 48 : 20, wide ? 36 : 28),
+                  padding: EdgeInsets.fromLTRB(
+                      wide ? 48 : 20, wide ? 40 : 20, wide ? 48 : 20, 8),
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1240),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Eyebrow(t.homeEyebrow(city), color: Colors.white),
-                          const SizedBox(height: 10),
                           Text(t.homeHeroLine1(city),
                               style: TextStyle(
                                   fontFamily: kSerif,
@@ -325,6 +362,17 @@ class _Hero extends StatelessWidget {
                     ),
                   ),
               ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: IconButton(
+                onPressed: onScrollDown,
+                style: IconButton.styleFrom(
+                  side: const BorderSide(color: Colors.white70),
+                  foregroundColor: Colors.white,
+                ),
+                icon: const Icon(Icons.keyboard_arrow_down, size: 28),
+              ),
             ),
           ],
         ),
