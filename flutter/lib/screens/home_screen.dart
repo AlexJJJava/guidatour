@@ -13,6 +13,10 @@ const _cityHeroes = {
   'Roma': 'assets/images/hero_roma.jpg',
   'Firenze': 'assets/images/hero_firenze.jpg',
   'Venezia': 'assets/images/hero_venezia.jpg',
+  'Milano': 'assets/images/hero_milano.jpg',
+  'Napoli': 'assets/images/hero_napoli.jpg',
+  'Bologna': 'assets/images/hero_bologna.jpg',
+  'Torino': 'assets/images/hero_torino.jpg',
 };
 
 String _heroFor(String city) =>
