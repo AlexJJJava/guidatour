@@ -31,6 +31,16 @@ jobs:
           --base-href /guidatour/
           --dart-define=BACKEND_URL=https://guidatour.onrender.com
         working-directory: flutter
+      # GitHub Pages fa tenere i file in cache ai browser per 10 minuti: con
+      # la versione nell'URL ogni deploy carica subito il codice nuovo.
+      - name: Versiona main.dart.js e flutter_bootstrap.js
+        working-directory: flutter/build/web
+        run: |
+          v="${GITHUB_SHA::8}"
+          sed -i "s/\"mainJsPath\":\"main.dart.js\"/\"mainJsPath\":\"main.dart.js?v=$v\"/" flutter_bootstrap.js
+          sed -i "s/src=\"flutter_bootstrap.js\"/src=\"flutter_bootstrap.js?v=$v\"/" index.html
+          grep -q "main.dart.js?v=$v" flutter_bootstrap.js
+          grep -q "flutter_bootstrap.js?v=$v" index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
