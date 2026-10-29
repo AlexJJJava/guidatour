@@ -69,22 +69,10 @@ class TourDetailScreen extends StatelessWidget {
           children: [
             Hero(
               tag: 'tour-color-${tour.id}',
-              child: Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(kRadius),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      categoryColor(tour.category),
-                      categoryColor(tour.category).withValues(alpha: 0.75),
-                    ],
-                  ),
-                ),
-                child: Icon(categoryIcon(tour.category),
-                    size: 84, color: Colors.white.withValues(alpha: 0.9)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(kRadius),
+                child: Image.asset(categoryImage(tour.category),
+                    height: 280, width: double.infinity, fit: BoxFit.cover),
               ),
             ),
             const SizedBox(height: 22),
@@ -99,6 +87,7 @@ class TourDetailScreen extends StatelessWidget {
             const SizedBox(height: 6),
             Text(tour.title,
                 style: const TextStyle(
+                    fontFamily: kSerif,
                     fontSize: 30,
                     height: 1.1,
                     fontWeight: FontWeight.w800,
@@ -112,27 +101,33 @@ class TourDetailScreen extends StatelessWidget {
                 _Fact(Icons.schedule, tour.duration),
                 _Fact(Icons.language, languageLabel(context, tour.language)),
                 _Fact(Icons.euro, fmtPrice(tour.price)),
-                _Fact(Icons.event_seat_outlined, t.detailSeatsCount(tour.seats)),
+                _Fact(
+                    Icons.event_seat_outlined, t.detailSeatsCount(tour.seats)),
               ],
             ),
             const SizedBox(height: 14),
-            _Fact(Icons.place_outlined, t.detailMeetingPoint(tour.meetingPoint)),
+            _Fact(
+                Icons.place_outlined, t.detailMeetingPoint(tour.meetingPoint)),
             const SizedBox(height: 20),
-            TourMeetingPointMap(meetingPoint: tour.meetingPoint, city: tour.city),
+            TourMeetingPointMap(
+                meetingPoint: tour.meetingPoint, city: tour.city),
             const SizedBox(height: 20),
             Text(tour.description,
                 style: const TextStyle(fontSize: 16, height: 1.5)),
             if (tour.isPackage) ...[
               const SizedBox(height: 16),
-              InfoBanner(t.detailPackageInfo(guide?.name ?? '',
-                  tour.accessories.map((a) => accessoryLabel(context, a)).join(', '))),
+              InfoBanner(t.detailPackageInfo(
+                  guide?.name ?? '',
+                  tour.accessories
+                      .map((a) => accessoryLabel(context, a))
+                      .join(', '))),
             ],
             const SizedBox(height: 22),
             Card(
               margin: EdgeInsets.zero,
               child: ListTile(
                 leading: const CircleAvatar(
-                  backgroundColor: Color(0xFFE5EFEC),
+                  backgroundColor: Color(0xFFF6EEDF),
                   child: Icon(Icons.person_outline, color: kPrimary),
                 ),
                 title: Text(guide?.name ?? '',
@@ -322,8 +317,8 @@ class _BookingFormState extends State<BookingForm> {
             controlAffinity: ListTileControlAffinity.leading,
             value: _privacy,
             onChanged: (v) => setState(() => _privacy = v ?? false),
-            title:
-                Text(t.bookingPrivacyConsent, style: const TextStyle(fontSize: 13)),
+            title: Text(t.bookingPrivacyConsent,
+                style: const TextStyle(fontSize: 13)),
           ),
           const SizedBox(height: 8),
           FilledButton(

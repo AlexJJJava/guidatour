@@ -29,7 +29,7 @@ class PosterScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFDCE5E0)),
+                border: Border.all(color: const Color(0xFFEAE2D3)),
               ),
               child: Column(
                 children: [

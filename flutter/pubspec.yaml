@@ -2,7 +2,7 @@ name: guidatour
 
 description: Piattaforma per scoprire guide, esperienze e alloggi locali.
 publish_to: 'none'
-version: 0.1.0+2
+version: 0.1.0+3
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -33,6 +33,31 @@ flutter:
   generate: true
   assets:
     - assets/icon/app_icon.png
+    - assets/images/
+  # Font inclusi nell'app (Google Fonts, licenza OFL): niente download a runtime.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+    - family: Playfair
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlayfairDisplay-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlayfairDisplay-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+    - family: Caveat
+      fonts:
+        - asset: assets/fonts/Caveat-SemiBold.ttf
+          weight: 600
 
 flutter_launcher_icons:
   android: true

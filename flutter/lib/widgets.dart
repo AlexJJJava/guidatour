@@ -5,12 +5,139 @@ import 'l10n/locale_controller.dart';
 import 'models.dart';
 import 'state.dart';
 
-const kPrimary = Color(0xFF0F766E);
-const kInk = Color(0xFF183A36);
-const kMuted = Color(0xFF6D817C);
+/// Oro scuro: icone, link e accenti su fondo chiaro.
+const kPrimary = Color(0xFFB4832F);
+
+/// Oro chiaro dei pulsanti principali.
+const kGold = Color(0xFFF2C36B);
+
+/// Oro dei titoli in corsivo sulle foto.
+const kGoldText = Color(0xFFF0C878);
+const kInk = Color(0xFF1E2A33);
+const kMuted = Color(0xFF6B6F76);
+const kCream = Color(0xFFFBF7F0);
+const kSand = Color(0xFFF6EEDF);
+const kLine = Color(0xFFEAE2D3);
+
+/// Blu notte di intestazione e footer.
+const kNight = Color(0xFF1F2A33);
+
+/// Font dei titoli (Playfair Display, vedi pubspec).
+const kSerif = 'Playfair';
 
 /// Raggio d'angolo condiviso da card e contenitori arrotondati.
-const kRadius = 14.0;
+const kRadius = 12.0;
+
+/// Etichetta maiuscola e spaziata sopra i titoli di sezione.
+class Eyebrow extends StatelessWidget {
+  const Eyebrow(this.text, {super.key, this.color = kMuted});
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Text(text.toUpperCase(),
+      style: TextStyle(
+          fontSize: 11,
+          letterSpacing: 2.2,
+          fontWeight: FontWeight.w600,
+          color: color));
+}
+
+/// Link sottolineato con freccia ("Vedi tutti i tour →").
+class ArrowLink extends StatelessWidget {
+  const ArrowLink(this.text, {super.key, required this.onTap});
+  final String text;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(text,
+                  style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: kInk,
+                      decoration: TextDecoration.underline,
+                      decorationColor: kInk)),
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_forward, size: 15, color: kInk),
+            ],
+          ),
+        ),
+      );
+}
+
+/// Pulsante oro con freccia, come "Cerca tour →".
+class GoldButton extends StatelessWidget {
+  const GoldButton(this.label,
+      {super.key, required this.onPressed, this.expand = false});
+  final String label;
+  final VoidCallback? onPressed;
+  final bool expand;
+
+  @override
+  Widget build(BuildContext context) => FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          minimumSize: Size(expand ? double.infinity : 0, 46),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+            const SizedBox(width: 10),
+            const Icon(Icons.arrow_forward, size: 17),
+          ],
+        ),
+      );
+}
+
+/// Logo testuale con l'icona del monumento.
+class BrandLogo extends StatelessWidget {
+  const BrandLogo({super.key, this.light = true, this.tagline});
+  final bool light;
+  final String? tagline;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = light ? Colors.white : kInk;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.account_balance_outlined, size: 34, color: kGold),
+        const SizedBox(width: 10),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('GUIDATOUR',
+                style: TextStyle(
+                    fontFamily: kSerif,
+                    fontSize: 22,
+                    height: 1,
+                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w600,
+                    color: fg)),
+            if (tagline != null) ...[
+              const SizedBox(height: 4),
+              Text(tagline!.toUpperCase(),
+                  style: TextStyle(
+                      fontSize: 8.5,
+                      letterSpacing: 1.6,
+                      color: fg.withValues(alpha: 0.8))),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+}
 
 /// Centra il contenuto e limita la larghezza (browser/tablet).
 class PageBody extends StatelessWidget {
@@ -35,22 +162,51 @@ class PageBody extends StatelessWidget {
 
 class SectionHeading extends StatelessWidget {
   const SectionHeading(
-      {super.key, required this.title, this.action, this.onAction});
+      {super.key,
+      required this.title,
+      this.eyebrow,
+      this.subtitle,
+      this.action,
+      this.onAction});
   final String title;
+  final String? eyebrow;
+  final String? subtitle;
   final String? action;
   final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
+    final wide = MediaQuery.of(context).size.width >= 900;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Expanded(
-          child: Text(title,
-              style: const TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.w800, color: kInk)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (eyebrow != null) ...[
+                Eyebrow(eyebrow!),
+                const SizedBox(height: 6),
+              ],
+              Text(title,
+                  style: TextStyle(
+                      fontFamily: kSerif,
+                      fontSize: wide ? 34 : 26,
+                      height: 1.15,
+                      fontWeight: FontWeight.w700,
+                      color: kInk)),
+              if (subtitle != null) ...[
+                const SizedBox(height: 6),
+                Text(subtitle!,
+                    style: const TextStyle(fontSize: 15, color: kMuted)),
+              ],
+            ],
+          ),
         ),
-        if (action != null)
-          TextButton(onPressed: onAction, child: Text(action!)),
+        if (action != null && wide) ...[
+          const SizedBox(width: 16),
+          ArrowLink(action!, onTap: onAction),
+        ],
       ],
     );
   }
@@ -58,22 +214,28 @@ class SectionHeading extends StatelessWidget {
 
 class ResponsiveGrid extends StatelessWidget {
   const ResponsiveGrid(
-      {super.key, required this.children, this.itemHeight = 136});
+      {super.key, required this.children, this.itemHeight = 440});
   final List<Widget> children;
   final double itemHeight;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, c) {
-      final cols = c.maxWidth >= 1000 ? 3 : (c.maxWidth >= 620 ? 2 : 1);
-      const gap = 10.0;
+      final cols = c.maxWidth >= 1100
+          ? 4
+          : (c.maxWidth >= 820 ? 3 : (c.maxWidth >= 540 ? 2 : 1));
+      const gap = 20.0;
       final w = (c.maxWidth - gap * (cols - 1)) / cols;
       return Wrap(
         spacing: gap,
         runSpacing: gap,
         children: [
           for (final child in children)
-            SizedBox(width: w, height: itemHeight, child: child),
+            SizedBox(
+                width: w,
+                // Su una colonna la card è più larga: serve meno altezza.
+                height: cols == 1 ? itemHeight - 50 : itemHeight,
+                child: child),
         ],
       );
     });
@@ -91,18 +253,19 @@ const _categoryIcons = {
 
 IconData categoryIcon(String c) => _categoryIcons[c] ?? Icons.explore_outlined;
 
-/// Un colore d'accento diverso per categoria: rende le liste più vive senza
-/// bisogno di immagini.
-const _categoryColors = {
-  'Visita guidata': Color(0xFFCC8B5C),
-  'Tour a piedi': Color(0xFF6FA287),
-  'Enogastronomico': Color(0xFFD9A441),
-  'Bambini e famiglie': Color(0xFF5B9BB0),
-  'Serale': Color(0xFF6C66A8),
-  'Accompagnamento': Color(0xFFB08968),
+/// Una foto per categoria (Unsplash, in assets/images): i tour non hanno
+/// ancora immagini proprie.
+const _categoryImages = {
+  'Visita guidata': 'assets/images/cat_visita.jpg',
+  'Tour a piedi': 'assets/images/cat_piedi.jpg',
+  'Enogastronomico': 'assets/images/cat_food.jpg',
+  'Bambini e famiglie': 'assets/images/cat_famiglie.jpg',
+  'Serale': 'assets/images/cat_serale.jpg',
+  'Accompagnamento': 'assets/images/cat_accompagnamento.jpg',
 };
 
-Color categoryColor(String c) => _categoryColors[c] ?? kPrimary;
+String categoryImage(String c) =>
+    _categoryImages[c] ?? 'assets/images/cat_visita.jpg';
 
 class TourCard extends StatelessWidget {
   const TourCard({super.key, required this.tour, required this.onTap});
@@ -111,90 +274,121 @@ class TourCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = l10n(context);
     final guide = appState.guideById(tour.guideId);
-    final roleText = guide == null ? '' : roleLabel(context, guide.role);
+    final user = appState.currentUser;
+    final canFavorite = user != null && !user.role.isProfessional;
+    final favorite = appState.isFavorite(tour.id);
     return Card(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 3,
-              child: Hero(
-                tag: 'tour-color-${tour.id}',
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        categoryColor(tour.category),
-                        categoryColor(tour.category).withValues(alpha: 0.75),
-                      ],
+            SizedBox(
+              height: 170,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Hero(
+                    tag: 'tour-color-${tour.id}',
+                    child: Image.asset(categoryImage(tour.category),
+                        fit: BoxFit.cover),
+                  ),
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(categoryLabel(context, tour.category),
+                          style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFC0392B))),
                     ),
                   ),
-                  child: Center(
-                    child: Icon(categoryIcon(tour.category),
-                        size: 34, color: Colors.white.withValues(alpha: 0.9)),
-                  ),
-                ),
+                  if (canFavorite)
+                    Positioned(
+                      top: 2,
+                      right: 2,
+                      child: IconButton(
+                        onPressed: () => runOrSnack(
+                            context, () => appState.toggleFavorite(tour.id)),
+                        icon: Icon(
+                            favorite ? Icons.favorite : Icons.favorite_border,
+                            color: Colors.white,
+                            shadows: const [
+                              Shadow(color: Colors.black45, blurRadius: 6)
+                            ]),
+                      ),
+                    ),
+                ],
               ),
             ),
             Expanded(
-              flex: 7,
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '${categoryLabel(context, tour.category)} · ${languageLabel(context, tour.language)}'
-                          .toUpperCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 11,
-                          letterSpacing: 0.5,
-                          fontWeight: FontWeight.w700,
-                          color: kMuted),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(tour.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontSize: 18,
-                            height: 1.15,
-                            fontWeight: FontWeight.w800,
-                            color: kInk)),
-                    const SizedBox(height: 3),
-                    Text(
-                      '${guide?.name ?? ''} · $roleText',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 13, color: kMuted),
-                    ),
-                    const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.schedule, size: 15, color: kMuted),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(fmtDate(tour.start),
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 13)),
-                        ),
-                        Text(fmtPrice(tour.price),
+                        const Icon(Icons.event, size: 14, color: kPrimary),
+                        const SizedBox(width: 5),
+                        Text(fmtDate(tour.start),
                             style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
                                 color: kPrimary)),
                       ],
                     ),
+                    const SizedBox(height: 6),
+                    Text(tour.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontFamily: kSerif,
+                            fontSize: 19,
+                            height: 1.2,
+                            fontWeight: FontWeight.w700,
+                            color: kInk)),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                            child: _CardFact(Icons.schedule, tour.duration)),
+                        Expanded(
+                            child: _CardFact(Icons.translate,
+                                languageLabel(context, tour.language))),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    if (guide != null)
+                      _CardFact(Icons.person_outline,
+                          '${guide.name} · ${roleLabel(context, guide.role)}'),
+                    const Spacer(),
+                    Text.rich(
+                      TextSpan(
+                        style: const TextStyle(fontSize: 13, color: kInk),
+                        children: [
+                          TextSpan(text: '${t.tourFrom} '),
+                          TextSpan(
+                              text: fmtPrice(tour.price),
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.w700)),
+                          TextSpan(text: '  ${t.tourPerPerson}'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    GoldButton(t.tourDiscover, onPressed: onTap, expand: true),
                   ],
                 ),
               ),
@@ -206,6 +400,26 @@ class TourCard extends StatelessWidget {
   }
 }
 
+class _CardFact extends StatelessWidget {
+  const _CardFact(this.icon, this.text);
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        children: [
+          Icon(icon, size: 15, color: kMuted),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12.5, color: kMuted)),
+          ),
+        ],
+      );
+}
+
 class InfoBanner extends StatelessWidget {
   const InfoBanner(this.text, {super.key, this.warning = false});
   final String text;
@@ -213,7 +427,7 @@ class InfoBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = warning ? const Color(0xFFFFF1D6) : const Color(0xFFE9F3F0);
+    final color = warning ? const Color(0xFFFFF1D6) : const Color(0xFFF6EEDF);
     final fg = warning ? const Color(0xFF7A4B00) : kPrimary;
     return Container(
       width: double.infinity,
@@ -285,7 +499,10 @@ class PlatformDisclaimer extends StatelessWidget {
 /// Selettore della città: filtra i tour mostrati in tutta l'app (come un
 /// marketplace di tour tipo GetYourGuide).
 class CityPicker extends StatelessWidget {
-  const CityPicker({super.key});
+  const CityPicker({super.key, this.plain = false});
+
+  /// Solo testo e freccia, per stare dentro un riquadro di ricerca.
+  final bool plain;
 
   @override
   Widget build(BuildContext context) {
@@ -300,24 +517,37 @@ class CityPicker extends StatelessWidget {
             for (final c in tourCities)
               PopupMenuItem(value: c, child: Text(cityLabel(context, c))),
           ],
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE1F0EC),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.location_on, size: 18, color: kPrimary),
-                const SizedBox(width: 6),
-                Text(cityLabel(context, appState.city),
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w700, color: kInk)),
-                const Icon(Icons.expand_more, size: 18, color: kMuted),
-              ],
-            ),
-          ),
+          child: plain
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(cityLabel(context, appState.city),
+                        style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                            color: kInk)),
+                    const Icon(Icons.expand_more, size: 18, color: kMuted),
+                  ],
+                )
+              : Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF6EEDF),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.location_on, size: 18, color: kPrimary),
+                      const SizedBox(width: 6),
+                      Text(cityLabel(context, appState.city),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, color: kInk)),
+                      const Icon(Icons.expand_more, size: 18, color: kMuted),
+                    ],
+                  ),
+                ),
         );
       },
     );

@@ -57,7 +57,10 @@ class _CartBodyState extends State<_CartBody> {
         children: [
           Text(t.cartTitle,
               style: const TextStyle(
-                  fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
+                  fontFamily: kSerif,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: kInk)),
           const SizedBox(height: 16),
           InfoBanner(t.cartNoPaymentInfo),
           const SizedBox(height: 16),
@@ -80,7 +83,8 @@ class _CartBodyState extends State<_CartBody> {
             controlAffinity: ListTileControlAffinity.leading,
             value: _privacy,
             onChanged: (v) => setState(() => _privacy = v ?? false),
-            title: Text(t.cartShareConsent, style: const TextStyle(fontSize: 13)),
+            title:
+                Text(t.cartShareConsent, style: const TextStyle(fontSize: 13)),
           ),
           FilledButton(
             onPressed: !_privacy

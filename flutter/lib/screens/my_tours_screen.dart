@@ -30,7 +30,10 @@ class MyToursScreen extends StatelessWidget {
             children: [
               Text(t.dashTabMyTours,
                   style: const TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
+                      fontFamily: kSerif,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: kInk)),
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: () => Navigator.of(context).push(
@@ -75,9 +78,8 @@ class _TourCard extends StatelessWidget {
               spacing: 8,
               children: [
                 OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) => PosterScreen(tour: tour))),
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => PosterScreen(tour: tour))),
                   icon: const Icon(Icons.qr_code_2, size: 18),
                   label: Text(t.qrAndPoster),
                 ),
@@ -90,8 +92,7 @@ class _TourCard extends StatelessWidget {
                   onPressed: () async {
                     final updated = await Navigator.of(context).push<bool>(
                         MaterialPageRoute(
-                            builder: (_) =>
-                                TourFormScreen(existing: tour)));
+                            builder: (_) => TourFormScreen(existing: tour)));
                     if (updated == true && context.mounted) {
                       snack(context, t.tourUpdated);
                     }

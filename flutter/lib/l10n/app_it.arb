@@ -1,13 +1,11 @@
 {
   "@@locale": "it",
-
   "navDiscover": "Scopri",
   "navSearch": "Tour",
   "navFavorites": "Preferiti",
   "navCart": "Carrello",
   "navBookings": "Prenotazioni",
   "navAccount": "Account",
-
   "startupLoading": "Sveglio il backend…",
   "login": "Accedi",
   "logout": "Esci",
@@ -24,7 +22,6 @@
   "linkCopied": "Link copiato",
   "newTour": "Nuovo tour",
   "qrAndPoster": "QR e locandina",
-
   "fieldCity": "Città",
   "cityRoma": "Roma",
   "cityMilano": "Milano",
@@ -33,13 +30,11 @@
   "cityNapoli": "Napoli",
   "cityBologna": "Bologna",
   "cityTorino": "Torino",
-
   "validationRequired": "Obbligatorio",
   "validationEmail": "Inserisci un’email valida",
   "validationPasswordLength": "Almeno 6 caratteri",
   "validationNumber": "Numero",
   "validationAtLeastOne": "≥ 1",
-
   "fieldName": "Nome / ragione sociale",
   "fieldFullName": "Nome e cognome",
   "fieldEmail": "Email",
@@ -59,15 +54,19 @@
   "fieldAccessories": "Servizi accessori inclusi",
   "fieldWhatsappNumber": "Numero WhatsApp",
   "whatsappHint": "+39 …",
-
   "homeHeroTitle": "Tour e visite guidate, con chi la conosce davvero.",
   "homeHeroSubtitle": "Guide abilitate, accompagnatori e tour operator verificati. Scegli, scrivi alla guida, parti.",
   "homeSearchCta": "Cerca un tour",
   "homeUpcomingTitle": "Prossimi tour a {city}",
-  "@homeUpcomingTitle": {"placeholders": {"city": {"type": "String"}}},
+  "@homeUpcomingTitle": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
   "operatorBannerTitle": "Sei una guida o un operatore?",
   "operatorBannerBody": "Pubblica il tuo tour in pochi minuti: pagina pubblica, QR code e locandina. Accedi o registrati per iniziare.",
-
   "authAcceptTerms": "Accetta i termini d’uso per registrarti.",
   "authCreateAccountTitle": "Crea il tuo account",
   "authLoginTitle": "Accedi o registrati",
@@ -84,10 +83,21 @@
   "authHaveAccount": "Hai già un account? Accedi",
   "authNoAccount": "Non hai un account? Registrati",
   "authSocialComingSoon": "Accesso con {label} non ancora attivo.",
-  "@authSocialComingSoon": {"placeholders": {"label": {"type": "String"}}},
+  "@authSocialComingSoon": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "authSocialLabel": "{label} (presto)",
-  "@authSocialLabel": {"placeholders": {"label": {"type": "String"}}},
-
+  "@authSocialLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "roleTurista": "Turista",
   "roleGuida": "Guida turistica",
   "roleAccompagnatore": "Accompagnatore turistico",
@@ -95,23 +105,38 @@
   "verifiedSuffix": "verificato",
   "unverifiedSuffix": "in attesa di verifica",
   "greetingHello": "Ciao {name}",
-  "@greetingHello": {"placeholders": {"name": {"type": "String"}}},
-
+  "@greetingHello": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "searchTitle": "Tour a {city}",
-  "@searchTitle": {"placeholders": {"city": {"type": "String"}}},
+  "@searchTitle": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
   "searchHint": "Es. Colosseo, Trastevere, bambini…",
   "filterAll": "Tutti",
   "filterAnyLanguage": "Ogni lingua",
   "searchResultsCount": "{count} tour",
-  "@searchResultsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@searchResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "searchNoResults": "Nessun tour trovato con questi filtri.",
-
   "favoritesTitle": "I tuoi preferiti",
   "favoritesEmpty": "Nessun preferito. Tocca il cuore su un tour per salvarlo.",
   "favoritesTouristOnly": "I preferiti sono disponibili per gli account turista.",
   "favAddTooltip": "Aggiungi ai preferiti",
   "favRemoveTooltip": "Rimuovi dai preferiti",
-
   "cartTitle": "Carrello",
   "cartTouristOnly": "Il carrello è disponibile per gli account turista.",
   "cartEmpty": "Il carrello è vuoto. Aggiungi i tour che ti interessano dalla scheda del tour.",
@@ -120,45 +145,111 @@
   "cartShareConsent": "Acconsento a condividere nome ed email con le guide per essere ricontattato.",
   "cartSubmit": "Invia le richieste",
   "cartCheckoutDone": "{count} richieste inviate. Le trovi in {destination}.",
-  "@cartCheckoutDone": {"placeholders": {"count": {"type": "int"}, "destination": {"type": "String"}}},
+  "@cartCheckoutDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
   "cartLinePricePerPerson": "{date} · {price} a persona",
-  "@cartLinePricePerPerson": {"placeholders": {"date": {"type": "String"}, "price": {"type": "String"}}},
+  "@cartLinePricePerPerson": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "cartAdded": "Aggiunto al carrello",
   "inCart": "Nel carrello",
   "addToCart": "Aggiungi al carrello",
-
   "bookingsTitleSent": "Le tue prenotazioni",
   "bookingsTitleReceived": "Prenotazioni ricevute",
   "historyEmpty": "Non hai ancora inviato richieste.",
   "historyLine": "{date} · {people} persone",
-  "@historyLine": {"placeholders": {"date": {"type": "String"}, "people": {"type": "int"}}},
+  "@historyLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "people": {
+        "type": "int"
+      }
+    }
+  },
   "historyLineWithTourDate": "{date} · {people} persone · tour del {tourDate}",
-  "@historyLineWithTourDate": {"placeholders": {"date": {"type": "String"}, "people": {"type": "int"}, "tourDate": {"type": "String"}}},
+  "@historyLineWithTourDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "people": {
+        "type": "int"
+      },
+      "tourDate": {
+        "type": "String"
+      }
+    }
+  },
   "tourUnavailable": "Tour non più disponibile",
   "noRequestsReceived": "Nessuna richiesta ricevuta.",
   "nameAndPeople": "{name} · {people} persone",
-  "@nameAndPeople": {"placeholders": {"name": {"type": "String"}, "people": {"type": "int"}}},
+  "@nameAndPeople": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "people": {
+        "type": "int"
+      }
+    }
+  },
   "statusInviata": "Inviata",
   "statusConfermata": "Confermata",
   "statusRifiutata": "Rifiutata",
-
   "detailNeedLoginFavorites": "Accedi o registrati (scheda Account) per usare preferiti e carrello.",
   "detailNeedTourist": "Preferiti e carrello sono riservati agli account turista.",
   "detailSeatsCount": "{count} posti",
-  "@detailSeatsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@detailSeatsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "detailMeetingPoint": "Ritrovo: {point}",
-  "@detailMeetingPoint": {"placeholders": {"point": {"type": "String"}}},
+  "@detailMeetingPoint": {
+    "placeholders": {
+      "point": {
+        "type": "String"
+      }
+    }
+  },
   "mapTitle": "Dove ci si incontra",
   "mapNotFound": "Non siamo riusciti a individuare il punto sulla mappa. Usa il pulsante qui sotto.",
   "mapOpenExternal": "Apri in Google Maps",
   "detailPackageInfo": "Pacchetto completo organizzato da {name}. Include: {items}.",
-  "@detailPackageInfo": {"placeholders": {"name": {"type": "String"}, "items": {"type": "String"}}},
+  "@detailPackageInfo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
+  },
   "bookingNeedPrivacy": "Per inviare la richiesta serve il consenso privacy.",
   "bookingSentInfo": "Richiesta inviata! La guida ti contatterà per confermare disponibilità e pagamento. Questa richiesta non è una prenotazione vincolante.",
   "bookingSectionTitle": "Richiedi informazioni / prenota",
   "bookingPrivacyConsent": "Ho letto l’informativa privacy e acconsento al trattamento dei dati per essere ricontattato dalla guida.",
   "bookingSubmit": "Invia richiesta",
-
   "dashTabOverview": "Panoramica",
   "dashTabMyTours": "I miei tour",
   "dashTabAssignments": "Assegnazioni",
@@ -174,26 +265,80 @@
   "dashNoNotifications": "Nessuna notifica.",
   "dashNoToursYet": "Non hai ancora pubblicato tour.",
   "dashTourLine": "{date} · {price} · {seats} posti · {visits} visite · {scans} scansioni",
-  "@dashTourLine": {"placeholders": {"date": {"type": "String"}, "price": {"type": "String"}, "seats": {"type": "int"}, "visits": {"type": "int"}, "scans": {"type": "int"}}},
+  "@dashTourLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      },
+      "seats": {
+        "type": "int"
+      },
+      "visits": {
+        "type": "int"
+      },
+      "scans": {
+        "type": "int"
+      }
+    }
+  },
   "proposeToColleague": "Proponi a un collega",
   "chooseRecipientGuide": "Scegli la guida destinataria",
   "noGuideAvailable": "Nessuna guida disponibile.",
   "proposalSentTo": "Proposta inviata a {name}",
-  "@proposalSentTo": {"placeholders": {"name": {"type": "String"}}},
+  "@proposalSentTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "assignmentInfoBanner": "La guida destinataria può solo accettare o rifiutare: non può riassegnare il tour ad altri.",
   "noProposalsReceived": "Nessuna proposta ricevuta.",
   "fromGuideStatus": "Da {name} · {status}",
-  "@fromGuideStatus": {"placeholders": {"name": {"type": "String"}, "status": {"type": "String"}}},
+  "@fromGuideStatus": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "rejectedNotified": "Rifiutato. Notifica inviata alla guida titolare.",
   "acceptedNotified": "Accettato. Notifica inviata alla guida titolare.",
   "noProposalsSent": "Nessuna proposta inviata.",
   "toGuideStatus": "A {name} · {status}",
-  "@toGuideStatus": {"placeholders": {"name": {"type": "String"}, "status": {"type": "String"}}},
+  "@toGuideStatus": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "bookingRequestsTitle": "Richieste di prenotazione",
   "whatsappConsentsTitle": "Consensi WhatsApp raccolti",
   "noOptins": "Nessun opt-in raccolto.",
   "consentLine": "{date} · {source} · mittente: {sender}",
-  "@consentLine": {"placeholders": {"date": {"type": "String"}, "source": {"type": "String"}, "sender": {"type": "String"}}},
+  "@consentLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
   "revokedSuffix": "REVOCATO",
   "registerRevoke": "Registra revoca",
   "statusProposto": "proposto",
@@ -201,16 +346,30 @@
   "statusRifiutato": "rifiutato",
   "statusAnnullato": "annullato",
   "statusCompletato": "completato",
-
   "formBlockAccessoriesNotOperator": "Con servizi accessori ({accessories}) l’offerta diventa un pacchetto turistico. Il profilo {role} può pubblicare solo la propria visita o attività: rimuovi i servizi accessori oppure usa un profilo Tour operator verificato.",
-  "@formBlockAccessoriesNotOperator": {"placeholders": {"accessories": {"type": "String"}, "role": {"type": "String"}}},
+  "@formBlockAccessoriesNotOperator": {
+    "placeholders": {
+      "accessories": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
   "formBlockNotVerified": "I pacchetti completi richiedono un profilo Tour operator verificato. Il tuo profilo è in attesa di verifica.",
   "formBlockAccompagnatoreCategory": "L’accompagnatore turistico può pubblicare solo attività di accompagnamento, non visite guidate: la categoria è riservata alla guida abilitata.",
   "formBlockCulturalKeywords": "Il testo sembra descrivere una visita guidata specialistica su beni culturali, riservata alla guida abilitata. Riformula come attività di accompagnamento o invia a revisione amministrativa.",
   "formChooseDateTime": "Scegli data e ora.",
   "formConfirmDeclaration": "Conferma la dichiarazione di responsabilità.",
   "formPublishingAs": "Stai pubblicando come {role}.",
-  "@formPublishingAs": {"placeholders": {"role": {"type": "String"}}},
+  "@formPublishingAs": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
   "formDeclaration": "Dichiaro di essere responsabile del contenuto pubblicato, della mia abilitazione (ove richiesta), della disponibilità e dello svolgimento dell’offerta.",
   "formSubmit": "Pubblica e genera QR",
   "editTour": "Modifica tour",
@@ -220,49 +379,132 @@
   "confirmDeleteTourBody": "Il tour e tutte le richieste di prenotazione collegate verranno eliminati definitivamente. L’azione non si può annullare.",
   "tourUpdated": "Tour aggiornato",
   "tourDeleted": "Tour eliminato",
-
   "editProfile": "Modifica profilo",
   "fieldBio": "Biografia",
   "fieldLanguagesSpoken": "Lingue parlate",
   "profileSaved": "Profilo aggiornato",
   "save": "Salva",
   "validationAtLeastOneLanguage": "Scegli almeno una lingua",
-
   "markAllRead": "Segna tutte come lette",
   "markRead": "Segna come letta",
-
   "posterByGuide": "con {name} · {role}",
-  "@posterByGuide": {"placeholders": {"name": {"type": "String"}, "role": {"type": "String"}}},
+  "@posterByGuide": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
   "posterScanHint": "Inquadra il QR per info e richiesta di prenotazione",
   "simulateScan": "Simula una scansione (demo)",
   "scanSimulated": "Scansione simulata registrata ({count} totali)",
-  "@scanSimulated": {"placeholders": {"count": {"type": "int"}}},
+  "@scanSimulated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "posterPdfComingSoon": "L’esportazione PDF della locandina sarà aggiunta nel prossimo passo.",
-
   "whatsappInvalidPhone": "Inserisci il numero in formato internazionale, es. +393331234567.",
   "whatsappNeedConsent": "Serve il consenso esplicito per procedere.",
   "whatsappDone": "Fatto! Riceverai su WhatsApp la lista aggiornata dei tour a Roma. Puoi annullare in qualsiasi momento rispondendo STOP.",
   "whatsappTitle": "Vuoi ricevere su WhatsApp la lista aggiornata delle escursioni a Roma?",
   "whatsappSubmit": "Ricevi la lista su WhatsApp",
-
   "platformDisclaimer": "GuidaTour è una piattaforma di promozione e contatto: non organizza i tour né incassa pagamenti. Disponibilità, conferma, pagamento ed esecuzione restano in capo a guida od operatore che pubblica l’offerta.",
-
   "categoryVisitaGuidata": "Visita guidata",
   "categoryTourAPiedi": "Tour a piedi",
   "categoryEnogastronomico": "Enogastronomico",
   "categoryBambiniEFamiglie": "Bambini e famiglie",
   "categorySerale": "Serale",
   "categoryAccompagnamento": "Accompagnamento",
-
   "languageItaliano": "Italiano",
   "languageEnglish": "Inglese",
   "languageEspanol": "Spagnolo",
   "languageFrancais": "Francese",
   "languageDeutsch": "Tedesco",
-
   "accessoryCenaRistorante": "Cena / ristorante",
   "accessoryTransferAuto": "Transfer / auto",
   "accessoryBigliettiIngressi": "Biglietti / ingressi",
   "accessoryHotel": "Hotel",
-  "accessoryEsperienzaFood": "Esperienza food"
+  "accessoryEsperienzaFood": "Esperienza food",
+  "homeEyebrow": "Visite guidate a {city}",
+  "@homeEyebrow": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroLine1": "Scopri {city}",
+  "@homeHeroLine1": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroLine2": "con guide locali esperte",
+  "homeHeroScript": "Vivi la vera {city} con chi la conosce davvero",
+  "@homeHeroScript": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "heroTourType": "Tipo di tour",
+  "heroAllTours": "Tutti i tour",
+  "heroWhat": "Cosa cerchi",
+  "heroSearch": "Cerca tour",
+  "trustGuidesTitle": "Guide abilitate",
+  "trustGuidesBody": "e profili verificati",
+  "trustRequestTitle": "Richiesta senza impegno",
+  "trustRequestBody": "scrivi direttamente alla guida",
+  "trustConfirmTitle": "Conferma dalla guida",
+  "trustConfirmBody": "ricevi la risposta nell’app",
+  "trustWhatsappTitle": "Aggiornamenti WhatsApp",
+  "trustWhatsappBody": "solo se li chiedi tu",
+  "toursEyebrow": "In partenza",
+  "toursTitle": "Esperienze indimenticabili a {city}",
+  "@toursTitle": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "toursSubtitle": "Scegli il tour che fa per te e lasciati guidare alla scoperta della città.",
+  "toursAction": "Vedi tutti i tour",
+  "tourFrom": "Da",
+  "tourPerPerson": "a persona",
+  "tourDiscover": "Scopri il tour",
+  "categoriesEyebrow": "Esplora per categoria",
+  "categoriesTitle": "Trova l’esperienza perfetta per te",
+  "categoriesAction": "Vedi tutte le esperienze",
+  "proEyebrow": "Per guide e tour operator",
+  "proFeaturePage": "Pagina pubblica del tour",
+  "proFeatureQr": "QR code e locandina pronti",
+  "proFeatureRequests": "Richieste di prenotazione in un unico posto",
+  "proFeatureAssign": "Cessione dei tour tra colleghi",
+  "proButton": "Inizia ora",
+  "guidesEyebrow": "Le nostre guide",
+  "guidesTitle": "Professionisti con una grande passione",
+  "ctaTitle": "Pronto a vivere {city}?",
+  "@ctaTitle": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "ctaBody": "Scegli il tuo tour e lasciati guidare in un’esperienza che ricorderai per sempre.",
+  "ctaButton": "Prenota un tour",
+  "footerTagline": "Tour ed esperienze autentiche",
+  "footerLinks": "Link utili",
+  "footerLanguage": "Lingua",
+  "footerRights": "Tutti i diritti riservati."
 }

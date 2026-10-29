@@ -20,7 +20,7 @@ class _StatTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE0E8E3)),
+        border: Border.all(color: const Color(0xFFEAE2D3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +66,10 @@ class DashboardOverviewScreen extends StatelessWidget {
             children: [
               Text(t.dashTabOverview,
                   style: const TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
+                      fontFamily: kSerif,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: kInk)),
               const SizedBox(height: 20),
               Wrap(spacing: 12, runSpacing: 12, children: [
                 _StatTile(

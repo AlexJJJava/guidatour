@@ -14,10 +14,9 @@ import 'screens/bookings_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/dashboard_overview_screen.dart';
 import 'screens/favorites_screen.dart';
+import 'screens/home_screen.dart';
 import 'screens/my_tours_screen.dart';
 import 'screens/search_screen.dart';
-import 'screens/tour_detail_screen.dart';
-import 'screens/whatsapp_optin.dart';
 import 'state.dart';
 import 'widgets.dart';
 
@@ -32,6 +31,8 @@ class GuidaTourApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final buttonShape =
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10));
     return ValueListenableBuilder<Locale>(
       valueListenable: localeController,
       builder: (context, locale, _) {
@@ -48,9 +49,16 @@ class GuidaTourApp extends StatelessWidget {
           ],
           theme: ThemeData(
             useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(seedColor: kPrimary),
-            scaffoldBackgroundColor: const Color(0xFFF7F8F4),
-            fontFamily: 'Arial',
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: kGold,
+              primary: kPrimary,
+              onPrimary: Colors.white,
+              secondary: kGold,
+              surface: Colors.white,
+              onSurface: kInk,
+            ),
+            scaffoldBackgroundColor: kCream,
+            fontFamily: 'Inter',
             // Transizioni leggere e coerenti tra le pagine su tutte le
             // piattaforme (incluse nel framework, nessun pacchetto in più).
             pageTransitionsTheme: const PageTransitionsTheme(builders: {
@@ -60,9 +68,19 @@ class GuidaTourApp extends StatelessWidget {
               TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(),
               TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
             }),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: kCream,
+              foregroundColor: kInk,
+              surfaceTintColor: Colors.transparent,
+              titleTextStyle: TextStyle(
+                  fontFamily: kSerif,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: kInk),
+            ),
             cardTheme: CardThemeData(
-              elevation: 2,
-              shadowColor: kInk.withValues(alpha: 0.12),
+              elevation: 3,
+              shadowColor: kInk.withValues(alpha: 0.14),
               color: Colors.white,
               surfaceTintColor: Colors.transparent,
               shape: RoundedRectangleBorder(
@@ -71,16 +89,45 @@ class GuidaTourApp extends StatelessWidget {
             ),
             filledButtonTheme: FilledButtonThemeData(
               style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                backgroundColor: kGold,
+                foregroundColor: kInk,
+                disabledBackgroundColor: kLine,
+                textStyle: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600),
+                shape: buttonShape,
               ),
             ),
             outlinedButtonTheme: OutlinedButtonThemeData(
               style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                foregroundColor: kInk,
+                side: const BorderSide(color: kLine),
+                shape: buttonShape,
               ),
             ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: kPrimary),
+            ),
+            chipTheme: const ChipThemeData(
+              backgroundColor: kSand,
+              selectedColor: kGold,
+              side: BorderSide.none,
+            ),
+            navigationBarTheme: NavigationBarThemeData(
+              backgroundColor: Colors.white,
+              indicatorColor: kSand,
+              surfaceTintColor: Colors.transparent,
+              iconTheme: WidgetStateProperty.resolveWith((s) => IconThemeData(
+                  color: s.contains(WidgetState.selected) ? kPrimary : kMuted)),
+              labelTextStyle: WidgetStateProperty.resolveWith((s) => TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: s.contains(WidgetState.selected)
+                      ? FontWeight.w600
+                      : FontWeight.w500,
+                  color: s.contains(WidgetState.selected) ? kInk : kMuted)),
+            ),
+            dividerTheme: const DividerThemeData(color: kLine),
           ),
           home: const _Startup(),
         );
@@ -116,6 +163,8 @@ class _StartupState extends State<_Startup> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  const BrandLogo(light: false),
+                  const SizedBox(height: 24),
                   const CircularProgressIndicator(color: kPrimary),
                   const SizedBox(height: 16),
                   Text(l10n(context).startupLoading,
@@ -138,12 +187,13 @@ class AppShell extends StatefulWidget {
   State<AppShell> createState() => _AppShellState();
 }
 
-/// Una voce del menu principale: etichetta, icone e la pagina che mostra.
+/// Una voce del menu principale: etichetta, icone e la pagina che mostra
+/// (null per la home, costruita a parte perché riceve la barra di navigazione).
 typedef _NavItem = (
   String label,
   IconData icon,
   IconData selectedIcon,
-  Widget page
+  Widget? page
 );
 
 class _AppShellState extends State<AppShell> {
@@ -158,20 +208,10 @@ class _AppShellState extends State<AppShell> {
   List<_NavItem> _navItems(BuildContext context) {
     final t = l10n(context);
     final user = appState.currentUser;
-    final items = <_NavItem>[];
-    items.add(
-      (
-        t.navDiscover,
-        Icons.explore_outlined,
-        Icons.explore,
-        HomeScreen(
-            onOpenSearch: () => _select(1),
-            onOpenAccount: () => _select(items.length - 1)),
-      ),
-    );
-    items.add(
+    final items = <_NavItem>[
+      (t.navDiscover, Icons.explore_outlined, Icons.explore, null),
       (t.navSearch, Icons.search, Icons.search, const SearchScreen()),
-    );
+    ];
     if (user != null && user.role.isProfessional) {
       items.addAll([
         (
@@ -245,46 +285,47 @@ class _AppShellState extends State<AppShell> {
         }
         final items = _navItems(context);
         if (_index >= items.length) _index = 0;
+        final accountIndex = items.length - 1;
         return LayoutBuilder(builder: (context, constraints) {
           final isDesktop = constraints.maxWidth >= 900;
-          return Scaffold(
-            body: SafeArea(
+          Widget topBar({required bool overPhoto}) => isDesktop
+              ? _TopBar(
+                  items: items,
+                  index: _index,
+                  onSelect: _select,
+                  overPhoto: overPhoto,
+                )
+              : const _MobileTopBar();
+          final Widget body;
+          if (_index == 0) {
+            body = HomeScreen(
+              header: topBar(overPhoto: true),
+              links: [
+                for (var i = 0; i < items.length; i++)
+                  (items[i].$1, () => _select(i)),
+              ],
+              onOpenSearch: () => _select(1),
+              onOpenAccount: () => _select(accountIndex),
+            );
+          } else if (isDesktop) {
+            body = Column(
+              children: [
+                topBar(overPhoto: false),
+                Expanded(child: items[_index].$4!),
+              ],
+            );
+          } else {
+            body = SafeArea(
               child: Stack(
                 children: [
-                  Row(
-                    children: [
-                      if (isDesktop)
-                        NavigationRail(
-                          extended: true,
-                          minExtendedWidth: 220,
-                          backgroundColor: Colors.white,
-                          selectedIndex: _index,
-                          onDestinationSelected: _select,
-                          leading: const Padding(
-                            padding: EdgeInsets.fromLTRB(0, 24, 0, 32),
-                            child: Text('guidatour',
-                                style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -1.1,
-                                    color: kPrimary)),
-                          ),
-                          destinations: [
-                            for (final item in items)
-                              NavigationRailDestination(
-                                icon: Icon(item.$2),
-                                selectedIcon: Icon(item.$3),
-                                label: Text(item.$1),
-                              ),
-                          ],
-                        ),
-                      Expanded(child: items[_index].$4),
-                    ],
-                  ),
+                  items[_index].$4!,
                   const Positioned(top: 10, right: 12, child: LanguagePicker()),
                 ],
               ),
-            ),
+            );
+          }
+          return Scaffold(
+            body: body,
             bottomNavigationBar: isDesktop
                 ? null
                 : NavigationBar(
@@ -306,150 +347,55 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen(
-      {super.key, required this.onOpenSearch, required this.onOpenAccount});
-  final VoidCallback onOpenSearch;
-  final VoidCallback onOpenAccount;
+/// Barra di navigazione orizzontale (desktop/browser): trasparente sopra la
+/// foto della home, blu notte nelle altre pagine.
+class _TopBar extends StatelessWidget {
+  const _TopBar({
+    required this.items,
+    required this.index,
+    required this.onSelect,
+    required this.overPhoto,
+  });
+  final List<_NavItem> items;
+  final int index;
+  final ValueChanged<int> onSelect;
+  final bool overPhoto;
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width >= 900;
-    final t = l10n(context);
-    return ListenableBuilder(
-      listenable: appState,
-      builder: (context, _) {
-        final upcoming = [...appState.tours]
-          ..sort((a, b) => a.start.compareTo(b.start));
-        return PageBody(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Expanded(
-                    child: Text('guidatour',
-                        style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -1.1,
-                            color: kPrimary)),
-                  ),
-                  if (appState.currentUser == null)
-                    FilledButton.tonalIcon(
-                      onPressed: onOpenAccount,
-                      icon: const Icon(Icons.login, size: 18),
-                      label: Text(t.login),
-                    )
-                  else
-                    TextButton.icon(
-                      onPressed: onOpenAccount,
-                      icon: const Icon(Icons.person, size: 18),
-                      label: Text(appState.currentUser!.name.split(' ').first),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 28),
-              _hero(context, isDesktop),
-              const SizedBox(height: 28),
-              Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: [
-                  for (final c in tourCategories)
-                    ActionChip(
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      backgroundColor: const Color(0xFFE1F0EC),
-                      side: BorderSide.none,
-                      avatar: Icon(categoryIcon(c), size: 16),
-                      label: Text(categoryLabel(context, c)),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => Scaffold(
-                            appBar: AppBar(backgroundColor: Colors.transparent),
-                            body: SearchScreen(initialCategory: c),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              SectionHeading(
-                  title: t.homeUpcomingTitle(cityLabel(context, appState.city)),
-                  action: t.seeAll,
-                  onAction: onOpenSearch),
-              const SizedBox(height: 16),
-              ResponsiveGrid(children: [
-                for (final tour in upcoming.take(6))
-                  TourCard(tour: tour, onTap: () => openTour(context, tour)),
-              ]),
-              const SizedBox(height: 36),
-              const WhatsAppOptInCard(source: 'Home'),
-              if (appState.currentUser == null ||
-                  !appState.currentUser!.role.isProfessional) ...[
-                const SizedBox(height: 28),
-                _operatorBanner(context, t),
-              ],
-              const PlatformDisclaimer(),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _hero(BuildContext context, bool isDesktop) {
     final t = l10n(context);
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isDesktop ? 38 : 24),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0E4F4A),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(t.homeHeroTitle,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  height: 1.1,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -1)),
-          const SizedBox(height: 10),
-          Text(t.homeHeroSubtitle,
-              style: const TextStyle(color: Color(0xFFD7E9E3), fontSize: 16)),
-          const SizedBox(height: 18),
-          const _HeroSearchBar(),
-        ],
-      ),
-    );
-  }
-
-  Widget _operatorBanner(BuildContext context, AppLocalizations t) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(kRadius),
-      onTap: onOpenAccount,
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF0E9D9),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      color: overPhoto ? null : kNight,
+      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
+      alignment: Alignment.center,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1240),
+        child: Row(
           children: [
-            Text(t.operatorBannerTitle,
-                style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF3C3427))),
-            const SizedBox(height: 6),
-            Text(t.operatorBannerBody,
-                style: const TextStyle(color: Color(0xFF625846))),
+            InkWell(
+              onTap: () => onSelect(0),
+              child: BrandLogo(tagline: t.footerTagline),
+            ),
+            const SizedBox(width: 36),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (var i = 0; i < items.length; i++)
+                      _NavLink(
+                        label: items[i].$1,
+                        selected: i == index,
+                        onTap: () => onSelect(i),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const LanguagePicker(),
+            const SizedBox(width: 14),
+            GoldButton(t.ctaButton, onPressed: () => onSelect(1)),
           ],
         ),
       ),
@@ -457,66 +403,52 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// Città e ricerca affiancate nel riquadro verde della home.
-class _HeroSearchBar extends StatefulWidget {
-  const _HeroSearchBar();
+class _NavLink extends StatelessWidget {
+  const _NavLink(
+      {required this.label, required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
-  State<_HeroSearchBar> createState() => _HeroSearchBarState();
-}
-
-class _HeroSearchBarState extends State<_HeroSearchBar> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _go(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          appBar: AppBar(backgroundColor: Colors.transparent),
-          body: SearchScreen(initialQuery: _controller.text.trim()),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = l10n(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const CityPicker(),
-        const SizedBox(width: 10),
-        Expanded(
-          child: TextField(
-            controller: _controller,
-            onSubmitted: (_) => _go(context),
-            style: const TextStyle(color: kInk),
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: t.searchHint,
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide.none,
-              ),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.search, color: kPrimary),
-                onPressed: () => _go(context),
-              ),
-            ),
+  Widget build(BuildContext context) => InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                      color: selected ? kGold : Colors.white)),
+              const SizedBox(height: 4),
+              Container(
+                  height: 2,
+                  width: 18,
+                  color: selected ? kGold : Colors.transparent),
+            ],
           ),
         ),
-      ],
-    );
-  }
+      );
+}
+
+/// Su telefono la home mostra solo logo e lingua sopra la foto: il menu è
+/// nella barra in basso.
+class _MobileTopBar extends StatelessWidget {
+  const _MobileTopBar();
+
+  @override
+  Widget build(BuildContext context) => const Padding(
+        padding: EdgeInsets.fromLTRB(20, 14, 16, 0),
+        child: Row(
+          children: [
+            BrandLogo(),
+            Spacer(),
+            LanguagePicker(),
+          ],
+        ),
+      );
 }

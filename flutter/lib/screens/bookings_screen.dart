@@ -42,7 +42,10 @@ class _SentBookings extends StatelessWidget {
         children: [
           Text(t.bookingsTitleSent,
               style: const TextStyle(
-                  fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
+                  fontFamily: kSerif,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: kInk)),
           const SizedBox(height: 20),
           if (reqs.isEmpty)
             EmptyState(icon: Icons.event_busy, message: t.historyEmpty)
@@ -90,7 +93,10 @@ class _ReceivedBookings extends StatelessWidget {
         children: [
           Text(t.bookingsTitleReceived,
               style: const TextStyle(
-                  fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
+                  fontFamily: kSerif,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: kInk)),
           const SizedBox(height: 20),
           if (reqs.isEmpty)
             EmptyState(icon: Icons.mail_outline, message: t.noRequestsReceived),

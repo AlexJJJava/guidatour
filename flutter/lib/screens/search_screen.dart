@@ -51,7 +51,10 @@ class _SearchScreenState extends State<SearchScreen> {
             children: [
               Text(t.searchTitle(cityLabel(context, appState.city)),
                   style: const TextStyle(
-                      fontSize: 30, fontWeight: FontWeight.w800, color: kInk)),
+                      fontFamily: kSerif,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w700,
+                      color: kInk)),
               const SizedBox(height: 16),
               TextField(
                 controller: _controller,
@@ -68,21 +71,27 @@ class _SearchScreenState extends State<SearchScreen> {
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFFDCE5E0)),
+                    borderSide: const BorderSide(color: Color(0xFFEAE2D3)),
                   ),
                 ),
               ),
               const SizedBox(height: 14),
               _chips(
                   context,
-                  [t.filterAll, ...tourCategories.map((c) => categoryLabel(context, c))],
+                  [
+                    t.filterAll,
+                    ...tourCategories.map((c) => categoryLabel(context, c))
+                  ],
                   [null, ...tourCategories],
                   _category,
                   (v) => setState(() => _category = v)),
               const SizedBox(height: 8),
               _chips(
                   context,
-                  [t.filterAnyLanguage, ...tourLanguages.map((l) => languageLabel(context, l))],
+                  [
+                    t.filterAnyLanguage,
+                    ...tourLanguages.map((l) => languageLabel(context, l))
+                  ],
                   [null, ...tourLanguages],
                   _language,
                   (v) => setState(() => _language = v)),
@@ -107,8 +116,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// [labels] e [values] sono parallele: labels[i] è il testo mostrato per
   /// values[i] (il valore canonico, null per "tutti/ogni lingua").
-  Widget _chips(BuildContext context, List<String> labels,
-      List<String?> values, String? selected, ValueChanged<String?> onTap) {
+  Widget _chips(BuildContext context, List<String> labels, List<String?> values,
+      String? selected, ValueChanged<String?> onTap) {
     return Wrap(
       spacing: 4,
       runSpacing: 4,
@@ -117,11 +126,11 @@ class _SearchScreenState extends State<SearchScreen> {
           ChoiceChip(
             visualDensity: VisualDensity.compact,
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            backgroundColor: const Color(0xFFE1F0EC),
+            backgroundColor: const Color(0xFFF6EEDF),
             selectedColor: kPrimary,
             side: BorderSide.none,
-            labelStyle: TextStyle(
-                color: selected == values[i] ? Colors.white : kInk),
+            labelStyle:
+                TextStyle(color: selected == values[i] ? Colors.white : kInk),
             selected: selected == values[i],
             label: Text(labels[i]),
             onSelected: (_) => onTap(values[i]),

@@ -21,9 +21,8 @@ class AssignmentsScreen extends StatelessWidget {
         final sent = appState.assignments
             .where((a) => a.fromGuideId == user.id)
             .toList();
-        final received = appState.assignments
-            .where((a) => a.toGuideId == user.id)
-            .toList();
+        final received =
+            appState.assignments.where((a) => a.toGuideId == user.id).toList();
         return PageBody(
           maxWidth: 900,
           child: Column(
@@ -31,7 +30,10 @@ class AssignmentsScreen extends StatelessWidget {
             children: [
               Text(t.dashTabAssignments,
                   style: const TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
+                      fontFamily: kSerif,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: kInk)),
               const SizedBox(height: 16),
               InfoBanner(t.assignmentInfoBanner),
               const SizedBox(height: 20),

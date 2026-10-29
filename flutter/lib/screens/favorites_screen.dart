@@ -31,6 +31,7 @@ class FavoritesScreen extends StatelessWidget {
             children: [
               Text(t.favoritesTitle,
                   style: const TextStyle(
+                      fontFamily: kSerif,
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
                       color: kInk)),

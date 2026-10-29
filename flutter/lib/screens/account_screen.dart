@@ -27,7 +27,10 @@ class AccountScreen extends StatelessWidget {
             children: [
               Text(t.greetingHello(user.name),
                   style: const TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
+                      fontFamily: kSerif,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: kInk)),
               const SizedBox(height: 6),
               Text(
                   user.role.isProfessional

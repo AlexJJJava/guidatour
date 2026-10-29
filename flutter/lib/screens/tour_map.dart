@@ -42,7 +42,8 @@ class _TourMeetingPointMapState extends State<TourMeetingPointMap> {
   /// Prova prima con l'indirizzo completo, poi con varianti via via più
   /// semplificate, finché Nominatim non trova un risultato.
   static Future<LatLng?> _geocode(String meetingPoint, String city) async {
-    final segments = meetingPoint.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty);
+    final segments =
+        meetingPoint.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty);
     final withoutFillers = meetingPoint
         .split(RegExp(r'[\s,]+'))
         .where((w) => !_fillerWords.contains(w.toLowerCase()))
@@ -107,14 +108,14 @@ class _TourMeetingPointMapState extends State<TourMeetingPointMap> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return const ColoredBox(
-                    color: Color(0xFFE9F3F0),
+                    color: Color(0xFFF6EEDF),
                     child: Center(child: CircularProgressIndicator()),
                   );
                 }
                 final point = snapshot.data;
                 if (point == null) {
                   return ColoredBox(
-                    color: const Color(0xFFE9F3F0),
+                    color: const Color(0xFFF6EEDF),
                     child: Center(
                       child: Padding(
                         padding: const EdgeInsets.all(16),

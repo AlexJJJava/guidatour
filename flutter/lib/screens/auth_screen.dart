@@ -78,7 +78,10 @@ class _AuthScreenState extends State<AuthScreen> {
           children: [
             Text(_register ? t.authCreateAccountTitle : t.authLoginTitle,
                 style: const TextStyle(
-                    fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
+                    fontFamily: kSerif,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: kInk)),
             const SizedBox(height: 8),
             Text(t.authIntro, style: const TextStyle(color: kMuted)),
             if (!_register) ...[
@@ -136,8 +139,9 @@ class _AuthScreenState extends State<AuthScreen> {
                         horizontal: 12, vertical: 12),
                     labelText: t.fieldName,
                     border: const OutlineInputBorder()),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? t.validationRequired : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? t.validationRequired
+                    : null,
               ),
               const SizedBox(height: 12),
             ],
@@ -168,8 +172,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   onPressed: () => setState(() => _hidden = !_hidden),
                 ),
               ),
-              validator: (v) =>
-                  (v == null || v.length < 6) ? t.validationPasswordLength : null,
+              validator: (v) => (v == null || v.length < 6)
+                  ? t.validationPasswordLength
+                  : null,
             ),
             if (_register) ...[
               const SizedBox(height: 16),
@@ -200,8 +205,8 @@ class _AuthScreenState extends State<AuthScreen> {
                 controlAffinity: ListTileControlAffinity.leading,
                 value: _terms,
                 onChanged: (v) => setState(() => _terms = v ?? false),
-                title: Text(t.authTermsText,
-                    style: const TextStyle(fontSize: 13)),
+                title:
+                    Text(t.authTermsText, style: const TextStyle(fontSize: 13)),
               ),
             ],
             const SizedBox(height: 14),
