@@ -130,7 +130,7 @@ class _SearchScreenState extends State<SearchScreen> {
             selectedColor: kPrimary,
             side: BorderSide.none,
             labelStyle:
-                TextStyle(color: selected == values[i] ? kOnGold : kInk),
+                TextStyle(color: selected == values[i] ? Colors.white : kInk),
             selected: selected == values[i],
             label: Text(labels[i]),
             onSelected: (_) => onTap(values[i]),

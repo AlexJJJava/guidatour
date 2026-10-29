@@ -50,12 +50,10 @@ class GuidaTourApp extends StatelessWidget {
           ],
           theme: ThemeData(
             useMaterial3: true,
-            brightness: Brightness.dark,
             colorScheme: ColorScheme.fromSeed(
-              brightness: Brightness.dark,
               seedColor: kGold,
               primary: kPrimary,
-              onPrimary: kOnGold,
+              onPrimary: Colors.white,
               secondary: kGold,
               onSecondary: kOnGold,
               surface: kSurface,
@@ -85,7 +83,7 @@ class GuidaTourApp extends StatelessWidget {
             ),
             cardTheme: CardThemeData(
               elevation: 3,
-              shadowColor: Colors.black,
+              shadowColor: kInk.withValues(alpha: 0.14),
               color: kSurface,
               surfaceTintColor: Colors.transparent,
               shape: RoundedRectangleBorder(

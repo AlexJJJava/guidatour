@@ -565,7 +565,7 @@ class _CategoryBubble extends StatelessWidget {
             height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: kLine, width: 4),
+              border: Border.all(color: kSurface, width: 4),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withValues(alpha: 0.15),
@@ -725,7 +725,7 @@ class _GuideCard extends StatelessWidget {
         border: Border.all(color: kLine),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: kInk.withValues(alpha: 0.06),
               blurRadius: 12,
               offset: const Offset(0, 4)),
         ],

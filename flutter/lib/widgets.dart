@@ -5,34 +5,30 @@ import 'l10n/locale_controller.dart';
 import 'models.dart';
 import 'state.dart';
 
-/// Tema scuro: pagine nere, testi chiari, accenti oro.
-
-/// Oro per icone, link e accenti.
-const kPrimary = Color(0xFFD9A24A);
+/// Oro scuro: icone, link e accenti su fondo chiaro.
+const kPrimary = Color(0xFFB4832F);
 
 /// Oro chiaro dei pulsanti principali.
 const kGold = Color(0xFFF2C36B);
 
 /// Testo sopra i pulsanti oro.
-const kOnGold = Color(0xFF1A1A1A);
+const kOnGold = Color(0xFF1E2A33);
 
 /// Oro dei titoli in corsivo sulle foto.
 const kGoldText = Color(0xFFF0C878);
-
-/// Testo principale (chiaro su fondo scuro).
-const kInk = Color(0xFFF2EEE7);
-const kMuted = Color(0xFFA39E95);
+const kInk = Color(0xFF1E2A33);
+const kMuted = Color(0xFF6B6F76);
 
 /// Sfondo delle pagine.
-const kCream = Color(0xFF0B0B0B);
+const kCream = Color(0xFFFBF7F0);
 
 /// Card, riquadri e sezioni alternate.
-const kSurface = Color(0xFF161514);
-const kSand = Color(0xFF1F1D1A);
-const kLine = Color(0xFF2E2B27);
+const kSurface = Colors.white;
+const kSand = Color(0xFFF6EEDF);
+const kLine = Color(0xFFEAE2D3);
 
-/// Intestazione e footer.
-const kNight = Color(0xFF111317);
+/// Blu notte di intestazione e footer.
+const kNight = Color(0xFF1F2A33);
 
 /// Font dei titoli (Playfair Display, vedi pubspec).
 const kSerif = 'Playfair';
