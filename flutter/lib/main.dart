@@ -135,6 +135,11 @@ class GuidaTourApp extends StatelessWidget {
             ),
             dividerTheme: const DividerThemeData(color: kLine),
             popupMenuTheme: const PopupMenuThemeData(color: kSand),
+            scrollbarTheme: ScrollbarThemeData(
+              thumbColor: WidgetStatePropertyAll(kGold.withValues(alpha: 0.7)),
+              trackColor: const WidgetStatePropertyAll(kSurface),
+              trackBorderColor: const WidgetStatePropertyAll(kLine),
+            ),
           ),
           home: const _Startup(),
         );

@@ -60,9 +60,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _scroll = ScrollController();
 
-  /// Prima sezione sotto la copertina: la freccia "scorri giù" porta qui.
-  final _toursKey = GlobalKey();
-
   Widget get header => widget.header;
   List<(String, VoidCallback)> get links => widget.links;
   VoidCallback get onOpenSearch => widget.onOpenSearch;
@@ -74,14 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _scrollDown() {
-    final target = _toursKey.currentContext;
-    if (target == null) return;
-    Scrollable.ensureVisible(target,
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeInOutCubic);
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -91,16 +80,18 @@ class _HomeScreenState extends State<HomeScreen> {
         final user = appState.currentUser;
         return Scrollbar(
           controller: _scroll,
+          // Sempre visibile, anche prima di scorrere: fa capire che la
+          // pagina continua.
           thumbVisibility: true,
+          trackVisibility: true,
+          thickness: 8,
+          radius: const Radius.circular(4),
           child: SingleChildScrollView(
             controller: _scroll,
             child: Column(
               children: [
-                _Hero(header: header, wide: wide, onScrollDown: _scrollDown),
-                KeyedSubtree(
-                    key: _toursKey,
-                    child: _Section(
-                        color: kSurface, child: _tours(context, wide))),
+                _Hero(header: header, wide: wide),
+                _Section(color: kSurface, child: _tours(context, wide)),
                 _Section(color: kCream, child: _categories(context, wide)),
                 if (user == null || !user.role.isProfessional)
                   _ProSection(wide: wide, onStart: onOpenAccount),
@@ -235,11 +226,9 @@ class _Section extends StatelessWidget {
 }
 
 class _Hero extends StatelessWidget {
-  const _Hero(
-      {required this.header, required this.wide, required this.onScrollDown});
+  const _Hero({required this.header, required this.wide});
   final Widget header;
   final bool wide;
-  final VoidCallback onScrollDown;
 
   @override
   Widget build(BuildContext context) {
@@ -364,17 +353,7 @@ class _Hero extends StatelessWidget {
                   ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6, top: 4),
-              child: IconButton(
-                onPressed: onScrollDown,
-                style: IconButton.styleFrom(
-                  side: const BorderSide(color: Colors.white70),
-                  foregroundColor: Colors.white,
-                ),
-                icon: const Icon(Icons.keyboard_arrow_down, size: 28),
-              ),
-            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
