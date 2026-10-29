@@ -127,9 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeading(
-          eyebrow: t.toursEyebrow,
           title: t.toursTitle(city),
-          subtitle: t.toursSubtitle,
           action: t.toursAction,
           onAction: onOpenSearch,
         ),
@@ -155,7 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeading(
-          eyebrow: t.categoriesEyebrow,
           title: t.categoriesTitle,
           action: t.categoriesAction,
           onAction: onOpenSearch,
@@ -194,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionHeading(eyebrow: t.guidesEyebrow, title: t.guidesTitle),
+        SectionHeading(title: t.guidesTitle),
         const SizedBox(height: 16),
         LayoutBuilder(builder: (context, c) {
           final cols = c.maxWidth >= 820 ? 3 : 1;
@@ -627,8 +624,6 @@ class _ProSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Eyebrow(t.proEyebrow),
-        const SizedBox(height: 8),
         Text(t.operatorBannerTitle,
             style: TextStyle(
                 fontFamily: kSerif,

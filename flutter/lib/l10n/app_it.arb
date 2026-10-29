@@ -446,7 +446,6 @@
   "trustConfirmBody": "ricevi la risposta nell’app",
   "trustWhatsappTitle": "Aggiornamenti WhatsApp",
   "trustWhatsappBody": "solo se li chiedi tu",
-  "toursEyebrow": "In partenza",
   "toursTitle": "Esperienze indimenticabili a {city}",
   "@toursTitle": {
     "placeholders": {
@@ -455,21 +454,17 @@
       }
     }
   },
-  "toursSubtitle": "Scegli il tour che fa per te e lasciati guidare alla scoperta della città.",
   "toursAction": "Vedi tutti i tour",
   "tourFrom": "Da",
   "tourPerPerson": "a persona",
   "tourDiscover": "Scopri il tour",
-  "categoriesEyebrow": "Esplora per categoria",
   "categoriesTitle": "Trova l’esperienza perfetta per te",
   "categoriesAction": "Vedi tutte le esperienze",
-  "proEyebrow": "Per guide e tour operator",
   "proFeaturePage": "Pagina pubblica del tour",
   "proFeatureQr": "QR code e locandina pronti",
   "proFeatureRequests": "Richieste di prenotazione in un unico posto",
   "proFeatureAssign": "Cessione dei tour tra colleghi",
   "proButton": "Inizia ora",
-  "guidesEyebrow": "Le nostre guide",
   "guidesTitle": "Professionisti con una grande passione",
   "ctaTitle": "Pronto a partire?",
   "ctaBody": "Scegli il tuo tour e lasciati guidare in un’esperienza che ricorderai per sempre.",
