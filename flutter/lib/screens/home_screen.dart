@@ -129,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
           action: t.toursAction,
           onAction: onOpenSearch,
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         if (upcoming.isEmpty)
           EmptyState(icon: Icons.explore_outlined, message: t.searchNoResults)
         else
@@ -156,18 +156,18 @@ class _HomeScreenState extends State<HomeScreen> {
           action: t.categoriesAction,
           onAction: onOpenSearch,
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 16),
         if (wide)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               for (final c in tourCategories)
-                Expanded(child: _CategoryBubble(category: c, size: 130)),
+                Expanded(child: _CategoryBubble(category: c, size: 96)),
             ],
           )
         else
           SizedBox(
-            height: 170,
+            height: 124,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: tourCategories.length,
@@ -175,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: (_, i) => SizedBox(
                   width: 124,
                   child:
-                      _CategoryBubble(category: tourCategories[i], size: 96)),
+                      _CategoryBubble(category: tourCategories[i], size: 72)),
             ),
           ),
       ],
@@ -191,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeading(eyebrow: t.guidesEyebrow, title: t.guidesTitle),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         LayoutBuilder(builder: (context, c) {
           final cols = c.maxWidth >= 820 ? 3 : 1;
           const gap = 20.0;
@@ -222,7 +222,7 @@ class _Section extends StatelessWidget {
       width: double.infinity,
       color: color,
       padding: EdgeInsets.symmetric(
-          horizontal: wide ? 48 : 20, vertical: wide ? 48 : 32),
+          horizontal: wide ? 48 : 20, vertical: wide ? 28 : 20),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1240),
@@ -277,7 +277,7 @@ class _Hero extends StatelessWidget {
               children: [
                 Padding(
                   padding: EdgeInsets.fromLTRB(
-                      wide ? 48 : 20, wide ? 40 : 20, wide ? 48 : 20, 8),
+                      wide ? 48 : 20, wide ? 16 : 10, wide ? 48 : 20, 0),
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1240),
@@ -287,31 +287,31 @@ class _Hero extends StatelessWidget {
                           Text(t.homeHeroLine1(city),
                               style: TextStyle(
                                   fontFamily: kSerif,
-                                  fontSize: wide ? 64 : 40,
+                                  fontSize: wide ? 46 : 30,
                                   height: 1.05,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white)),
                           Text(t.homeHeroLine2,
                               style: TextStyle(
                                   fontFamily: kSerif,
-                                  fontSize: wide ? 54 : 32,
+                                  fontSize: wide ? 38 : 24,
                                   height: 1.15,
                                   fontStyle: FontStyle.italic,
                                   fontWeight: FontWeight.w600,
                                   color: kGoldText)),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 8),
                           Align(
                             alignment: Alignment.centerLeft,
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 480),
                               child: Text(t.homeHeroSubtitle,
                                   style: const TextStyle(
-                                      fontSize: 17,
+                                      fontSize: 15,
                                       height: 1.4,
                                       color: Colors.white)),
                             ),
                           ),
-                          const SizedBox(height: 28),
+                          const SizedBox(height: 16),
                           Align(
                             alignment: Alignment.centerLeft,
                             child: ConstrainedBox(
@@ -319,7 +319,7 @@ class _Hero extends StatelessWidget {
                               child: _HeroSearchPanel(wide: wide),
                             ),
                           ),
-                          const SizedBox(height: 26),
+                          const SizedBox(height: 14),
                           Wrap(
                             spacing: 32,
                             runSpacing: 16,
@@ -342,7 +342,7 @@ class _Hero extends StatelessWidget {
                 if (MediaQuery.of(context).size.width >= 1300)
                   Positioned(
                     right: 70,
-                    top: 150,
+                    top: 60,
                     child: Transform.rotate(
                       angle: -0.2,
                       child: SizedBox(
@@ -364,7 +364,7 @@ class _Hero extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.only(bottom: 6, top: 4),
               child: IconButton(
                 onPressed: onScrollDown,
                 style: IconButton.styleFrom(
@@ -629,14 +629,14 @@ class _ProSection extends StatelessWidget {
         Text(t.operatorBannerTitle,
             style: TextStyle(
                 fontFamily: kSerif,
-                fontSize: wide ? 32 : 26,
+                fontSize: wide ? 26 : 22,
                 height: 1.15,
                 fontWeight: FontWeight.w700,
                 color: kInk)),
         const SizedBox(height: 12),
         Text(t.operatorBannerBody,
             style: const TextStyle(fontSize: 15, height: 1.5, color: kMuted)),
-        const SizedBox(height: 22),
+        const SizedBox(height: 16),
         GoldButton(t.proButton, onPressed: onStart),
       ],
     );
@@ -658,12 +658,12 @@ class _ProSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 200, child: image),
+            const SizedBox(height: 140, child: image),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [text, const SizedBox(height: 24), features],
+                children: [text, const SizedBox(height: 12), features],
               ),
             ),
           ],
@@ -672,7 +672,7 @@ class _ProSection extends StatelessWidget {
     }
     return Container(
       color: const Color(0xFFFDFAF5),
-      height: 380,
+      height: 280,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -703,13 +703,13 @@ class _Feature extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 7),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 34,
+              height: 34,
               decoration:
                   const BoxDecoration(color: kSand, shape: BoxShape.circle),
               child: Icon(icon, size: 19, color: kPrimary),
@@ -827,7 +827,7 @@ class _CtaBand extends StatelessWidget {
         Text(t.ctaTitle(city),
             style: TextStyle(
                 fontFamily: kSerif,
-                fontSize: wide ? 44 : 30,
+                fontSize: wide ? 32 : 24,
                 height: 1.1,
                 fontWeight: FontWeight.w700,
                 color: Colors.white)),
@@ -860,7 +860,7 @@ class _CtaBand extends StatelessWidget {
           ),
         ),
         padding: EdgeInsets.symmetric(
-            horizontal: wide ? 48 : 20, vertical: wide ? 56 : 36),
+            horizontal: wide ? 48 : 20, vertical: wide ? 28 : 22),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1240),
@@ -875,7 +875,7 @@ class _CtaBand extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       text,
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       GoldButton(t.ctaButton, onPressed: onBook),
                     ],
                   ),
@@ -936,7 +936,7 @@ class _Footer extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: kNight,
-      padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 40, wide ? 48 : 20, 20),
+      padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 28, wide ? 48 : 20, 20),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1240),
@@ -954,14 +954,14 @@ class _Footer extends StatelessWidget {
                 )
               else ...[
                 brand,
-                const SizedBox(height: 28),
+                const SizedBox(height: 18),
                 nav,
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 language,
               ],
-              const SizedBox(height: 28),
+              const SizedBox(height: 18),
               const Divider(color: Colors.white12, height: 1),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Text('© ${DateTime.now().year} guidatour. ${t.footerRights}',
                   style: const TextStyle(fontSize: 12, color: Colors.white54)),
             ],
