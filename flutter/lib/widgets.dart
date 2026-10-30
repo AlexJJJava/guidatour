@@ -33,6 +33,10 @@ const kNight = Color(0xFF1F2A33);
 /// Font dei titoli (Playfair Display, vedi pubspec).
 const kSerif = 'Playfair';
 
+/// Larghezza massima del contenuto della home: tutte le sezioni stanno in
+/// questa colonna, anche su schermi molto larghi.
+const kContentWidth = 1320.0;
+
 /// Raggio d'angolo condiviso da card e contenitori arrotondati.
 const kRadius = 12.0;
 

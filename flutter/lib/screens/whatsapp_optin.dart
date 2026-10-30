@@ -60,7 +60,7 @@ class _WhatsAppOptInCardState extends State<WhatsAppOptInCard> {
       color: kSand,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
         child: _done
             ? Row(
                 children: [
@@ -69,41 +69,66 @@ class _WhatsAppOptInCardState extends State<WhatsAppOptInCard> {
                   Expanded(child: Text(t.whatsappDone)),
                 ],
               )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(t.whatsappTitle,
-                      style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: kInk)),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _phone,
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                      labelText: t.fieldWhatsappNumber,
-                      hintText: t.whatsappHint,
-                      filled: true,
-                      fillColor: kSurface,
-                      border: const OutlineInputBorder(),
-                    ),
+            : LayoutBuilder(builder: (context, c) {
+                final title = Text(t.whatsappTitle,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: kInk));
+                final phone = TextField(
+                  controller: _phone,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    labelText: t.fieldWhatsappNumber,
+                    hintText: t.whatsappHint,
+                    filled: true,
+                    fillColor: kSurface,
+                    border: const OutlineInputBorder(),
                   ),
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    value: _consent,
-                    onChanged: (v) => setState(() => _consent = v ?? false),
-                    title: const Text(AppState.whatsappConsentText,
-                        style: TextStyle(fontSize: 13)),
-                  ),
-                  FilledButton.icon(
-                    onPressed: _sending ? null : _submit,
-                    icon: const Icon(Icons.chat),
-                    label: Text(t.whatsappSubmit),
-                  ),
-                ],
-              ),
+                );
+                final button = FilledButton.icon(
+                  onPressed: _sending ? null : _submit,
+                  icon: const Icon(Icons.chat),
+                  label: Text(t.whatsappSubmit),
+                );
+                final consent = CheckboxListTile(
+                  dense: true,
+                  visualDensity: VisualDensity.compact,
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: _consent,
+                  onChanged: (v) => setState(() => _consent = v ?? false),
+                  title: const Text(AppState.whatsappConsentText,
+                      style: TextStyle(fontSize: 12)),
+                );
+                // Su schermi larghi titolo, numero e pulsante su una riga.
+                if (c.maxWidth >= 760) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        Expanded(child: title),
+                        const SizedBox(width: 16),
+                        SizedBox(width: 260, child: phone),
+                        const SizedBox(width: 12),
+                        button,
+                      ]),
+                      consent,
+                    ],
+                  );
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    title,
+                    const SizedBox(height: 10),
+                    phone,
+                    consent,
+                    button,
+                  ],
+                );
+              }),
       ),
     );
   }

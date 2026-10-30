@@ -394,7 +394,7 @@ class _TopBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
       alignment: Alignment.center,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1240),
+        constraints: const BoxConstraints(maxWidth: kContentWidth),
         child: Row(
           children: [
             InkWell(

@@ -225,7 +225,7 @@ class _Section extends StatelessWidget {
           horizontal: wide ? 48 : 20, vertical: wide ? 16 : 12),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1240),
+          constraints: const BoxConstraints(maxWidth: kContentWidth),
           child: child,
         ),
       ),
@@ -292,7 +292,8 @@ class _Hero extends StatelessWidget {
                         wide ? 48 : 20, wide ? 16 : 10, wide ? 48 : 20, 0),
                     child: Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1240),
+                        constraints:
+                            const BoxConstraints(maxWidth: kContentWidth),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -365,7 +366,12 @@ class _Hero extends StatelessWidget {
                   ),
                   if (MediaQuery.of(context).size.width >= 1300)
                     Positioned(
-                      right: 70,
+                      // Dentro la colonna del contenuto, non sul bordo dello
+                      // schermo.
+                      right:
+                          (MediaQuery.of(context).size.width - kContentWidth) /
+                                  2 +
+                              20,
                       top: 60,
                       child: Transform.rotate(
                         angle: -0.2,
@@ -685,27 +691,25 @@ class _ProSection extends StatelessWidget {
         ),
       );
     }
-    return Container(
+    // Nella stessa colonna delle altre sezioni: foto e testo affiancati.
+    return _Section(
       color: kSurface,
-      height: 240,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Expanded(flex: 5, child: image),
-          Expanded(
-            flex: 7,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 48),
-              child: Row(
-                children: [
-                  Expanded(child: text),
-                  const SizedBox(width: 40),
-                  Flexible(child: features),
-                ],
-              ),
+      child: SizedBox(
+        height: 230,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              flex: 5,
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(kRadius), child: image),
             ),
-          ),
-        ],
+            const SizedBox(width: 36),
+            Expanded(flex: 5, child: Center(child: text)),
+            const SizedBox(width: 28),
+            Expanded(flex: 4, child: Center(child: features)),
+          ],
+        ),
       ),
     );
   }
@@ -878,7 +882,7 @@ class _CtaBand extends StatelessWidget {
             horizontal: wide ? 48 : 20, vertical: wide ? 28 : 22),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1240),
+            constraints: const BoxConstraints(maxWidth: kContentWidth),
             child: wide
                 ? Row(
                     children: [
@@ -954,7 +958,7 @@ class _Footer extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 22, wide ? 48 : 20, 20),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1240),
+          constraints: const BoxConstraints(maxWidth: kContentWidth),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
