@@ -199,7 +199,7 @@ class SectionHeading extends StatelessWidget {
               Text(title,
                   style: TextStyle(
                       fontFamily: kSerif,
-                      fontSize: wide ? 28 : 22,
+                      fontSize: wide ? 26 : 20,
                       height: 1.15,
                       fontWeight: FontWeight.w700,
                       color: kInk)),
@@ -222,7 +222,7 @@ class SectionHeading extends StatelessWidget {
 
 class ResponsiveGrid extends StatelessWidget {
   const ResponsiveGrid(
-      {super.key, required this.children, this.itemHeight = 372});
+      {super.key, required this.children, this.itemHeight = 352});
   final List<Widget> children;
   final double itemHeight;
 
@@ -308,7 +308,7 @@ class TourCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 136,
+              height: 128,
               child: Stack(
                 fit: StackFit.expand,
                 children: [

@@ -84,8 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
           // Sempre visibile, anche prima di scorrere: fa capire che la
           // pagina continua.
           thumbVisibility: true,
-          trackVisibility: true,
-          thickness: 8,
+          trackVisibility: false,
+          thickness: 6,
           radius: const Radius.circular(4),
           child: SingleChildScrollView(
             controller: _scroll,
@@ -125,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
           action: t.toursAction,
           onAction: onOpenSearch,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         if (upcoming.isEmpty)
           EmptyState(icon: Icons.explore_outlined, message: t.searchNoResults)
         else
@@ -151,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
           action: t.categoriesAction,
           onAction: onOpenSearch,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         if (wide)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeading(title: t.guidesTitle),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         LayoutBuilder(builder: (context, c) {
           final cols = c.maxWidth >= 820 ? 3 : 1;
           const gap = 20.0;
@@ -218,7 +218,7 @@ class _Section extends StatelessWidget {
       width: double.infinity,
       color: color,
       padding: EdgeInsets.symmetric(
-          horizontal: wide ? 48 : 20, vertical: wide ? 28 : 20),
+          horizontal: wide ? 48 : 20, vertical: wide ? 24 : 16),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1240),
@@ -296,7 +296,7 @@ class _Hero extends StatelessWidget {
                               const Align(
                                   alignment: Alignment.centerLeft,
                                   child: CityPicker()),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 8),
                             ],
                             Text(t.homeHeroLine1,
                                 style: TextStyle(
@@ -321,12 +321,12 @@ class _Hero extends StatelessWidget {
                                     const BoxConstraints(maxWidth: 480),
                                 child: Text(t.homeHeroSubtitle,
                                     style: const TextStyle(
-                                        fontSize: 15,
+                                        fontSize: 14,
                                         height: 1.4,
                                         color: Colors.white)),
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
                             Align(
                               alignment: Alignment.centerLeft,
                               child: ConstrainedBox(
@@ -335,19 +335,23 @@ class _Hero extends StatelessWidget {
                                 child: _HeroSearchPanel(wide: wide),
                               ),
                             ),
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 12),
                             Wrap(
-                              spacing: 32,
-                              runSpacing: 16,
+                              spacing: 24,
+                              runSpacing: 10,
                               children: [
                                 _TrustItem(Icons.verified_outlined,
-                                    t.trustGuidesTitle, t.trustGuidesBody),
+                                    t.trustGuidesTitle, t.trustGuidesBody,
+                                    compact: !wide),
                                 _TrustItem(Icons.mail_outline,
-                                    t.trustRequestTitle, t.trustRequestBody),
+                                    t.trustRequestTitle, t.trustRequestBody,
+                                    compact: !wide),
                                 _TrustItem(Icons.check_circle_outline,
-                                    t.trustConfirmTitle, t.trustConfirmBody),
+                                    t.trustConfirmTitle, t.trustConfirmBody,
+                                    compact: !wide),
                                 _TrustItem(Icons.chat_bubble_outline,
-                                    t.trustWhatsappTitle, t.trustWhatsappBody),
+                                    t.trustWhatsappTitle, t.trustWhatsappBody,
+                                    compact: !wide),
                               ],
                             ),
                           ],
@@ -379,7 +383,7 @@ class _Hero extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
             ],
           ),
         ),
@@ -480,10 +484,12 @@ class _HeroSearchPanelState extends State<_HeroSearchPanel> {
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                type,
-                const Divider(height: 12, color: kLine),
-                query,
-                const SizedBox(height: 10),
+                Row(children: [
+                  Expanded(child: type),
+                  const _PanelDivider(),
+                  Expanded(child: query),
+                ]),
+                const SizedBox(height: 8),
                 button,
               ],
             ),
@@ -531,35 +537,40 @@ class _PanelDivider extends StatelessWidget {
 }
 
 class _TrustItem extends StatelessWidget {
-  const _TrustItem(this.icon, this.title, this.body);
+  const _TrustItem(this.icon, this.title, this.body, {this.compact = false});
   final IconData icon;
   final String title;
   final String body;
+
+  /// Su telefono: icona più piccola e solo il titolo, due per riga.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: compact ? 28 : 36,
+            height: compact ? 28 : 36,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(color: kGold, width: 1.5),
             ),
-            child: Icon(icon, size: 18, color: kGold),
+            child: Icon(icon, size: compact ? 15 : 18, color: kGold),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: compact ? 7 : 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title,
-                  style: const TextStyle(
-                      fontSize: 13,
+                  style: TextStyle(
+                      fontSize: compact ? 12 : 13,
                       fontWeight: FontWeight.w600,
                       color: Colors.white)),
-              Text(body,
-                  style: const TextStyle(fontSize: 12, color: Colors.white70)),
+              if (!compact)
+                Text(body,
+                    style:
+                        const TextStyle(fontSize: 12, color: Colors.white70)),
             ],
           ),
         ],
@@ -630,10 +641,10 @@ class _ProSection extends StatelessWidget {
                 height: 1.15,
                 fontWeight: FontWeight.w700,
                 color: kInk)),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Text(t.operatorBannerBody,
             style: const TextStyle(fontSize: 15, height: 1.5, color: kMuted)),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         GoldButton(t.proButton, onPressed: onStart),
       ],
     );
@@ -658,7 +669,7 @@ class _ProSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 140, child: image),
+            const SizedBox(height: 120, child: image),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
               child: Column(
@@ -672,7 +683,7 @@ class _ProSection extends StatelessWidget {
     }
     return Container(
       color: kSurface,
-      height: 280,
+      height: 240,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -936,7 +947,7 @@ class _Footer extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: kNight,
-      padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 28, wide ? 48 : 20, 20),
+      padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 22, wide ? 48 : 20, 20),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1240),
@@ -954,12 +965,12 @@ class _Footer extends StatelessWidget {
                 )
               else ...[
                 brand,
-                const SizedBox(height: 18),
+                const SizedBox(height: 14),
                 nav,
                 const SizedBox(height: 16),
                 language,
               ],
-              const SizedBox(height: 18),
+              const SizedBox(height: 14),
               const Divider(color: Colors.white12, height: 1),
               const SizedBox(height: 12),
               Text('© ${DateTime.now().year} guidatour. ${t.footerRights}',
