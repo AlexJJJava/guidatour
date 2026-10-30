@@ -125,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
           action: t.toursAction,
           onAction: onOpenSearch,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         if (upcoming.isEmpty)
           EmptyState(icon: Icons.explore_outlined, message: t.searchNoResults)
         else
@@ -151,13 +151,17 @@ class _HomeScreenState extends State<HomeScreen> {
           action: t.categoriesAction,
           onAction: onOpenSearch,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         if (wide)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          // Larghezza fissa e allineati a sinistra: vicini tra loro invece
+          // che sparsi su tutta la riga.
+          Wrap(
+            spacing: 4,
+            runSpacing: 8,
             children: [
               for (final c in tourCategories)
-                Expanded(child: _CategoryBubble(category: c, size: 96)),
+                SizedBox(
+                    width: 140, child: _CategoryBubble(category: c, size: 96)),
             ],
           )
         else
@@ -166,9 +170,9 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: tourCategories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 14),
+              separatorBuilder: (_, __) => const SizedBox(width: 4),
               itemBuilder: (_, i) => SizedBox(
-                  width: 124,
+                  width: 112,
                   child:
                       _CategoryBubble(category: tourCategories[i], size: 72)),
             ),
@@ -187,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeading(title: t.guidesTitle),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         LayoutBuilder(builder: (context, c) {
           final cols = c.maxWidth >= 820 ? 3 : 1;
           const gap = 20.0;
@@ -218,7 +222,7 @@ class _Section extends StatelessWidget {
       width: double.infinity,
       color: color,
       padding: EdgeInsets.symmetric(
-          horizontal: wide ? 48 : 20, vertical: wide ? 24 : 16),
+          horizontal: wide ? 48 : 20, vertical: wide ? 16 : 12),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1240),
@@ -383,7 +387,7 @@ class _Hero extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 14),
             ],
           ),
         ),
@@ -607,12 +611,12 @@ class _CategoryBubble extends StatelessWidget {
                   fit: BoxFit.cover),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Text(categoryLabel(context, category),
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontFamily: kSerif,
-                  fontSize: size < 120 ? 14 : 16,
+                  fontSize: size < 120 ? 13 : 16,
                   fontWeight: FontWeight.w700,
                   color: kInk)),
         ],

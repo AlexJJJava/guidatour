@@ -232,7 +232,7 @@ class ResponsiveGrid extends StatelessWidget {
       final cols = c.maxWidth >= 1100
           ? 4
           : (c.maxWidth >= 820 ? 3 : (c.maxWidth >= 540 ? 2 : 1));
-      const gap = 16.0;
+      const gap = 14.0;
       final w = (c.maxWidth - gap * (cols - 1)) / cols;
       return Wrap(
         spacing: gap,
@@ -242,7 +242,7 @@ class ResponsiveGrid extends StatelessWidget {
             SizedBox(
                 width: w,
                 // Su una colonna la card è più larga: serve meno altezza.
-                height: cols == 1 ? itemHeight - 50 : itemHeight,
+                height: cols == 1 ? itemHeight - 28 : itemHeight,
                 child: child),
         ],
       );
