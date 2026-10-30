@@ -19,7 +19,8 @@ const _cityHeroes = {
   'Torino': 'assets/images/hero_torino.jpg',
 };
 
-String _heroFor(String city) =>
+/// Senza città scelta (primo accesso) una copertina generica sull'Italia.
+String _heroFor(String? city) =>
     _cityHeroes[city] ?? 'assets/images/hero_italia.jpg';
 
 void _openSearch(BuildContext context, {String query = '', String? category}) {
@@ -111,14 +112,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _tours(BuildContext context, bool wide) {
     final t = l10n(context);
-    final city = cityLabel(context, appState.city);
+    final city = appState.city;
     final upcoming = [...appState.tours]
       ..sort((a, b) => a.start.compareTo(b.start));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeading(
-          title: t.toursTitle(city),
+          title: city == null
+              ? t.toursTitleItaly
+              : t.toursTitle(cityLabel(context, city)),
           action: t.toursAction,
           onAction: onOpenSearch,
         ),
@@ -176,8 +179,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _guides(BuildContext context, bool wide) {
     final t = l10n(context);
-    final local =
-        appState.guides.where((g) => g.city == appState.city).toList();
+    final local = appState.city == null
+        ? const <Guide>[]
+        : appState.guides.where((g) => g.city == appState.city).toList();
     final guides = (local.isEmpty ? appState.guides : local).take(3).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,135 +237,159 @@ class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: kNight,
-        image: DecorationImage(
-          image: AssetImage(_heroFor(appState.city)),
-          colorFilter: photoFilter(_heroFor(appState.city)),
-          fit: BoxFit.cover,
-          alignment: const Alignment(0.4, 0),
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              Colors.black.withValues(alpha: 0.78),
-              Colors.black.withValues(alpha: 0.4),
-              Colors.black.withValues(alpha: 0.1),
-            ],
-            stops: const [0, 0.55, 1],
+    final photo = _heroFor(appState.city);
+    return Stack(
+      children: [
+        // Cambiando città la nuova foto entra in dissolvenza sulla vecchia.
+        Positioned.fill(
+          child: ColoredBox(
+            color: kNight,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 600),
+              layoutBuilder: (current, previous) => Stack(
+                fit: StackFit.expand,
+                children: [...previous, if (current != null) current],
+              ),
+              child: Image.asset(
+                photo,
+                key: ValueKey(photo),
+                fit: BoxFit.cover,
+                alignment: const Alignment(0.4, 0),
+                color: photoShade(photo),
+                colorBlendMode: BlendMode.srcATop,
+              ),
+            ),
           ),
         ),
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
-              child: header,
-            ),
-            Stack(
-              children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      wide ? 48 : 20, wide ? 16 : 10, wide ? 48 : 20, 0),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1240),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(t.homeHeroLine1,
-                              style: TextStyle(
-                                  fontFamily: kSerif,
-                                  fontSize: wide ? 46 : 30,
-                                  height: 1.05,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white)),
-                          Text(t.homeHeroLine2,
-                              style: TextStyle(
-                                  fontFamily: kSerif,
-                                  fontSize: wide ? 38 : 24,
-                                  height: 1.15,
-                                  fontStyle: FontStyle.italic,
-                                  fontWeight: FontWeight.w600,
-                                  color: kGoldText)),
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 480),
-                              child: Text(t.homeHeroSubtitle,
-                                  style: const TextStyle(
-                                      fontSize: 15,
-                                      height: 1.4,
-                                      color: Colors.white)),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 880),
-                              child: _HeroSearchPanel(wide: wide),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Wrap(
-                            spacing: 32,
-                            runSpacing: 16,
-                            children: [
-                              _TrustItem(Icons.verified_outlined,
-                                  t.trustGuidesTitle, t.trustGuidesBody),
-                              _TrustItem(Icons.mail_outline,
-                                  t.trustRequestTitle, t.trustRequestBody),
-                              _TrustItem(Icons.check_circle_outline,
-                                  t.trustConfirmTitle, t.trustConfirmBody),
-                              _TrustItem(Icons.chat_bubble_outline,
-                                  t.trustWhatsappTitle, t.trustWhatsappBody),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                if (MediaQuery.of(context).size.width >= 1300)
-                  Positioned(
-                    right: 70,
-                    top: 60,
-                    child: Transform.rotate(
-                      angle: -0.2,
-                      child: SizedBox(
-                        width: 240,
-                        child: Text(t.homeHeroScript,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                                fontFamily: 'Caveat',
-                                fontSize: 34,
-                                height: 1.05,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                shadows: [
-                                  Shadow(color: Colors.black54, blurRadius: 8)
-                                ])),
-                      ),
-                    ),
-                  ),
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Colors.black.withValues(alpha: 0.78),
+                Colors.black.withValues(alpha: 0.4),
+                Colors.black.withValues(alpha: 0.1),
               ],
+              stops: const [0, 0.55, 1],
             ),
-            const SizedBox(height: 24),
-          ],
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding:
+                    EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
+                child: header,
+              ),
+              Stack(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                        wide ? 48 : 20, wide ? 16 : 10, wide ? 48 : 20, 0),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1240),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (!wide) ...[
+                              const Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: CityPicker()),
+                              const SizedBox(height: 12),
+                            ],
+                            Text(t.homeHeroLine1,
+                                style: TextStyle(
+                                    fontFamily: kSerif,
+                                    fontSize: wide ? 46 : 30,
+                                    height: 1.05,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white)),
+                            Text(t.homeHeroLine2,
+                                style: TextStyle(
+                                    fontFamily: kSerif,
+                                    fontSize: wide ? 38 : 24,
+                                    height: 1.15,
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.w600,
+                                    color: kGoldText)),
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: ConstrainedBox(
+                                constraints:
+                                    const BoxConstraints(maxWidth: 480),
+                                child: Text(t.homeHeroSubtitle,
+                                    style: const TextStyle(
+                                        fontSize: 15,
+                                        height: 1.4,
+                                        color: Colors.white)),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: ConstrainedBox(
+                                constraints:
+                                    const BoxConstraints(maxWidth: 880),
+                                child: _HeroSearchPanel(wide: wide),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Wrap(
+                              spacing: 32,
+                              runSpacing: 16,
+                              children: [
+                                _TrustItem(Icons.verified_outlined,
+                                    t.trustGuidesTitle, t.trustGuidesBody),
+                                _TrustItem(Icons.mail_outline,
+                                    t.trustRequestTitle, t.trustRequestBody),
+                                _TrustItem(Icons.check_circle_outline,
+                                    t.trustConfirmTitle, t.trustConfirmBody),
+                                _TrustItem(Icons.chat_bubble_outline,
+                                    t.trustWhatsappTitle, t.trustWhatsappBody),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (MediaQuery.of(context).size.width >= 1300)
+                    Positioned(
+                      right: 70,
+                      top: 60,
+                      child: Transform.rotate(
+                        angle: -0.2,
+                        child: SizedBox(
+                          width: 240,
+                          child: Text(t.homeHeroScript,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  fontFamily: 'Caveat',
+                                  fontSize: 34,
+                                  height: 1.05,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                  shadows: [
+                                    Shadow(color: Colors.black54, blurRadius: 8)
+                                  ])),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }
 
-/// Riquadro bianco di ricerca: città, tipo di tour, testo libero.
+/// Riquadro bianco di ricerca: tipo di tour e testo libero (la città si
+/// sceglie nella barra in alto).
 class _HeroSearchPanel extends StatefulWidget {
   const _HeroSearchPanel({required this.wide});
   final bool wide;
@@ -388,10 +416,6 @@ class _HeroSearchPanelState extends State<_HeroSearchPanel> {
     final t = l10n(context);
     const valueStyle =
         TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: kInk);
-    final city = _PanelField(
-        icon: Icons.location_on_outlined,
-        label: t.fieldCity,
-        child: const CityPicker(plain: true));
     final type = _PanelField(
       icon: Icons.tour_outlined,
       label: t.heroTourType,
@@ -446,9 +470,7 @@ class _HeroSearchPanelState extends State<_HeroSearchPanel> {
       child: widget.wide
           ? Row(
               children: [
-                city,
-                const _PanelDivider(),
-                SizedBox(width: 190, child: type),
+                SizedBox(width: 200, child: type),
                 const _PanelDivider(),
                 Expanded(child: query),
                 const SizedBox(width: 10),
@@ -458,11 +480,7 @@ class _HeroSearchPanelState extends State<_HeroSearchPanel> {
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(children: [
-                  Expanded(child: city),
-                  const _PanelDivider(),
-                  Expanded(child: type),
-                ]),
+                type,
                 const Divider(height: 12, color: kLine),
                 query,
                 const SizedBox(height: 10),

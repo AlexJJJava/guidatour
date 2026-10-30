@@ -518,58 +518,52 @@ class PlatformDisclaimer extends StatelessWidget {
       );
 }
 
-/// Selettore della città: filtra i tour mostrati in tutta l'app (come un
-/// marketplace di tour tipo GetYourGuide).
+/// Selettore della città in alto (fuori dal modulo di ricerca, perché vale
+/// per tutta l'app): filtra i tour e cambia la foto di copertina. "Tutta
+/// Italia" finché l'utente non sceglie.
 class CityPicker extends StatelessWidget {
-  const CityPicker({super.key, this.plain = false});
+  const CityPicker({super.key});
 
-  /// Solo testo e freccia, per stare dentro un riquadro di ricerca.
-  final bool plain;
+  /// Valore della voce "Tutta Italia" nel menu (un null chiuderebbe il menu
+  /// come un annullamento).
+  static const _allItaly = '';
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: appState,
       builder: (context, _) {
-        return PopupMenuButton<String>(
-          tooltip: l10n(context).fieldCity,
-          initialValue: appState.city,
-          onSelected: (c) => appState.setCity(c),
-          itemBuilder: (context) => [
-            for (final c in tourCities)
-              PopupMenuItem(value: c, child: Text(cityLabel(context, c))),
-          ],
-          child: plain
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(cityLabel(context, appState.city),
-                        style: const TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w600,
-                            color: kInk)),
-                    const Icon(Icons.expand_more, size: 18, color: kMuted),
-                  ],
-                )
-              : Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: kSand,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.location_on, size: 18, color: kPrimary),
-                      const SizedBox(width: 6),
-                      Text(cityLabel(context, appState.city),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w700, color: kInk)),
-                      const Icon(Icons.expand_more, size: 18, color: kMuted),
-                    ],
-                  ),
-                ),
+        final t = l10n(context);
+        final city = appState.city;
+        return Material(
+          color: kSurface,
+          elevation: 1,
+          borderRadius: BorderRadius.circular(20),
+          child: PopupMenuButton<String>(
+            tooltip: t.fieldCity,
+            initialValue: city ?? _allItaly,
+            onSelected: (c) => appState.setCity(c == _allItaly ? null : c),
+            itemBuilder: (context) => [
+              PopupMenuItem(value: _allItaly, child: Text(t.cityAllItaly)),
+              const PopupMenuDivider(),
+              for (final c in tourCities)
+                PopupMenuItem(value: c, child: Text(cityLabel(context, c))),
+            ],
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.location_on, size: 18, color: kPrimary),
+                  const SizedBox(width: 4),
+                  Text(city == null ? t.cityAllItaly : cityLabel(context, city),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, color: kInk)),
+                  const Icon(Icons.expand_more, size: 18, color: kMuted),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );

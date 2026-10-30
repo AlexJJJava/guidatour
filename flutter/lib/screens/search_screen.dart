@@ -49,7 +49,10 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(t.searchTitle(cityLabel(context, appState.city)),
+              Text(
+                  appState.city == null
+                      ? t.searchTitleItaly
+                      : t.searchTitle(cityLabel(context, appState.city!)),
                   style: const TextStyle(
                       fontFamily: kSerif,
                       fontSize: 30,

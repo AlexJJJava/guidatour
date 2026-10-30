@@ -328,10 +328,15 @@ class _AppShellState extends State<AppShell> {
             );
           } else {
             body = SafeArea(
-              child: Stack(
+              child: Column(
                 children: [
-                  items[_index].$4!,
-                  const Positioned(top: 10, right: 12, child: _TopActions()),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(12, 8, 12, 0),
+                    child: Align(
+                        alignment: Alignment.centerRight,
+                        child: _TopActions(withCity: true)),
+                  ),
+                  Expanded(child: items[_index].$4!),
                 ],
               ),
             );
@@ -416,6 +421,8 @@ class _TopBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
+            const CityPicker(),
+            const SizedBox(width: 8),
             const LanguagePicker(),
             const SizedBox(width: 14),
             GoldButton(t.ctaButton, onPressed: () => onSelect(1)),
@@ -486,14 +493,20 @@ bool _showsCart() {
   return user == null || !user.role.isProfessional;
 }
 
-/// Lingua e carrello in alto a destra su telefono.
+/// Lingua e carrello in alto a destra su telefono; nelle pagine interne
+/// anche la città (in home sta sopra il titolo della copertina).
 class _TopActions extends StatelessWidget {
-  const _TopActions();
+  const _TopActions({this.withCity = false});
+  final bool withCity;
 
   @override
   Widget build(BuildContext context) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (withCity) ...[
+            const CityPicker(),
+            const SizedBox(width: 8),
+          ],
           const LanguagePicker(),
           if (_showsCart()) ...[
             const SizedBox(width: 8),

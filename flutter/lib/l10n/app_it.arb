@@ -507,5 +507,8 @@
     }
   },
   "authPendingApproval": "Il tuo account non è ancora stato approvato. Un amministratore deve verificare la registrazione: riprova più tardi.",
-  "authRejectedApproval": "La tua registrazione non è stata approvata da un amministratore."
+  "authRejectedApproval": "La tua registrazione non è stata approvata da un amministratore.",
+  "cityAllItaly": "Tutta Italia",
+  "toursTitleItaly": "Esperienze indimenticabili in Italia",
+  "searchTitleItaly": "Tour in Italia"
 }

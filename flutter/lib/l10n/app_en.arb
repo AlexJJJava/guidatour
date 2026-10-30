@@ -267,5 +267,8 @@
   "approvalsApprovedDone": "{name} has been approved",
   "approvalsRejectedDone": "{name} has been rejected",
   "authPendingApproval": "Your account has not been approved yet. An administrator needs to review your registration: please try again later.",
-  "authRejectedApproval": "Your registration was not approved by an administrator."
+  "authRejectedApproval": "Your registration was not approved by an administrator.",
+  "cityAllItaly": "All of Italy",
+  "toursTitleItaly": "Unforgettable experiences in Italy",
+  "searchTitleItaly": "Tours in Italy"
 }

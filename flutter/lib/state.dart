@@ -52,8 +52,9 @@ class AppState extends ChangeNotifier {
   /// Registrazioni professionali in attesa (solo per gli admin).
   int pendingRegistrations = 0;
 
-  /// Città selezionata in home: filtra i tour mostrati in tutta l'app.
-  String city = 'Roma';
+  /// Città scelta dalla barra in alto: filtra i tour mostrati in tutta
+  /// l'app. null = tutta Italia (così al primo accesso).
+  String? city;
 
   static const whatsappConsentText =
       'Acconsento a ricevere su WhatsApp la lista aggiornata di tour ed '
@@ -63,24 +64,29 @@ class AppState extends ChangeNotifier {
   /// Da chiamare una volta all'avvio dell'app.
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    city = prefs.getString(_cityPrefKey) ?? 'Roma';
+    city = prefs.getString(_cityPrefKey);
     await Future.wait([_loadTours(), _loadGuides()]);
     ready = true;
     notifyListeners();
   }
 
-  Future<void> setCity(String newCity) async {
+  Future<void> setCity(String? newCity) async {
     if (newCity == city) return;
     city = newCity;
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_cityPrefKey, newCity);
+    if (newCity == null) {
+      await prefs.remove(_cityPrefKey);
+    } else {
+      await prefs.setString(_cityPrefKey, newCity);
+    }
     await _loadTours();
   }
 
   Future<void> _loadTours() async {
     try {
-      final json = await api.get('/tours', query: {'city': city}) as Map;
+      final json = await api
+          .get('/tours', query: {if (city != null) 'city': city!}) as Map;
       final list = (json['tours'] as List)
           .map((j) => Tour.fromJson(j as Map<String, dynamic>))
           .toList();

@@ -267,5 +267,8 @@
   "approvalsApprovedDone": "{name} ha sido aprobado",
   "approvalsRejectedDone": "{name} ha sido rechazado",
   "authPendingApproval": "Tu cuenta aún no ha sido aprobada. Un administrador debe revisar tu registro: inténtalo más tarde.",
-  "authRejectedApproval": "Tu registro no ha sido aprobado por un administrador."
+  "authRejectedApproval": "Tu registro no ha sido aprobado por un administrador.",
+  "cityAllItaly": "Toda Italia",
+  "toursTitleItaly": "Experiencias inolvidables en Italia",
+  "searchTitleItaly": "Tours en Italia"
 }
