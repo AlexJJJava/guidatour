@@ -94,7 +94,6 @@ final turistaPages = [
   t.navSearch,
   t.navFavorites,
   t.navBookings,
-  t.navAccount,
 ];
 final proPages = [
   t.navDiscover,
@@ -103,9 +102,13 @@ final proPages = [
   t.dashTabMyTours,
   t.dashTabAssignments,
   t.navBookings,
-  t.navAccount,
 ];
-final allPages = {...turistaPages, ...proPages, t.navApprovals};
+final allPages = {
+  ...turistaPages,
+  ...proPages,
+  t.navApprovals,
+  t.navAccount,
+};
 
 /// Con i font veri il menu ha le misure reali: le voci non finiscono in Altro.
 Future<void> loadFonts() async {
@@ -141,7 +144,7 @@ void main() {
 
   group('menu su computer', () {
     final cases = <(String, Guide?, List<String>, bool)>[
-      ('visitatore', null, turistaPages, true),
+      ('visitatore', null, [...turistaPages, t.navAccount], true),
       ('turista', user(Role.turista), turistaPages, true),
       ('guida', user(Role.guida), proPages, false),
       ('accompagnatore', user(Role.accompagnatore), proPages, false),
@@ -193,7 +196,18 @@ void main() {
       seed(user(Role.turista));
       await tester.pumpWidget(const GuidaTourApp());
       await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(NavigationDestination), findsNWidgets(4));
+      expect(find.text(t.navAccount), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('il visitatore ha anche Account', (tester) async {
+      sized(tester, const Size(412, 915));
+      seed(null);
+      await tester.pumpWidget(const GuidaTourApp());
+      await tester.pump(const Duration(milliseconds: 100));
       expect(find.byType(NavigationDestination), findsNWidgets(5));
+      expect(find.text(t.navAccount), findsWidgets);
       await tester.pumpWidget(const SizedBox());
     });
 
@@ -372,8 +386,15 @@ void main() {
                 matching: find.text('UP')),
             findsOneWidget);
         await tester.tap(find.byKey(const ValueKey('user-avatar')));
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
         expect(find.text(t.editProfile), findsOneWidget);
+        expect(find.byType(BackButton), findsOneWidget);
+        appState.currentUser = null;
+        appState.notifyListeners();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(find.text(t.editProfile), findsNothing);
         await tester.pumpWidget(const SizedBox());
       });
     }

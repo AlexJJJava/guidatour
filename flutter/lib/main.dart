@@ -246,8 +246,15 @@ class _AppShellState extends State<AppShell> {
 
   void _select(int i) => setState(() => _index = i);
 
-  /// Account è sempre l'ultima voce del menu.
-  void openAccount() => _select(_navItems(context).length - 1);
+  /// Chi è collegato arriva all'Account dal pallino, non dal menu.
+  void openAccount() {
+    if (appState.currentUser == null) {
+      _select(_navItems(context).length - 1);
+    } else {
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => const _AccountPage()));
+    }
+  }
 
   List<_NavItem> _navItems(BuildContext context) {
     final t = l10n(context);
@@ -307,12 +314,14 @@ class _AppShellState extends State<AppShell> {
         const ApprovalsScreen(),
       ));
     }
-    items.add((
-      t.navAccount,
-      Icons.person_outline,
-      Icons.person,
-      const AccountScreen()
-    ));
+    if (user == null) {
+      items.add((
+        t.navAccount,
+        Icons.person_outline,
+        Icons.person,
+        const AccountScreen()
+      ));
+    }
     return items;
   }
 
@@ -404,7 +413,6 @@ class _AppShellState extends State<AppShell> {
         }
         final items = _navItems(context);
         if (_index >= items.length) _index = 0;
-        final accountIndex = items.length - 1;
         return LayoutBuilder(builder: (context, constraints) {
           final isDesktop = constraints.maxWidth >= kDesktopWidth;
           Widget topBar({required bool overPhoto}) => isDesktop
@@ -424,7 +432,7 @@ class _AppShellState extends State<AppShell> {
                   (items[i].$1, () => _select(i)),
               ],
               onOpenSearch: () => _select(1),
-              onOpenAccount: () => _select(accountIndex),
+              onOpenAccount: openAccount,
             );
           } else if (isDesktop) {
             body = Column(
@@ -712,6 +720,26 @@ class _TopActions extends StatelessWidget {
             const _UserButton(),
           ],
         ],
+      );
+}
+
+/// Account di chi è collegato; dopo il logout si torna alla pagina di prima.
+class _AccountPage extends StatelessWidget {
+  const _AccountPage();
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: Text(l10n(context).navAccount)),
+        body: ListenableBuilder(
+          listenable: appState,
+          builder: (context, _) {
+            if (appState.currentUser != null) return const AccountScreen();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) Navigator.of(context).maybePop();
+            });
+            return const SizedBox.shrink();
+          },
+        ),
       );
 }
 
