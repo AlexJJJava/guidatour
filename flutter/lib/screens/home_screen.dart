@@ -250,7 +250,7 @@ class _Hero extends StatelessWidget {
             child: Image.asset(
               _heroPhoto,
               fit: BoxFit.cover,
-              alignment: const Alignment(0.9, -0.53),
+              alignment: const Alignment(0.9, -0.13),
             ),
           ),
         ),
