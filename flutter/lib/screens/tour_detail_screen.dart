@@ -8,7 +8,12 @@ import 'tour_map.dart';
 import 'whatsapp_optin.dart';
 
 void openTour(BuildContext context, Tour t, {bool fromQr = false}) {
-  appState.recordVisit(t);
+  if (fromQr) {
+    // Il conteggio non deve fermare chi ha appena inquadrato il QR.
+    appState.recordScan(t).catchError((_) {});
+  } else {
+    appState.recordVisit(t);
+  }
   Navigator.of(context).push(
     MaterialPageRoute(builder: (_) => TourDetailScreen(tour: t)),
   );

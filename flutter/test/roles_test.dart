@@ -341,6 +341,28 @@ void main() {
     });
   });
 
+  group('link e QR', () {
+    test('il link del tour usa il sito pubblico', () {
+      final tour = tourBy('g1');
+      expect(tour.url, '$publicSiteUrl?tour=tour1');
+      expect(Uri.parse(tour.url).host, isNot('guidatour.it'));
+    });
+
+    test('il link del QR si riconosce come scansione', () {
+      final qr = Uri.parse('${tourBy('g1').url}&src=qr');
+      expect(tourLinkFrom(qr), ('tour1', true));
+    });
+
+    test('il link semplice è una visita', () {
+      expect(tourLinkFrom(Uri.parse(tourBy('g1').url)), ('tour1', false));
+    });
+
+    test('senza tour non si apre nulla', () {
+      expect(tourLinkFrom(Uri.parse(publicSiteUrl)), isNull);
+      expect(tourLinkFrom(Uri.parse('$publicSiteUrl?tour=')), isNull);
+    });
+  });
+
   group('approvazioni', () {
     testWidgets('la pagina si apre per l\'admin', (tester) async {
       sized(tester, const Size(1280, 1600));

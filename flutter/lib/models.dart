@@ -1,3 +1,5 @@
+import 'app_config.dart';
+
 /// Profili professionali distinti (BRD BR-014D, §13.4).
 enum Role { turista, guida, accompagnatore, tourOperator }
 
@@ -139,7 +141,7 @@ class Tour {
   int scans;
 
   bool get isPackage => accessories.isNotEmpty;
-  String get url => 'https://guidatour.it/roma/tour/$id';
+  String get url => '$publicSiteUrl?tour=$id';
 
   factory Tour.fromJson(Map<String, dynamic> j) => Tour(
         id: j['id'] as String,

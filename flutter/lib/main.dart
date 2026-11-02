@@ -19,6 +19,7 @@ import 'screens/home_screen.dart';
 import 'screens/my_tours_screen.dart';
 import 'screens/search_screen.dart';
 import 'state.dart';
+import 'screens/tour_detail_screen.dart';
 import 'widgets.dart';
 
 Future<void> main() async {
@@ -190,6 +191,13 @@ class _StartupState extends State<_Startup> {
   }
 }
 
+/// Link diretto a un tour (`?tour=id`, con `&src=qr` se arriva dalla locandina).
+(String, bool)? tourLinkFrom(Uri uri) {
+  final id = uri.queryParameters['tour'];
+  if (id == null || id.isEmpty) return null;
+  return (id, uri.queryParameters['src'] == 'qr');
+}
+
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
@@ -208,6 +216,29 @@ typedef _NavItem = (
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
+
+  /// AppShell può ricostruirsi: il link va aperto una volta sola.
+  static bool _linkOpened = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openLinkedTour());
+  }
+
+  Future<void> _openLinkedTour() async {
+    final link = tourLinkFrom(Uri.base);
+    if (link == null || _linkOpened) return;
+    _linkOpened = true;
+    final (id, fromQr) = link;
+    final tour = await appState.fetchTour(id);
+    if (!mounted) return;
+    if (tour == null) {
+      snack(context, l10n(context).tourUnavailable);
+    } else {
+      openTour(context, tour, fromQr: fromQr);
+    }
+  }
 
   /// 'guest' | 'tourist' | 'pro': quando cambia (login/logout/cambio ruolo)
   /// il menu cambia voci, quindi si torna alla prima.

@@ -453,6 +453,19 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Tour aperto da un link: può non essere tra i futuri già caricati.
+  Future<Tour?> fetchTour(String id) async {
+    try {
+      final tour = Tour.fromJson(
+          await api.get('/tours/$id') as Map<String, dynamic>);
+      _cacheTour(tour);
+      notifyListeners();
+      return tour;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> recordVisit(Tour t) async {
     try {
       await api.post('/tours/${t.id}/visit');

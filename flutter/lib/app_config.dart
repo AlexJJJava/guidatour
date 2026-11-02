@@ -6,6 +6,13 @@ const backendUrl = String.fromEnvironment(
   defaultValue: 'https://guidatour.onrender.com',
 );
 
+/// Sito pubblico: da qui partono i link dei tour e quindi i QR delle locandine.
+/// Cambiandolo, i QR già stampati continuano a puntare al vecchio indirizzo.
+const publicSiteUrl = String.fromEnvironment(
+  'PUBLIC_SITE_URL',
+  defaultValue: 'https://alexjjjava.github.io/guidatour/',
+);
+
 /// La anon key è pensata per essere pubblica: la sicurezza è nelle policy
 /// RLS del progetto Supabase (vedi nodeBE/supabase/schema.sql).
 const supabaseUrl = 'https://oetmzmnysdblzulxhywt.supabase.co';

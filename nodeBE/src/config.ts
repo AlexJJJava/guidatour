@@ -19,4 +19,6 @@ export const WHATSAPP_CONSENT_TEXT =
   'momento rispondendo STOP.'
 export const WHATSAPP_SENDER = 'GuidaTour'
 
-export const PUBLIC_TOUR_BASE_URL = 'https://guidatour.it/roma/tour'
+// Sito pubblico: da qui partono i link dei tour e quindi i QR delle locandine.
+export const PUBLIC_SITE_URL =
+  process.env.PUBLIC_SITE_URL || 'https://alexjjjava.github.io/guidatour/'

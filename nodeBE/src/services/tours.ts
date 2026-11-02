@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto'
-import { PUBLIC_TOUR_BASE_URL } from '../config.js'
+import { PUBLIC_SITE_URL } from '../config.js'
 import { HttpError, notFound, unwrap } from '../errors.js'
 import type { Db } from '../supabase.js'
 import { getPublicProfile, type Profile, type PublicProfile } from './profiles.js'
@@ -106,7 +106,7 @@ export const toTour = (r: TourRow): Tour => ({
   visits: r.visits,
   scans: r.scans,
   isPackage: r.accessories.length > 0,
-  url: `${PUBLIC_TOUR_BASE_URL}/${r.id}`,
+  url: `${PUBLIC_SITE_URL}?tour=${r.id}`,
 })
 
 const toRow = (t: Partial<TourInput>) => ({
