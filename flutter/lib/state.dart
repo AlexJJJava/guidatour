@@ -361,7 +361,6 @@ class AppState extends ChangeNotifier {
     required String description,
     required int seats,
     required List<String> accessories,
-    bool repeatWeekly = false,
   }) async {
     final json = await api.post('/tours', {
       'title': title,
@@ -375,7 +374,6 @@ class AppState extends ChangeNotifier {
       'description': description,
       'seats': seats,
       'accessories': accessories,
-      if (repeatWeekly) 'repeatWeekly': true,
     }) as Map<String, dynamic>;
     final tour = Tour.fromJson(json);
     _cacheTour(tour);
@@ -396,7 +394,6 @@ class AppState extends ChangeNotifier {
     required String description,
     required int seats,
     required List<String> accessories,
-    bool? repeatWeekly,
   }) async {
     final json = await api.patch('/tours/$id', {
       'title': title,
@@ -410,7 +407,6 @@ class AppState extends ChangeNotifier {
       'description': description,
       'seats': seats,
       'accessories': accessories,
-      if (repeatWeekly != null) 'repeatWeekly': repeatWeekly,
     }) as Map<String, dynamic>;
     final tour = Tour.fromJson(json);
     _cacheTour(tour);

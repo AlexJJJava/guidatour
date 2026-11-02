@@ -110,10 +110,6 @@ class TourDetailScreen extends StatelessWidget {
                     Icons.event_seat_outlined, t.detailSeatsCount(tour.seats)),
               ],
             ),
-            if (tour.repeatWeekly) ...[
-              const SizedBox(height: 14),
-              _Fact(Icons.event_repeat, t.detailEveryWeek),
-            ],
             const SizedBox(height: 14),
             _Fact(
                 Icons.place_outlined, t.detailMeetingPoint(tour.meetingPoint)),

@@ -19,8 +19,6 @@ Nessuna suite di test. Node 18+.
 4. Applicare in ordine le migrazioni di `supabase/migrations/` sui database già esistenti.
 5. Approvazione registrazioni (migrazione 0004): guide, accompagnatori e tour operator nascono con `approval_status = in_attesa` e finché un admin non li approva non sono professionisti per RLS (`is_professional`), non compaiono in `public_profiles` e il backend risponde 403 alle loro rotte da professionista; l'app li disconnette al login mostrando un avviso. I turisti sono `approvato` subito. Il primo admin si nomina dalla dashboard (`update profiles set is_admin = true where email = ...`).
 
-6. Tour settimanali (migrazione 0005): richiede `pg_cron`; il job `roll-weekly-tours` sposta ogni ora i tour con `repeat_weekly` alla settimana successiva, e `booking_requests.tour_start` conserva la data scelta dal turista.
-
 ## Architettura
 
 - `src/index.ts`: app Hono, CORS, gestione errori, montaggio rotte.

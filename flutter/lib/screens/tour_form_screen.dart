@@ -55,7 +55,6 @@ class _TourFormScreenState extends State<TourFormScreen> {
   late String _language = widget.existing?.language ?? tourLanguages.first;
   late DateTime? _start = widget.existing?.start;
   late final Set<String> _accessories = {...?widget.existing?.accessories};
-  late bool _weekly = widget.existing?.repeatWeekly ?? false;
   bool _declaration = false;
 
   bool get _isEdit => widget.existing != null;
@@ -142,8 +141,6 @@ class _TourFormScreenState extends State<TourFormScreen> {
           description: _description.text.trim(),
           seats: int.parse(_seats.text),
           accessories: _accessories.toList(),
-          repeatWeekly:
-              _weekly == widget.existing!.repeatWeekly ? null : _weekly,
         );
         if (!mounted) return;
         Navigator.of(context).pop(true);
@@ -161,7 +158,6 @@ class _TourFormScreenState extends State<TourFormScreen> {
         description: _description.text.trim(),
         seats: int.parse(_seats.text),
         accessories: _accessories.toList(),
-        repeatWeekly: _weekly,
       );
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
@@ -335,13 +331,6 @@ class _TourFormScreenState extends State<TourFormScreen> {
                           v ? _accessories.add(s) : _accessories.remove(s)),
                     ),
                 ],
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: _weekly,
-                onChanged: (v) => setState(() => _weekly = v),
-                title: Text(t.formRepeatWeekly),
-                subtitle: Text(t.formRepeatWeeklyHint),
               ),
               if (_user.role == Role.accompagnatore) ...[
                 const SizedBox(height: 14),
