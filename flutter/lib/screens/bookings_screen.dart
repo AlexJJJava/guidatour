@@ -65,7 +65,7 @@ class _SentBookings extends StatelessWidget {
                   subtitle: Text(tour == null
                       ? t.historyLine(fmtDate(r.createdAt), r.people)
                       : t.historyLineWithTourDate(
-                          fmtDate(r.createdAt), r.people, fmtDate(tour.start))),
+                          fmtDate(r.createdAt), r.people, fmtDate(r.tourStart ?? tour.start))),
                   trailing: Text(requestStatusLabel(context, r.status),
                       style:
                           TextStyle(color: color, fontWeight: FontWeight.w700)),
@@ -105,7 +105,9 @@ class _ReceivedBookings extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.mail_outline),
               title: Text(t.nameAndPeople(r.name, r.people)),
-              subtitle: Text('${appState.tourById(r.tourId)?.title}\n${r.email}'
+              subtitle: Text('${appState.tourById(r.tourId)?.title}'
+                  '${r.tourStart == null ? '' : ' · ${fmtDate(r.tourStart!)}'}'
+                  '\n${r.email}'
                   '${r.phone.isEmpty ? '' : ' · ${r.phone}'}'
                   '${r.message.isEmpty ? '' : '\n“${r.message}”'}'),
               isThreeLine: true,

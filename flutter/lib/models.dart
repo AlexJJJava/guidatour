@@ -121,6 +121,7 @@ class Tour {
     this.accessories = const [],
     this.visits = 0,
     this.scans = 0,
+    this.repeatWeekly = false,
   });
   final String id;
   final String title;
@@ -137,6 +138,7 @@ class Tour {
   final List<String> accessories;
   int visits;
   int scans;
+  final bool repeatWeekly;
 
   bool get isPackage => accessories.isNotEmpty;
   String get url => 'https://guidatour.it/roma/tour/$id';
@@ -157,6 +159,7 @@ class Tour {
         accessories: (j['accessories'] as List?)?.cast<String>() ?? const [],
         visits: (j['visits'] as num?)?.toInt() ?? 0,
         scans: (j['scans'] as num?)?.toInt() ?? 0,
+        repeatWeekly: j['repeatWeekly'] as bool? ?? false,
       );
 }
 
@@ -172,6 +175,7 @@ class BookingRequest {
     required this.createdAt,
     this.userId,
     this.status = 'inviata',
+    this.tourStart,
   });
   final String? id;
   final String tourId;
@@ -188,6 +192,9 @@ class BookingRequest {
   /// 'inviata' → 'confermata' o 'rifiutata' dalla guida.
   String status;
 
+  /// Data scelta: i tour settimanali intanto si spostano in avanti.
+  final DateTime? tourStart;
+
   factory BookingRequest.fromJson(Map<String, dynamic> j) => BookingRequest(
         id: j['id'] as String?,
         tourId: j['tourId'] as String,
@@ -199,6 +206,10 @@ class BookingRequest {
         createdAt: DateTime.parse(j['createdAt'] as String).toLocal(),
         userId: j['userId'] as String?,
         status: j['status'] as String? ?? 'inviata',
+        tourStart: switch (j['tour']) {
+          {'start': final String start} => DateTime.parse(start).toLocal(),
+          _ => null,
+        },
       );
 }
 

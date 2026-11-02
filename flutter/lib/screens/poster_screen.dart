@@ -55,7 +55,7 @@ class PosterScreen extends StatelessWidget {
                             color: _paperInk)),
                     const SizedBox(height: 10),
                     Text(
-                        '${fmtDate(tour.start)} · ${tour.duration} · ${languageLabel(context, tour.language)}',
+                        '${fmtDate(tour.start)}${tour.repeatWeekly ? ' · ${t.detailEveryWeek}' : ''} · ${tour.duration} · ${languageLabel(context, tour.language)}',
                         textAlign: TextAlign.center),
                     Text(t.detailMeetingPoint(tour.meetingPoint),
                         textAlign: TextAlign.center),

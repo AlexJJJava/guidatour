@@ -34,6 +34,8 @@ type RequestRow = {
   message: string
   status: RequestStatus
   created_at: string
+  // Data scelta dal turista: i tour settimanali intanto si spostano avanti.
+  tour_start?: string | null
   tours?: { id: string; title: string; start_at: string }
 }
 
@@ -50,7 +52,9 @@ export const toRequest = (r: RequestRow): BookingRequest => ({
   message: r.message,
   status: r.status,
   createdAt: r.created_at,
-  ...(r.tours && { tour: { id: r.tours.id, title: r.tours.title, start: r.tours.start_at } }),
+  ...(r.tours && {
+    tour: { id: r.tours.id, title: r.tours.title, start: r.tour_start ?? r.tours.start_at },
+  }),
 })
 
 /**

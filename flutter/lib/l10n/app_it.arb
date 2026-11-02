@@ -372,6 +372,10 @@
     }
   },
   "formDeclaration": "Dichiaro di essere responsabile del contenuto pubblicato, della mia abilitazione (ove richiesta), della disponibilità e dello svolgimento dell’offerta.",
+  "formRepeatWeekly": "Si ripete ogni settimana",
+  "formRepeatWeeklyHint": "Stesso giorno e stessa ora: il tour non scade.",
+  "detailEveryWeek": "Ogni settimana, stesso giorno e stessa ora",
+  "accompagnatoreNotice": "L’accompagnatore turistico offre assistenza e supporto operativo ai gruppi: non è una guida turistica abilitata e non svolge visite guidate specialistiche.",
   "formSubmit": "Pubblica e genera QR",
   "editTour": "Modifica tour",
   "formSubmitEdit": "Salva modifiche",

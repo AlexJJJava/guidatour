@@ -110,6 +110,10 @@ class TourDetailScreen extends StatelessWidget {
                     Icons.event_seat_outlined, t.detailSeatsCount(tour.seats)),
               ],
             ),
+            if (tour.repeatWeekly) ...[
+              const SizedBox(height: 14),
+              _Fact(Icons.event_repeat, t.detailEveryWeek),
+            ],
             const SizedBox(height: 14),
             _Fact(
                 Icons.place_outlined, t.detailMeetingPoint(tour.meetingPoint)),
@@ -126,6 +130,10 @@ class TourDetailScreen extends StatelessWidget {
                   tour.accessories
                       .map((a) => accessoryLabel(context, a))
                       .join(', '))),
+            ],
+            if (guide?.role == Role.accompagnatore) ...[
+              const SizedBox(height: 16),
+              InfoBanner(t.accompagnatoreNotice),
             ],
             const SizedBox(height: 22),
             Card(

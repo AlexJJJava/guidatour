@@ -30,6 +30,7 @@ const tourSchema = z.object({
   description: z.string().trim().max(5000).default(''),
   seats: z.int().min(1).max(1000),
   accessories: z.array(z.enum(ACCESSORY_SERVICES)).max(10).default([]),
+  repeatWeekly: z.boolean().optional(),
 })
 
 const listQuery = z.object({

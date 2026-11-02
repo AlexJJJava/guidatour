@@ -40,6 +40,12 @@ const CULTURAL_KEYWORDS = [
   'vaticano',
   'archeolog',
   'galleria',
+  'pinacoteca',
+  'visita guidata',
+  'visite guidate',
+  'guida turistica',
+  'guida abilitata',
+  'beni culturali',
 ]
 
 export interface TourInput {
@@ -54,6 +60,7 @@ export interface TourInput {
   description: string
   seats: number
   accessories: string[]
+  repeatWeekly?: boolean
 }
 
 export interface Tour extends TourInput {
@@ -62,6 +69,7 @@ export interface Tour extends TourInput {
   visits: number
   scans: number
   isPackage: boolean
+  repeatWeekly: boolean
   url: string
 }
 
@@ -81,6 +89,8 @@ export type TourRow = {
   accessories: string[]
   visits: number
   scans: number
+  // Assente finché non si applica la migrazione 0005.
+  repeat_weekly?: boolean
 }
 
 export const toTour = (r: TourRow): Tour => ({
@@ -100,6 +110,7 @@ export const toTour = (r: TourRow): Tour => ({
   visits: r.visits,
   scans: r.scans,
   isPackage: r.accessories.length > 0,
+  repeatWeekly: r.repeat_weekly ?? false,
   url: `${PUBLIC_TOUR_BASE_URL}/${r.id}`,
 })
 
@@ -115,6 +126,7 @@ const toRow = (t: Partial<TourInput>) => ({
   description: t.description,
   seats: t.seats,
   accessories: t.accessories,
+  repeat_weekly: t.repeatWeekly,
 })
 
 /**

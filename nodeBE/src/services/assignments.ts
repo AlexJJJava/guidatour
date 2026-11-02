@@ -1,6 +1,7 @@
 import { HttpError, unwrap } from '../errors.js'
 import type { Db } from '../supabase.js'
-import { getPublicProfiles, type PublicProfile } from './profiles.js'
+import { getPublicProfile, getPublicProfiles, type PublicProfile } from './profiles.js'
+import { getTour } from './tours.js'
 
 // Cambio / cessione tour tra professionisti (BR-011A). Le transizioni di
 // stato consentite sono imposte dalle policy RLS su assignments.
@@ -71,6 +72,17 @@ export async function proposeAssignment(
   toGuideId: string,
 ): Promise<Assignment> {
   if (toGuideId === userId) throw new HttpError(422, 'Non puoi proporre il tour a te stesso')
+  // BRD §13.4: all'accompagnatore solo accompagnamento o supporto nei pacchetti.
+  const [tour, target] = await Promise.all([
+    getTour(db, tourId),
+    getPublicProfile(db, toGuideId),
+  ])
+  if (target.role === 'accompagnatore' && tour.category !== 'Accompagnamento' && !tour.isPackage) {
+    throw new HttpError(
+      422,
+      'Le visite guidate sono riservate alla guida abilitata: non puoi proporle a un accompagnatore.',
+    )
+  }
   const row = unwrap(
     await db
       .from('assignments')
