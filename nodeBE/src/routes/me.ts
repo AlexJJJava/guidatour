@@ -23,6 +23,7 @@ const profilePatch = z.object({
   bio: z.string().trim().max(2000).optional(),
   languages: z.array(z.enum(TOUR_LANGUAGES)).min(1).max(10).optional(),
   city: z.enum(CITIES).optional(),
+  avatarUrl: z.url().max(500).nullable().optional(),
 })
 
 const people = z.int().min(1).max(100)

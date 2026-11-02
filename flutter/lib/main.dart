@@ -246,6 +246,9 @@ class _AppShellState extends State<AppShell> {
 
   void _select(int i) => setState(() => _index = i);
 
+  /// Account è sempre l'ultima voce del menu.
+  void openAccount() => _select(_navItems(context).length - 1);
+
   List<_NavItem> _navItems(BuildContext context) {
     final t = l10n(context);
     final user = appState.currentUser;
@@ -514,6 +517,10 @@ class _TopBar extends StatelessWidget {
               const SizedBox(width: 12),
               const CartButton(),
             ],
+            if (appState.currentUser != null) ...[
+              const SizedBox(width: 12),
+              const _UserButton(),
+            ],
           ],
         ),
       ),
@@ -700,6 +707,24 @@ class _TopActions extends StatelessWidget {
             const SizedBox(width: 8),
             const CartButton(),
           ],
+          if (appState.currentUser != null) ...[
+            const SizedBox(width: 8),
+            const _UserButton(),
+          ],
         ],
+      );
+}
+
+/// Pallino dell'utente collegato: porta alla pagina Account.
+class _UserButton extends StatelessWidget {
+  const _UserButton();
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+        key: const ValueKey('user-avatar'),
+        customBorder: const CircleBorder(),
+        onTap: () =>
+            context.findAncestorStateOfType<_AppShellState>()?.openAccount(),
+        child: UserAvatar(user: appState.currentUser!),
       );
 }

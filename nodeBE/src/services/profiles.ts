@@ -1,3 +1,4 @@
+import { SUPABASE_URL } from '../config.js'
 import { HttpError, notFound, unwrap } from '../errors.js'
 import type { Db } from '../supabase.js'
 
@@ -17,6 +18,7 @@ export interface Profile {
   verified: boolean
   isAdmin: boolean
   approvalStatus: ApprovalStatus
+  avatarUrl: string | null
   languages: string[]
   bio: string
   city: string
@@ -44,6 +46,8 @@ type ProfileRow = {
   is_admin: boolean
   // Assente finché la migrazione 0004 non è applicata.
   approval_status?: ApprovalStatus
+  // Assente finché la migrazione 0005 non è applicata.
+  avatar_url?: string | null
   languages: string[]
   bio: string
   city: string
@@ -61,6 +65,7 @@ const toProfile = (r: ProfileRow): Profile => ({
   verified: r.verified,
   isAdmin: r.is_admin,
   approvalStatus: r.approval_status ?? 'approvato',
+  avatarUrl: r.avatar_url ?? null,
   languages: r.languages,
   bio: r.bio,
   city: r.city,
@@ -122,10 +127,26 @@ export async function setApprovalStatus(
 export async function updateMyProfile(
   db: Db,
   userId: string,
-  patch: { name?: string; bio?: string; languages?: string[]; city?: string },
+  patch: {
+    name?: string
+    bio?: string
+    languages?: string[]
+    city?: string
+    avatarUrl?: string | null
+  },
 ): Promise<Profile> {
+  const { avatarUrl, ...fields } = patch
+  // Solo una foto caricata dall'utente nella propria cartella.
+  if (avatarUrl && !avatarUrl.startsWith(`${SUPABASE_URL}/storage/v1/object/public/avatars/${userId}/`)) {
+    throw new HttpError(422, 'Indirizzo della foto non valido')
+  }
   const row = unwrap(
-    await db.from('profiles').update(patch).eq('id', userId).select('*').single<ProfileRow>(),
+    await db
+      .from('profiles')
+      .update({ ...fields, ...(avatarUrl !== undefined && { avatar_url: avatarUrl }) })
+      .eq('id', userId)
+      .select('*')
+      .single<ProfileRow>(),
   )
   return toProfile(row)
 }

@@ -627,6 +627,28 @@ class LanguagePicker extends StatelessWidget {
   }
 }
 
+/// Pallino dell'utente: la foto o, se manca o non si carica, le iniziali.
+class UserAvatar extends StatelessWidget {
+  const UserAvatar({super.key, required this.user, this.radius = 19});
+  final Guide user;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final url = user.avatarUrl;
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: kGold,
+      foregroundColor: kOnGold,
+      foregroundImage: url == null ? null : NetworkImage(url),
+      onForegroundImageError: url == null ? null : (_, __) {},
+      child: Text(user.initials,
+          style: TextStyle(
+              fontSize: radius * 0.8, fontWeight: FontWeight.w700)),
+    );
+  }
+}
+
 void snack(BuildContext context, String msg) =>
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 

@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../l10n/labels.dart';
 import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
+import 'avatar_crop_screen.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
@@ -20,6 +24,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   late final Set<String> _languages = {..._user.languages};
   late String _city = _user.city;
   bool _saving = false;
+  bool _photoBusy = false;
 
   @override
   void dispose() {
@@ -54,6 +59,63 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     }
   }
 
+  Future<void> _pickPhoto() async {
+    final t = l10n(context);
+    final navigator = Navigator.of(context);
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+    final bytes = await picked.readAsBytes();
+    final png = await navigator.push<Uint8List>(
+        MaterialPageRoute(builder: (_) => AvatarCropScreen(bytes: bytes)));
+    if (png == null) return;
+    await _changePhoto(() => appState.uploadAvatar(png), t.avatarSaved);
+  }
+
+  Future<void> _changePhoto(Future<void> Function() action, String done) async {
+    final t = l10n(context);
+    setState(() => _photoBusy = true);
+    try {
+      await action();
+      if (mounted) snack(context, done);
+    } catch (_) {
+      if (mounted) snack(context, t.avatarError);
+    }
+    if (mounted) setState(() => _photoBusy = false);
+  }
+
+  Widget _photo(BuildContext context) {
+    final t = l10n(context);
+    final user = appState.currentUser ?? _user;
+    return Column(
+      children: [
+        UserAvatar(user: user, radius: 52),
+        const SizedBox(height: 10),
+        if (_photoBusy)
+          const CircularProgressIndicator(color: kPrimary)
+        else
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            children: [
+              OutlinedButton.icon(
+                onPressed: _pickPhoto,
+                icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                label: Text(
+                    user.avatarUrl == null ? t.avatarUpload : t.avatarChange),
+              ),
+              if (user.avatarUrl != null)
+                TextButton(
+                  onPressed: () =>
+                      _changePhoto(appState.removeAvatar, t.avatarRemoved),
+                  child: Text(t.avatarRemove),
+                ),
+            ],
+          ),
+        const SizedBox(height: 18),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
@@ -66,6 +128,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              _photo(context),
               TextFormField(
                 controller: _name,
                 decoration: InputDecoration(

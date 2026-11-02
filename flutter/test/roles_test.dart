@@ -10,6 +10,7 @@ import 'package:guidatour/l10n/locale_controller.dart';
 import 'package:guidatour/main.dart';
 import 'package:guidatour/models.dart';
 import 'package:guidatour/screens/approvals_screen.dart';
+import 'package:guidatour/screens/avatar_crop_screen.dart';
 import 'package:guidatour/screens/auth_screen.dart';
 import 'package:guidatour/screens/bookings_screen.dart';
 import 'package:guidatour/screens/cart_screen.dart';
@@ -18,6 +19,7 @@ import 'package:guidatour/screens/my_tours_screen.dart';
 import 'package:guidatour/screens/tour_detail_screen.dart';
 import 'package:guidatour/screens/tour_form_screen.dart';
 import 'package:guidatour/state.dart';
+import 'package:guidatour/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -339,6 +341,77 @@ void main() {
       await tester.pump();
       expect(find.text(t.formBlockNotVerified), findsNothing);
       expect(find.byIcon(Icons.warning_amber_rounded), findsNothing);
+    });
+  });
+
+  group('pallino utente', () {
+    test('iniziali di nome e cognome', () {
+      Guide named(String name) =>
+          Guide(id: 'x', name: name, email: '', role: Role.turista);
+      expect(named('Maria Cristina Bevilacqua').initials, 'MB');
+      expect(named('giulia romano').initials, 'GR');
+      expect(named('Admin').initials, 'A');
+      expect(named('  ').initials, '?');
+    });
+
+    for (final (name, u) in <(String, Guide)>[
+      ('turista', user(Role.turista)),
+      ('guida', user(Role.guida)),
+      ('accompagnatore', user(Role.accompagnatore)),
+      ('tour operator', user(Role.tourOperator)),
+      ('admin', user(Role.turista, isAdmin: true)),
+    ]) {
+      testWidgets('$name lo vede e apre l\'account', (tester) async {
+        sized(tester, const Size(1920, 1080));
+        seed(u);
+        await tester.pumpWidget(const GuidaTourApp());
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(
+            find.descendant(
+                of: find.byKey(const ValueKey('user-avatar')),
+                matching: find.text('UP')),
+            findsOneWidget);
+        await tester.tap(find.byKey(const ValueKey('user-avatar')));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(find.text(t.editProfile), findsOneWidget);
+        await tester.pumpWidget(const SizedBox());
+      });
+    }
+
+    testWidgets('il visitatore non lo vede', (tester) async {
+      sized(tester, const Size(1920, 1080));
+      seed(null);
+      await tester.pumpWidget(const GuidaTourApp());
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(UserAvatar), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('ritaglio della foto', () {
+    test('una foto larga parte centrata e riempie il riquadro', () {
+      const side = 300.0;
+      final rect =
+          visibleRect(coverTransform(const Size(2000, 1000), side), side);
+      expect(rect.left, closeTo(500, 0.01));
+      expect(rect.top, closeTo(0, 0.01));
+      expect(rect.width, closeTo(1000, 0.01));
+    });
+
+    test('una foto alta parte centrata e riempie il riquadro', () {
+      const side = 300.0;
+      final rect =
+          visibleRect(coverTransform(const Size(1000, 3000), side), side);
+      expect(rect.left, closeTo(0, 0.01));
+      expect(rect.top, closeTo(1000, 0.01));
+      expect(rect.height, closeTo(1000, 0.01));
+    });
+
+    test('spostando la foto cambia la parte tenuta', () {
+      const side = 300.0;
+      final moved = coverTransform(const Size(2000, 1000), side)
+        ..setTranslationRaw(0, 0, 0);
+      expect(visibleRect(moved, side).left, closeTo(0, 0.01));
     });
   });
 

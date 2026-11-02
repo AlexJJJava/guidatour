@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart' show StringCharacters;
+
 import 'app_config.dart';
 
 /// Profili professionali distinti (BRD BR-014D, §13.4).
@@ -24,6 +26,7 @@ class Guide {
     this.city = 'Roma',
     this.approvalStatus = 'approvato',
     this.createdAt,
+    this.avatarUrl,
   });
   final String id;
   final String name;
@@ -40,6 +43,16 @@ class Guide {
   /// operator restano in attesa finché un admin non li approva.
   final String approvalStatus;
   final DateTime? createdAt;
+  final String? avatarUrl;
+
+  /// Prima lettera di nome e cognome, per il pallino senza foto.
+  String get initials {
+    final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
+    if (words.isEmpty) return '?';
+    final first = words.first.characters.first;
+    final last = words.length > 1 ? words.last.characters.first : '';
+    return '$first$last'.toUpperCase();
+  }
 
   bool get isApproved => approvalStatus == 'approvato';
 
@@ -70,6 +83,7 @@ class Guide {
         isAdmin: j['isAdmin'] as bool? ?? false,
         city: j['city'] as String? ?? 'Roma',
         approvalStatus: j['approvalStatus'] as String? ?? 'approvato',
+        avatarUrl: j['avatarUrl'] as String?,
         createdAt: j['createdAt'] == null
             ? null
             : DateTime.parse(j['createdAt'] as String).toLocal(),

@@ -21,6 +21,8 @@ Node 18+.
 4. Applicare in ordine le migrazioni di `supabase/migrations/` sui database già esistenti.
 5. Approvazione registrazioni (migrazione 0004): guide, accompagnatori e tour operator nascono con `approval_status = in_attesa` e finché un admin non li approva non sono professionisti per RLS (`is_professional`), non compaiono in `public_profiles` e il backend risponde 403 alle loro rotte da professionista; l'app li disconnette al login mostrando un avviso. I turisti sono `approvato` subito. Il primo admin si nomina dalla dashboard (`update profiles set is_admin = true where email = ...`).
 
+6. Foto profilo (migrazione 0005): bucket pubblico `avatars`, ognuno scrive solo in `<id utente>/`; l'app carica direttamente e salva l'indirizzo con `PATCH /me`.
+
 ## Architettura
 
 - `src/index.ts`: app Hono, CORS, gestione errori, montaggio rotte.

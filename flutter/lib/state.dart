@@ -437,6 +437,30 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sostituisce la foto profilo: l'indirizzo cambia a ogni caricamento,
+  /// altrimenti il browser continuerebbe a mostrare quella vecchia.
+  Future<void> uploadAvatar(Uint8List png) async {
+    final bucket = Supabase.instance.client.storage.from('avatars');
+    final path = '${currentUser!.id}/avatar.png';
+    await bucket.uploadBinary(path, png,
+        fileOptions: const FileOptions(upsert: true, contentType: 'image/png'));
+    final url = bucket.getPublicUrl(path);
+    await _setAvatar('$url?v=${DateTime.now().millisecondsSinceEpoch}');
+  }
+
+  Future<void> removeAvatar() async {
+    await Supabase.instance.client.storage
+        .from('avatars')
+        .remove(['${currentUser!.id}/avatar.png']);
+    await _setAvatar(null);
+  }
+
+  Future<void> _setAvatar(String? url) async {
+    final json = await api.patch('/me', {'avatarUrl': url});
+    currentUser = Guide.fromProfileJson(json as Map<String, dynamic>);
+    notifyListeners();
+  }
+
   Future<void> markNotificationRead(AppNotification n) async {
     if (n.isRead) return;
     await api.post('/me/notifications/${n.id}/read');
