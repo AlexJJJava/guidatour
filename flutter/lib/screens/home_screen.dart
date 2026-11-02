@@ -241,16 +241,16 @@ class _Hero extends StatelessWidget {
     final t = l10n(context);
     return Stack(
       children: [
-        // Riempie sempre la copertina: se è più bassa della foto si taglia
-        // sopra e sotto in parti uguali; sul telefono, più stretto della foto,
-        // resta in vista San Pietro.
+        // La foto è allargata verso sinistra (sotto testo e velo): su schermo
+        // largo entrano cupola e ponte; se stretto si resta su San Pietro, a
+        // destra.
         Positioned.fill(
           child: ColoredBox(
             color: kNight,
             child: Image.asset(
               _heroPhoto,
               fit: BoxFit.cover,
-              alignment: const Alignment(0.2, -0.05),
+              alignment: const Alignment(0.9, -0.64),
             ),
           ),
         ),
