@@ -9,20 +9,8 @@ import 'search_screen.dart';
 import 'tour_detail_screen.dart';
 import 'whatsapp_optin.dart';
 
-/// Foto di copertina per città (Unsplash, in assets/images).
-const _cityHeroes = {
-  'Roma': 'assets/images/hero_roma.jpg',
-  'Firenze': 'assets/images/hero_firenze.jpg',
-  'Venezia': 'assets/images/hero_venezia.jpg',
-  'Milano': 'assets/images/hero_milano.jpg',
-  'Napoli': 'assets/images/hero_napoli.jpg',
-  'Bologna': 'assets/images/hero_bologna.jpg',
-  'Torino': 'assets/images/hero_torino.jpg',
-};
-
-/// Senza città scelta (primo accesso) una copertina generica sull'Italia.
-String _heroFor(String? city) =>
-    _cityHeroes[city] ?? 'assets/images/hero_italia.jpg';
+/// Foto di copertina, uguale per tutte le città.
+const _heroPhoto = 'assets/images/hero.jpg';
 
 void _openSearch(BuildContext context, {String query = '', String? category}) {
   Navigator.of(context).push(
@@ -251,27 +239,18 @@ class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
-    final photo = _heroFor(appState.city);
     return Stack(
       children: [
-        // Cambiando città la nuova foto entra in dissolvenza sulla vecchia.
+        // Riempie sempre la copertina: se è più bassa della foto si taglia
+        // sopra e sotto in parti uguali; sul telefono, più stretto della foto,
+        // resta in vista San Pietro.
         Positioned.fill(
           child: ColoredBox(
             color: kNight,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 600),
-              layoutBuilder: (current, previous) => Stack(
-                fit: StackFit.expand,
-                children: [...previous, if (current != null) current],
-              ),
-              child: Image.asset(
-                photo,
-                key: ValueKey(photo),
-                fit: BoxFit.cover,
-                alignment: const Alignment(0.4, 0),
-                color: photoShade(photo),
-                colorBlendMode: BlendMode.srcATop,
-              ),
+            child: Image.asset(
+              _heroPhoto,
+              fit: BoxFit.cover,
+              alignment: const Alignment(0.5, 0),
             ),
           ),
         ),
@@ -281,9 +260,10 @@ class _Hero extends StatelessWidget {
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
               colors: [
-                Colors.black.withValues(alpha: 0.78),
-                Colors.black.withValues(alpha: 0.4),
-                Colors.black.withValues(alpha: 0.1),
+                // Sul telefono il testo sta sopra la parte illuminata.
+                Colors.black.withValues(alpha: wide ? 0.78 : 0.75),
+                Colors.black.withValues(alpha: wide ? 0.4 : 0.6),
+                Colors.black.withValues(alpha: wide ? 0.1 : 0.4),
               ],
               stops: const [0, 0.55, 1],
             ),
