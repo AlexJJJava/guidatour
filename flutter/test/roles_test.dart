@@ -242,6 +242,7 @@ void main() {
         'Guida',
         'Accompagnatore',
         'Tour operator',
+        'T.O. non verificato',
         'Admin',
       ]) {
         expect(find.widgetWithText(OutlinedButton, label), findsOneWidget,

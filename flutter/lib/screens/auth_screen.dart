@@ -12,6 +12,7 @@ const _demoAccounts = [
   ('Guida', 'alessio.damico+guida1@gmail.com'),
   ('Accompagnatore', 'alessio.damico+accompagnatore1@gmail.com'),
   ('Tour operator', 'alessio.damico+operator1@gmail.com'),
+  ('T.O. non verificato', 'alessio.damico+operator2@gmail.com'),
   ('Admin', 'alessio.damico+admin1@gmail.com'),
 ];
 const _demoPassword = 'GuidaTour2026!';
