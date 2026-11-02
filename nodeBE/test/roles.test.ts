@@ -516,3 +516,69 @@ describe('tentativi di scavalcare i ruoli', () => {
     for (const t of json.tours) assert.ok(new Date(t.start) >= new Date(Date.now() - 60_000))
   })
 })
+
+describe('foto profilo', () => {
+  // PNG di 1×1 pixel.
+  const png = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+    'base64',
+  )
+  const upload = (token: string, owner: string, type = 'image/png') =>
+    fetch(`${SUPABASE_URL}/storage/v1/object/avatars/${owner}/avatar.png`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${token}`,
+        'Content-Type': type,
+        'x-upsert': 'true',
+      },
+      body: png,
+    })
+  const remove = (token: string, owner: string) =>
+    fetch(`${SUPABASE_URL}/storage/v1/object/avatars/${owner}/avatar.png`, {
+      method: 'DELETE',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` },
+    })
+
+  after(async () => {
+    await remove(tokens.turista, ids.turista)
+    await api('/me', { method: 'PATCH', token: tokens.turista, body: { avatarUrl: null } })
+  })
+
+  test('ognuno carica, salva e rimuove la propria', async () => {
+    const token = tokens.turista
+    assert.ok((await upload(token, ids.turista)).ok, 'caricamento rifiutato')
+    const url = `${SUPABASE_URL}/storage/v1/object/public/avatars/${ids.turista}/avatar.png?v=1`
+    const saved = await api('/me', { method: 'PATCH', token, body: { avatarUrl: url } })
+    assert.equal(saved.status, 200, JSON.stringify(saved.json))
+    assert.equal(saved.json.avatarUrl, url)
+    const pub = await fetch(url)
+    assert.equal(pub.status, 200)
+    assert.equal(pub.headers.get('content-type'), 'image/png')
+    const clear = await api('/me', { method: 'PATCH', token, body: { avatarUrl: null } })
+    assert.equal(clear.json.avatarUrl, null)
+  })
+
+  test('nessuno scrive nella cartella di un altro', async () => {
+    assert.ok(!(await upload(tokens.guida, ids.turista)).ok)
+  })
+
+  test('un visitatore non carica foto', async () => {
+    assert.ok(!(await upload(SUPABASE_ANON_KEY, ids.turista)).ok)
+  })
+
+  test('accetta solo immagini PNG', async () => {
+    assert.ok(!(await upload(tokens.turista, ids.turista, 'text/html')).ok)
+  })
+
+  test('non accetta indirizzi esterni o di altri utenti', async () => {
+    const token = tokens.turista
+    for (const avatarUrl of [
+      'https://example.com/x.png',
+      `${SUPABASE_URL}/storage/v1/object/public/avatars/${ids.guida}/avatar.png`,
+    ]) {
+      const r = await api('/me', { method: 'PATCH', token, body: { avatarUrl } })
+      assert.equal(r.status, 422, avatarUrl)
+    }
+  })
+})
