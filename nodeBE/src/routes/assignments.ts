@@ -16,7 +16,11 @@ export const assignments = new Hono<AppEnv>()
 
 assignments.use('*', requireAuth)
 
-assignments.get('/', async (c) => c.json({ assignments: await listAssignments(c.get('db')) }))
+assignments.get('/', async (c) => {
+  const db = c.get('db')
+  await requireProfessional(db, currentUserId(c))
+  return c.json({ assignments: await listAssignments(db) })
+})
 
 assignments.post('/', async (c) => {
   const db = c.get('db')

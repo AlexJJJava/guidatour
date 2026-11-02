@@ -9,7 +9,9 @@ npm start         # node dist/index.js (quello che gira su Render)
 npx tsc --noEmit  # solo type-check
 ```
 
-Nessuna suite di test. Node 18+.
+Node 18+.
+
+`npm run test:roles` prova i permessi di ogni ruolo sul backend online (o su `BACKEND_URL`) con gli account di prova: crea tour `[TEST]` e li cancella alla fine.
 
 ## Setup Supabase
 

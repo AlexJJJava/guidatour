@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { currentUserId, requireAuth, type AppEnv } from '../auth.js'
+import { requireProfessional } from '../services/profiles.js'
 import { REQUEST_STATUSES, listReceived, setRequestStatus } from '../services/requests.js'
 import { parseBody } from '../validate.js'
 
@@ -9,6 +10,10 @@ import { parseBody } from '../validate.js'
 export const requests = new Hono<AppEnv>()
 
 requests.use('*', requireAuth)
+requests.use('*', async (c, next) => {
+  await requireProfessional(c.get('db'), currentUserId(c))
+  await next()
+})
 
 requests.get('/received', async (c) => {
   return c.json({ requests: await listReceived(c.get('db'), currentUserId(c)) })

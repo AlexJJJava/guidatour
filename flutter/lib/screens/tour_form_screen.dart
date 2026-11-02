@@ -191,7 +191,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
     final t = l10n(context);
     final block = _blockReason(context);
     final categories = _user.role == Role.accompagnatore
-        ? tourCategories
+        ? const ['Accompagnamento']
         : tourCategories.where((c) => c != 'Accompagnamento').toList();
     if (!categories.contains(_category)) _category = categories.first;
     String? required(String? v) =>
