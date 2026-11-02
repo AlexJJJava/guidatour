@@ -72,7 +72,8 @@ class TourDetailScreen extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(kRadius),
                 child: Image.asset(categoryImage(tour.category),
-                    height: 280,
+                    height: (MediaQuery.sizeOf(context).width * 0.55)
+                        .clamp(180.0, 280.0),
                     width: double.infinity,
                     fit: BoxFit.cover,
                     color: photoShade(categoryImage(tour.category)),

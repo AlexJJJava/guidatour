@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 
 import '../l10n/labels.dart';
@@ -77,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListenableBuilder(
       listenable: appState,
       builder: (context, _) {
-        final wide = MediaQuery.of(context).size.width >= 900;
+        final wide = MediaQuery.of(context).size.width >= kDesktopWidth;
         final user = appState.currentUser;
         return Scrollbar(
           controller: _scroll,
@@ -166,15 +167,24 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         else
           SizedBox(
-            height: 124,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: tourCategories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 4),
-              itemBuilder: (_, i) => SizedBox(
-                  width: 112,
-                  child:
-                      _CategoryBubble(category: tourCategories[i], size: 72)),
+            height: 84 + MediaQuery.textScalerOf(context).scale(40),
+            // Nelle finestre strette del browser si scorre trascinando col
+            // mouse: di norma funziona solo col dito.
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(dragDevices: {
+                PointerDeviceKind.touch,
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.trackpad,
+              }),
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: tourCategories.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 4),
+                itemBuilder: (_, i) => SizedBox(
+                    width: 124,
+                    child:
+                        _CategoryBubble(category: tourCategories[i], size: 72)),
+              ),
             ),
           ),
       ],
@@ -217,7 +227,7 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wide = MediaQuery.of(context).size.width >= 900;
+    final wide = MediaQuery.of(context).size.width >= kDesktopWidth;
     return Container(
       width: double.infinity,
       color: color,
@@ -337,7 +347,10 @@ class _Hero extends StatelessWidget {
                               child: ConstrainedBox(
                                 constraints:
                                     const BoxConstraints(maxWidth: 880),
-                                child: _HeroSearchPanel(wide: wide),
+                                // Su tablet i campi stanno già su una riga.
+                                child: _HeroSearchPanel(
+                                    wide: MediaQuery.sizeOf(context).width >=
+                                        700),
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -694,21 +707,24 @@ class _ProSection extends StatelessWidget {
     // Nella stessa colonna delle altre sezioni: foto e testo affiancati.
     return _Section(
       color: kSurface,
-      child: SizedBox(
-        height: 230,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              flex: 5,
-              child: ClipRRect(
-                  borderRadius: BorderRadius.circular(kRadius), child: image),
-            ),
-            const SizedBox(width: 36),
-            Expanded(flex: 5, child: Center(child: text)),
-            const SizedBox(width: 28),
-            Expanded(flex: 4, child: Center(child: features)),
-          ],
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 230),
+        // Cresce con il testo (finestre strette, carattere ingrandito).
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                flex: 5,
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(kRadius), child: image),
+              ),
+              const SizedBox(width: 36),
+              Expanded(flex: 5, child: Center(child: text)),
+              const SizedBox(width: 28),
+              Expanded(flex: 4, child: Center(child: features)),
+            ],
+          ),
         ),
       ),
     );
@@ -918,7 +934,11 @@ class _Footer extends StatelessWidget {
     final brand = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BrandLogo(tagline: t.footerTagline),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: BrandLogo(tagline: t.footerTagline),
+        ),
         const SizedBox(height: 16),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 380),

@@ -282,6 +282,79 @@ class _AppShellState extends State<AppShell> {
     return items;
   }
 
+  Widget _bottomBar(BuildContext context, List<_NavItem> items) {
+    final t = l10n(context);
+    final collapsed = items.length > _maxBottomItems;
+    final visible = collapsed ? items.sublist(0, _maxBottomItems - 1) : items;
+    final hidden =
+        collapsed ? items.sublist(_maxBottomItems - 1) : <_NavItem>[];
+    // Telefono in orizzontale: lo spazio in altezza è poco.
+    final short = MediaQuery.sizeOf(context).height < 480;
+    final bar = NavigationBar(
+      height: short ? 56 : null,
+      labelBehavior:
+          short ? NavigationDestinationLabelBehavior.alwaysHide : null,
+      selectedIndex: _index.clamp(0, visible.length),
+      onDestinationSelected: (i) =>
+          i < visible.length ? _select(i) : _openMore(context, hidden),
+      destinations: [
+        for (final item in visible)
+          NavigationDestination(
+            icon: _navIcon(item.$2, item.$4),
+            selectedIcon: _navIcon(item.$3, item.$4),
+            label: item.$1,
+          ),
+        if (collapsed)
+          NavigationDestination(
+            icon: Badge(
+              isLabelVisible: hidden.any((i) => i.$4 is ApprovalsScreen) &&
+                  appState.pendingRegistrations > 0,
+              label: Text('${appState.pendingRegistrations}'),
+              child: const Icon(Icons.menu),
+            ),
+            label: t.navMore,
+          ),
+      ],
+    );
+    if (MediaQuery.sizeOf(context).width >= 360) return bar;
+    // Sui telefoni più stretti "Prenotazioni" andrebbe a capo a metà parola.
+    final theme = NavigationBarTheme.of(context);
+    return NavigationBarTheme(
+      data: theme.copyWith(
+        labelTextStyle: WidgetStateProperty.resolveWith(
+            (s) => theme.labelTextStyle?.resolve(s)?.copyWith(fontSize: 10)),
+      ),
+      child: bar,
+    );
+  }
+
+  /// Le voci che non stanno nella barra in basso.
+  void _openMore(BuildContext context, List<_NavItem> hidden) {
+    final offset = _maxBottomItems - 1;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: kSurface,
+      builder: (sheet) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            for (var i = 0; i < hidden.length; i++)
+              ListTile(
+                leading: _navIcon(hidden[i].$2, hidden[i].$4),
+                title: Text(hidden[i].$1),
+                selected: _index == offset + i,
+                selectedColor: kPrimary,
+                onTap: () {
+                  Navigator.pop(sheet);
+                  _select(offset + i);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -299,7 +372,7 @@ class _AppShellState extends State<AppShell> {
         if (_index >= items.length) _index = 0;
         final accountIndex = items.length - 1;
         return LayoutBuilder(builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth >= 900;
+          final isDesktop = constraints.maxWidth >= kDesktopWidth;
           Widget topBar({required bool overPhoto}) => isDesktop
               ? _TopBar(
                   items: items,
@@ -343,26 +416,17 @@ class _AppShellState extends State<AppShell> {
           }
           return Scaffold(
             body: body,
-            bottomNavigationBar: isDesktop
-                ? null
-                : NavigationBar(
-                    selectedIndex: _index,
-                    onDestinationSelected: _select,
-                    destinations: [
-                      for (final item in items)
-                        NavigationDestination(
-                          icon: _navIcon(item.$2, item.$4),
-                          selectedIcon: _navIcon(item.$3, item.$4),
-                          label: item.$1,
-                        ),
-                    ],
-                  ),
+            bottomNavigationBar: isDesktop ? null : _bottomBar(context, items),
           );
         });
       },
     );
   }
 }
+
+/// Oltre questo numero di voci la barra in basso non è più leggibile: le
+/// ultime finiscono in "Altro".
+const _maxBottomItems = 5;
 
 /// Icona del menu, con il numero di registrazioni da approvare sulla voce
 /// degli admin.
@@ -389,9 +453,11 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
+    // Nelle finestre strette lo spazio va ai link del menu.
+    final roomy = MediaQuery.sizeOf(context).width >= 1240;
     return Container(
       color: overPhoto ? null : kNight,
-      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
+      padding: EdgeInsets.symmetric(horizontal: roomy ? 48 : 24, vertical: 14),
       alignment: Alignment.center,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: kContentWidth),
@@ -399,33 +465,20 @@ class _TopBar extends StatelessWidget {
           children: [
             InkWell(
               onTap: () => onSelect(0),
-              child: BrandLogo(tagline: t.footerTagline),
+              child: BrandLogo(tagline: roomy ? t.footerTagline : null),
             ),
-            const SizedBox(width: 36),
+            SizedBox(width: roomy ? 36 : 16),
             Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    for (var i = 0; i < items.length; i++)
-                      _NavLink(
-                        label: items[i].$4 is ApprovalsScreen &&
-                                appState.pendingRegistrations > 0
-                            ? '${items[i].$1} (${appState.pendingRegistrations})'
-                            : items[i].$1,
-                        selected: i == index,
-                        onTap: () => onSelect(i),
-                      ),
-                  ],
-                ),
-              ),
+              child: _NavLinks(items: items, index: index, onSelect: onSelect),
             ),
             const SizedBox(width: 12),
             const CityPicker(),
             const SizedBox(width: 8),
             const LanguagePicker(),
-            const SizedBox(width: 14),
-            GoldButton(t.ctaButton, onPressed: () => onSelect(1)),
+            if (roomy) ...[
+              const SizedBox(width: 14),
+              GoldButton(t.ctaButton, onPressed: () => onSelect(1)),
+            ],
             if (_showsCart()) ...[
               const SizedBox(width: 12),
               const CartButton(),
@@ -437,27 +490,123 @@ class _TopBar extends StatelessWidget {
   }
 }
 
+/// I link che stanno nella barra, con misura del testo reale (cambia con la
+/// lingua); gli altri finiscono nel menu "Altro".
+class _NavLinks extends StatelessWidget {
+  const _NavLinks(
+      {required this.items, required this.index, required this.onSelect});
+  final List<_NavItem> items;
+  final int index;
+  final ValueChanged<int> onSelect;
+
+  String _label(_NavItem item) =>
+      item.$4 is ApprovalsScreen && appState.pendingRegistrations > 0
+          ? '${item.$1} (${appState.pendingRegistrations})'
+          : item.$1;
+
+  double _width(BuildContext context, String label) {
+    final painter = TextPainter(
+      text: TextSpan(text: label, style: _NavLink.textStyle),
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final width = painter.width + _NavLink.padding * 2;
+    painter.dispose();
+    return width;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final more = l10n(context).navMore;
+    return LayoutBuilder(builder: (context, c) {
+      final widths = [for (final i in items) _width(context, _label(i))];
+      final total = widths.fold(0.0, (a, b) => a + b);
+      var shown = items.length;
+      // Un po' di margine: il peso del carattere cambia sul link attivo.
+      if (total + 16 > c.maxWidth) {
+        final room = c.maxWidth - _width(context, more) - 20;
+        var used = 0.0;
+        shown = 0;
+        while (shown < items.length && used + widths[shown] <= room) {
+          used += widths[shown++];
+        }
+      }
+      final row = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < shown; i++)
+            _NavLink(
+              label: _label(items[i]),
+              selected: i == index,
+              onTap: () => onSelect(i),
+            ),
+          if (shown < items.length)
+            PopupMenuButton<int>(
+              tooltip: more,
+              initialValue: index,
+              onSelected: onSelect,
+              itemBuilder: (_) => [
+                for (var i = shown; i < items.length; i++)
+                  PopupMenuItem(value: i, child: Text(_label(items[i]))),
+              ],
+              child: _NavLink(
+                label: more,
+                selected: index >= shown,
+                showArrow: true,
+              ),
+            ),
+        ],
+      );
+      return FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: row,
+      );
+    });
+  }
+}
+
 class _NavLink extends StatelessWidget {
-  const _NavLink(
-      {required this.label, required this.selected, required this.onTap});
+  const _NavLink({
+    required this.label,
+    required this.selected,
+    this.onTap,
+    this.showArrow = false,
+  });
   final String label;
   final bool selected;
-  final VoidCallback onTap;
+
+  /// Null quando il tocco lo gestisce il menu che lo contiene.
+  final VoidCallback? onTap;
+  final bool showArrow;
+
+  static const padding = 13.0;
+  static const textStyle =
+      TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w600);
 
   @override
   Widget build(BuildContext context) => InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(6),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+          padding:
+              const EdgeInsets.symmetric(horizontal: padding, vertical: 10),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(label,
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                      color: selected ? kGold : Colors.white)),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(label,
+                      style: textStyle.copyWith(
+                          fontWeight:
+                              selected ? FontWeight.w600 : FontWeight.w500,
+                          color: selected ? kGold : Colors.white)),
+                  if (showArrow)
+                    Icon(Icons.expand_more,
+                        size: 16, color: selected ? kGold : Colors.white),
+                ],
+              ),
               const SizedBox(height: 4),
               Container(
                   height: 2,
@@ -479,8 +628,15 @@ class _MobileTopBar extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(20, 14, 16, 0),
         child: Row(
           children: [
-            BrandLogo(),
-            Spacer(),
+            // Sui telefoni più stretti il logo si rimpicciolisce.
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: BrandLogo(),
+              ),
+            ),
+            SizedBox(width: 8),
             _TopActions(),
           ],
         ),
@@ -504,7 +660,8 @@ class _TopActions extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (withCity) ...[
-            const CityPicker(),
+            // Su uno schermo stretto il nome della città si accorcia.
+            const Flexible(child: CityPicker()),
             const SizedBox(width: 8),
           ],
           const LanguagePicker(),

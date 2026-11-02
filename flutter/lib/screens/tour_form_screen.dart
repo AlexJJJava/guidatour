@@ -248,45 +248,53 @@ class _TourFormScreenState extends State<TourFormScreen> {
                 label: Text(_start == null ? t.fieldDateTime : fmtDate(_start!)),
               ),
               const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _duration,
-                      decoration: InputDecoration(
-                          labelText: t.fieldDuration, border: const OutlineInputBorder()),
-                      validator: required,
+              LayoutBuilder(builder: (context, c) {
+                const gap = 12.0;
+                final w =
+                    c.maxWidth < 440 ? c.maxWidth : (c.maxWidth - gap * 2) / 3;
+                return Wrap(
+                  spacing: gap,
+                  runSpacing: 14,
+                  children: [
+                    SizedBox(
+                      width: w,
+                      child: TextFormField(
+                        controller: _duration,
+                        decoration: InputDecoration(
+                            labelText: t.fieldDuration, border: const OutlineInputBorder()),
+                        validator: required,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _price,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                          labelText: t.fieldPrice,
-                          border: const OutlineInputBorder()),
-                      validator: (v) =>
-                          double.tryParse((v ?? '').replaceAll(',', '.')) ==
-                                  null
-                              ? t.validationNumber
-                              : null,
+                    SizedBox(
+                      width: w,
+                      child: TextFormField(
+                        controller: _price,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                            labelText: t.fieldPrice,
+                            border: const OutlineInputBorder()),
+                        validator: (v) =>
+                            double.tryParse((v ?? '').replaceAll(',', '.')) ==
+                                    null
+                                ? t.validationNumber
+                                : null,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _seats,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                          labelText: t.fieldSeats, border: const OutlineInputBorder()),
-                      validator: (v) => (int.tryParse(v ?? '') ?? 0) < 1
-                          ? t.validationAtLeastOne
-                          : null,
+                    SizedBox(
+                      width: w,
+                      child: TextFormField(
+                        controller: _seats,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                            labelText: t.fieldSeats, border: const OutlineInputBorder()),
+                        validator: (v) => (int.tryParse(v ?? '') ?? 0) < 1
+                            ? t.validationAtLeastOne
+                            : null,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                );
+              }),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _meeting,

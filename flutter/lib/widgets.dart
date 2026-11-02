@@ -37,6 +37,10 @@ const kSerif = 'Playfair';
 /// questa colonna, anche su schermi molto larghi.
 const kContentWidth = 1320.0;
 
+/// Da questa larghezza in su: menu in alto e sezioni affiancate. Sotto (telefoni
+/// e tablet in verticale): barra in basso e sezioni in colonna.
+const kDesktopWidth = 1024.0;
+
 /// Raggio d'angolo condiviso da card e contenitori arrotondati.
 const kRadius = 12.0;
 
@@ -159,7 +163,7 @@ class PageBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wide = MediaQuery.of(context).size.width >= 900;
+    final wide = MediaQuery.of(context).size.width >= kDesktopWidth;
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 26, wide ? 48 : 20, 40),
       child: Center(
@@ -188,7 +192,7 @@ class SectionHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wide = MediaQuery.of(context).size.width >= 900;
+    final wide = MediaQuery.of(context).size.width >= kDesktopWidth;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -224,9 +228,11 @@ class SectionHeading extends StatelessWidget {
   }
 }
 
+const _cardPhotoHeight = 120.0;
+
 class ResponsiveGrid extends StatelessWidget {
   const ResponsiveGrid(
-      {super.key, required this.children, this.itemHeight = 352});
+      {super.key, required this.children, this.itemHeight = 356});
   final List<Widget> children;
   final double itemHeight;
 
@@ -238,16 +244,15 @@ class ResponsiveGrid extends StatelessWidget {
           : (c.maxWidth >= 820 ? 3 : (c.maxWidth >= 540 ? 2 : 1));
       const gap = 14.0;
       final w = (c.maxWidth - gap * (cols - 1)) / cols;
+      // Il testo cresce con il carattere impostato sul telefono, la foto no.
+      final height = _cardPhotoHeight +
+          MediaQuery.textScalerOf(context).scale(itemHeight - _cardPhotoHeight);
       return Wrap(
         spacing: gap,
         runSpacing: gap,
         children: [
           for (final child in children)
-            SizedBox(
-                width: w,
-                // Su una colonna la card è più larga: serve meno altezza.
-                height: cols == 1 ? itemHeight - 28 : itemHeight,
-                child: child),
+            SizedBox(width: w, height: height, child: child),
         ],
       );
     });
@@ -312,7 +317,7 @@ class TourCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 128,
+              height: _cardPhotoHeight,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -560,9 +565,16 @@ class CityPicker extends StatelessWidget {
                 children: [
                   const Icon(Icons.location_on, size: 18, color: kPrimary),
                   const SizedBox(width: 4),
-                  Text(city == null ? t.cityAllItaly : cityLabel(context, city),
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w700, color: kInk)),
+                  Flexible(
+                    child: Text(
+                        city == null
+                            ? t.cityAllItaly
+                            : cityLabel(context, city),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, color: kInk)),
+                  ),
                   const Icon(Icons.expand_more, size: 18, color: kMuted),
                 ],
               ),

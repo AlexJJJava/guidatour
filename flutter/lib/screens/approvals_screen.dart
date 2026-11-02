@@ -52,21 +52,24 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
           const SizedBox(height: 6),
           Text(t.approvalsIntro, style: const TextStyle(color: kMuted)),
           const SizedBox(height: 18),
-          SegmentedButton<String>(
-            segments: [
-              ButtonSegment(
-                  value: 'in_attesa', label: Text(t.approvalsPending)),
-              ButtonSegment(
-                  value: 'approvato', label: Text(t.approvalsApproved)),
-              ButtonSegment(
-                  value: 'rifiutato', label: Text(t.approvalsRejected)),
-            ],
-            selected: {_status},
-            showSelectedIcon: false,
-            onSelectionChanged: (s) {
-              _status = s.first;
-              _reload();
-            },
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SegmentedButton<String>(
+              segments: [
+                ButtonSegment(
+                    value: 'in_attesa', label: Text(t.approvalsPending)),
+                ButtonSegment(
+                    value: 'approvato', label: Text(t.approvalsApproved)),
+                ButtonSegment(
+                    value: 'rifiutato', label: Text(t.approvalsRejected)),
+              ],
+              selected: {_status},
+              showSelectedIcon: false,
+              onSelectionChanged: (s) {
+                _status = s.first;
+                _reload();
+              },
+            ),
           ),
           const SizedBox(height: 18),
           FutureBuilder<List<Guide>>(
@@ -140,7 +143,7 @@ class _RegistrationCard extends StatelessWidget {
           alignment: WrapAlignment.spaceBetween,
           children: [
             ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 260, maxWidth: 480),
+              constraints: const BoxConstraints(maxWidth: 480),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

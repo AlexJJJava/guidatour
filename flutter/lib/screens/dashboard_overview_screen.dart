@@ -15,7 +15,8 @@ class _StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 150,
+      // Sempre due per riga anche sui telefoni più stretti.
+      width: ((MediaQuery.sizeOf(context).width - 52) / 2).clamp(130.0, 150.0),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: kSurface,
