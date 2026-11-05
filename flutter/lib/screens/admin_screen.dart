@@ -176,12 +176,16 @@ class _AdminStat extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    // Due per riga su telefono, fino a quattro su computer.
-    final tile = width < 600 ? (width - 52) / 2 : 236.0;
+  Widget build(BuildContext context) => LayoutBuilder(builder: _tile);
+
+  /// Griglia regolare: tre per riga su schermo largo, due su telefono, tutti
+  /// alti uguali anche con le etichette su due righe.
+  Widget _tile(BuildContext context, BoxConstraints c) {
+    const gap = 12.0;
+    final cols = c.maxWidth >= 700 ? 3 : 2;
     return SizedBox(
-      width: tile,
+      width: (c.maxWidth - gap * (cols - 1)) / cols,
+      height: MediaQuery.textScalerOf(context).scale(84),
       child: Material(
         color: highlight ? kGold.withValues(alpha: 0.3) : kSurface,
         borderRadius: BorderRadius.circular(kRadius),
@@ -219,6 +223,8 @@ class _AdminStat extends StatelessWidget {
                               fontWeight: FontWeight.w800,
                               color: kInk)),
                       Text(label,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(color: kMuted, fontSize: 12)),
                     ],
                   ),
@@ -288,7 +294,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     t.adminStatRequests, n('requests'), Icons.mail_outline),
                 _AdminStat(
                     t.adminStatViews,
-                    t.adminViewsValue(n('visits'), n('scans')),
+                    '${n('visits')} · ${n('scans')}',
                     Icons.qr_code_2),
                 _AdminStat(t.adminStatConsents, n('consents'),
                     Icons.chat_bubble_outline,

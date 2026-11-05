@@ -522,7 +522,7 @@
   "adminStatUpcoming": "Tour in programma",
   "adminStatTours": "Tour in totale",
   "adminStatRequests": "Richieste di prenotazione",
-  "adminStatViews": "Visite e scansioni QR",
+  "adminStatViews": "Visite · scansioni QR",
   "adminStatConsents": "Consensi WhatsApp",
   "adminViewsValue": "{visits} visite · {scans} QR",
   "@adminViewsValue": {"placeholders":{"visits":{"type":"String"},"scans":{"type":"String"}}},

@@ -302,7 +302,7 @@
   "adminStatUpcoming": "Tours programados",
   "adminStatTours": "Tours en total",
   "adminStatRequests": "Solicitudes de reserva",
-  "adminStatViews": "Visitas y escaneos QR",
+  "adminStatViews": "Visitas · escaneos QR",
   "adminStatConsents": "Consentimientos de WhatsApp",
   "adminViewsValue": "{visits} visitas · {scans} QR",
   "adminUpcomingTitle": "Próximos tours",
