@@ -364,27 +364,20 @@ class _AppShellState extends State<AppShell> {
           const AssignmentsScreen(),
         ),
         (
-          t.navBookings,
-          Icons.event_note_outlined,
-          Icons.event_note,
+          t.navRequests,
+          Icons.inbox_outlined,
+          Icons.inbox,
           const BookingsScreen(),
         ),
       ]);
     } else {
-      items.addAll([
-        (
-          t.navFavorites,
-          Icons.favorite_border,
-          Icons.favorite,
-          const FavoritesScreen(),
-        ),
-        (
-          t.navBookings,
-          Icons.event_note_outlined,
-          Icons.event_note,
-          const BookingsScreen(),
-        ),
-      ]);
+      // Le richieste inviate dal turista stanno nel carrello.
+      items.add((
+        t.navFavorites,
+        Icons.favorite_border,
+        Icons.favorite,
+        const FavoritesScreen(),
+      ));
     }
     if (user != null && user.isAdmin) {
       items.add((

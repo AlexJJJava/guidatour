@@ -5,10 +5,11 @@ import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
 import 'auth_screen.dart';
+import 'cart_screen.dart';
 import 'tour_detail_screen.dart';
 
-/// Prenotazioni: se non è loggato mostra l'accesso. Da loggato mostra lo
-/// storico delle richieste inviate (turista) o quelle ricevute (professionista).
+/// Richieste: per il professionista quelle ricevute; il turista trova le sue
+/// nel carrello (non ha più questa voce di menu).
 class BookingsScreen extends StatelessWidget {
   const BookingsScreen({super.key});
 
@@ -21,7 +22,7 @@ class BookingsScreen extends StatelessWidget {
         if (user == null) return const AuthScreen();
         return user.role.isProfessional
             ? const _ReceivedBookings()
-            : const _SentBookings();
+            : const CartScreen();
       },
     );
   }
@@ -50,71 +51,80 @@ Widget _thumb(Tour? tour) => ClipRRect(
               width: 64, height: 64, fit: BoxFit.cover),
     );
 
-/// Richieste inviate dal turista per i propri tour (storico).
-class _SentBookings extends StatelessWidget {
-  const _SentBookings();
+/// Richieste inviate dal turista, con lo stato; quelle con una risposta
+/// nuova sono segnalate.
+class SentRequestsList extends StatelessWidget {
+  const SentRequestsList({super.key});
 
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
     final reqs = appState.myRequests;
-    return PageBody(
-      maxWidth: 900,
-      title: t.bookingsTitleSent,
-      subtitle: t.pageBookingsSentSub,
-      icon: Icons.event_note_outlined,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (reqs.isEmpty)
-            EmptyState(icon: Icons.event_busy, message: t.historyEmpty)
-          else
-            for (final r in reqs)
-              Builder(builder: (context) {
-                final tour = appState.tourById(r.tourId);
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: tour == null ? null : () => openTour(context, tour),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          _thumb(tour),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(tour?.title ?? t.tourUnavailable,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 15)),
-                                const SizedBox(height: 4),
-                                Text(
-                                    tour == null
-                                        ? t.historyLine(
-                                            fmtDate(r.createdAt), r.people)
-                                        : t.historyLineWithTourDate(
-                                            fmtDate(r.createdAt),
-                                            r.people,
-                                            fmtDate(tour.start)),
-                                    style: const TextStyle(
-                                        color: kMuted, fontSize: 13)),
-                              ],
-                            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (reqs.isEmpty)
+          EmptyState(icon: Icons.event_busy, message: t.historyEmpty)
+        else
+          for (final r in reqs)
+            Builder(builder: (context) {
+              final tour = appState.tourById(r.tourId);
+              return Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: tour == null ? null : () => openTour(context, tour),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        _thumb(tour),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(tour?.title ?? t.tourUnavailable,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15)),
+                              const SizedBox(height: 4),
+                              Text(
+                                  tour == null
+                                      ? t.historyLine(
+                                          fmtDate(r.createdAt), r.people)
+                                      : t.historyLineWithTourDate(
+                                          fmtDate(r.createdAt),
+                                          r.people,
+                                          fmtDate(tour.start)),
+                                  style: const TextStyle(
+                                      color: kMuted, fontSize: 13)),
+                            ],
                           ),
-                          const SizedBox(width: 10),
-                          _statusPill(context, r.status),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            _statusPill(context, r.status),
+                            if (appState.isNewAnswer(r)) ...[
+                              const SizedBox(height: 4),
+                              Text(t.cartNewAnswer,
+                                  key: ValueKey('new-answer-${r.id}'),
+                                  style: const TextStyle(
+                                      color: kPrimary,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700)),
+                            ],
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                );
-              }),
-        ],
-      ),
+                ),
+              );
+            }),
+      ],
     );
   }
 }

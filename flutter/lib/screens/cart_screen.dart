@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../l10n/labels.dart';
@@ -5,10 +7,11 @@ import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
 import 'auth_screen.dart';
+import 'bookings_screen.dart';
 import 'tour_detail_screen.dart';
 
-/// Carrello dell'utente: se non è loggato mostra l'accesso, altrimenti
-/// (per un account turista) le richieste da inviare, senza pagamento online.
+/// Carrello del turista: i tour da richiedere (senza pagamento online) e le
+/// richieste già inviate con le risposte di guide e operatori.
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
@@ -41,69 +44,99 @@ class _CartBody extends StatefulWidget {
 class _CartBodyState extends State<_CartBody> {
   bool _privacy = false;
 
+  Timer? _seen;
+
+  @override
+  void initState() {
+    super.initState();
+    // Aprendo il carrello le risposte nuove si considerano viste: restano
+    // segnalate per qualche secondo, poi il numero sull'icona si aggiorna.
+    _seen = Timer(const Duration(seconds: 3), appState.markAnswersSeen);
+  }
+
+  @override
+  void dispose() {
+    _seen?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
     final items = appState.cart;
-    if (items.isEmpty) {
-      return Center(
-          child: EmptyState(
-              icon: Icons.shopping_cart_outlined, message: t.cartEmpty));
-    }
     return PageBody(
       maxWidth: 900,
+      title: t.cartTitle,
+      subtitle: t.pageCartSub,
+      icon: Icons.shopping_cart_outlined,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PageHeader(
-              title: t.cartTitle,
-              icon: Icons.shopping_cart_outlined,
-              subtitle: t.pageCartSub),
-          const SizedBox(height: 16),
-          InfoBanner(t.cartNoPaymentInfo),
-          const SizedBox(height: 16),
-          for (final item in items) _line(context, item),
-          const Divider(height: 32),
-          Row(
-            children: [
-              Text(t.cartTotalLabel,
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
-              const Spacer(),
-              Text(fmtPrice(appState.cartTotal),
-                  style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: kPrimary)),
-            ],
+          GoldPanel(
+            title: t.cartToSendSection,
+            icon: Icons.shopping_cart_outlined,
+            child: items.isEmpty
+                ? Text(t.cartEmpty, style: const TextStyle(color: kMuted))
+                : _toSend(context, items),
           ),
-          CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-            value: _privacy,
-            onChanged: (v) => setState(() => _privacy = v ?? false),
-            title:
-                Text(t.cartShareConsent, style: const TextStyle(fontSize: 13)),
-          ),
-          FilledButton(
-            onPressed: !_privacy
-                ? null
-                : () async {
-                    try {
-                      final n = await appState.checkoutCart();
-                      if (!context.mounted) return;
-                      snack(context, t.cartCheckoutDone(n, t.navBookings));
-                      setState(() => _privacy = false);
-                    } catch (e) {
-                      if (context.mounted) snack(context, '$e');
-                    }
-                  },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(t.cartSubmit),
-            ),
+          const SizedBox(height: 16),
+          GoldPanel(
+            title: t.cartSentSection,
+            icon: Icons.mail_outline,
+            child: const SentRequestsList(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _toSend(BuildContext context, List<CartItem> items) {
+    final t = l10n(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InfoBanner(t.cartNoPaymentInfo),
+        const SizedBox(height: 16),
+        for (final item in items) _line(context, item),
+        const Divider(height: 32),
+        Row(
+          children: [
+            Text(t.cartTotalLabel,
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+            const Spacer(),
+            Text(fmtPrice(appState.cartTotal),
+                style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: kPrimary)),
+          ],
+        ),
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+          value: _privacy,
+          onChanged: (v) => setState(() => _privacy = v ?? false),
+          title: Text(t.cartShareConsent, style: const TextStyle(fontSize: 13)),
+        ),
+        FilledButton(
+          onPressed: !_privacy
+              ? null
+              : () async {
+                  try {
+                    final n = await appState.checkoutCart();
+                    if (!context.mounted) return;
+                    snack(context, t.cartCheckoutDone(n, t.cartSentSection));
+                    setState(() => _privacy = false);
+                  } catch (e) {
+                    if (context.mounted) snack(context, '$e');
+                  }
+                },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(t.cartSubmit),
+          ),
+        ),
+      ],
     );
   }
 
@@ -170,7 +203,8 @@ class CartButton extends StatelessWidget {
     return ListenableBuilder(
       listenable: appState,
       builder: (context, _) {
-        final count = appState.cart.length;
+        // Tour da inviare più risposte nuove alle richieste già inviate.
+        final count = appState.cart.length + appState.unseenAnswers;
         return IconButton(
           tooltip: l10n(context).navCart,
           style: IconButton.styleFrom(backgroundColor: kSurface),

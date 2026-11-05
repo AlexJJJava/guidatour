@@ -98,7 +98,6 @@ final turistaPages = [
   t.navDiscover,
   t.navSearch,
   t.navFavorites,
-  t.navBookings,
 ];
 final proPages = [
   t.navDiscover,
@@ -106,13 +105,15 @@ final proPages = [
   t.dashTabOverview,
   t.dashTabMyTours,
   t.dashTabAssignments,
-  t.navBookings,
+  t.navRequests,
 ];
 final allPages = {
   ...turistaPages,
   ...proPages,
   t.navManage,
   t.navAccount,
+  // Non più nel menu: le richieste del turista stanno nel carrello.
+  t.navBookings,
 };
 
 /// Con i font veri il menu ha le misure reali: le voci non finiscono in Altro.
@@ -399,11 +400,11 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
 
-    testWidgets('turista su Prenotazioni, esce: resta', (tester) async {
+    testWidgets('turista su Preferiti, esce: resta', (tester) async {
       await open(tester, user(Role.turista));
-      await go(tester, t.navBookings);
+      await go(tester, t.navFavorites);
       await become(tester, null);
-      expect(find.byType(BookingsScreen), findsOneWidget);
+      expect(find.byType(FavoritesScreen), findsOneWidget);
       expect(find.byType(AuthScreen), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
@@ -453,14 +454,72 @@ void main() {
     });
   });
 
+  group('carrello e richieste', () {
+    BookingRequest req(String id, String status) => BookingRequest(
+          id: id,
+          tourId: 'tour1',
+          name: 'Anna',
+          email: 'a@example.com',
+          phone: '',
+          people: 2,
+          message: '',
+          createdAt: DateTime(2026, 11, 1),
+          status: status,
+        );
+
+    testWidgets('il carrello mostra da inviare e richieste inviate',
+        (tester) async {
+      sized(tester, const Size(1280, 2000));
+      seed(user(Role.turista));
+      appState.myRequests = [req('q1', 'inviata'), req('q2', 'confermata')];
+      await tester.pumpWidget(page(const CartScreen()));
+      await tester.pump();
+      expect(find.text(t.cartToSendSection), findsOneWidget);
+      expect(find.text(t.cartSentSection), findsOneWidget);
+      expect(find.text(t.cartEmpty), findsOneWidget);
+      expect(find.text(t.statusConfermata), findsOneWidget);
+      // La conferma è una risposta nuova finché non viene vista.
+      expect(find.byKey(const ValueKey('new-answer-q2')), findsOneWidget);
+      expect(find.byKey(const ValueKey('new-answer-q1')), findsNothing);
+      expect(appState.unseenAnswers, 1);
+      await tester.pump(const Duration(seconds: 4));
+      expect(appState.unseenAnswers, 0);
+      appState.myRequests = [];
+    });
+
+    testWidgets("l'icona del carrello conta anche le risposte nuove",
+        (tester) async {
+      sized(tester, const Size(1920, 1080));
+      seed(user(Role.turista));
+      appState.myRequests = [req('q3', 'rifiutata')];
+      await tester.pumpWidget(const GuidaTourApp());
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(
+          find.descendant(
+              of: find.byType(CartButton), matching: find.text('1')),
+          findsOneWidget);
+      appState.myRequests = [];
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('il professionista vede la voce Richieste', (tester) async {
+      sized(tester, const Size(1280, 1600));
+      seed(user(Role.guida));
+      await tester.pumpWidget(page(const BookingsScreen()));
+      await tester.pump();
+      expect(find.text(t.bookingsTitleReceived), findsOneWidget);
+    });
+  });
+
   group('barra su telefono', () {
     testWidgets('il turista ha tutte le voci', (tester) async {
       sized(tester, const Size(412, 915));
       seed(user(Role.turista));
       await tester.pumpWidget(const GuidaTourApp());
       await tester.pump(const Duration(milliseconds: 100));
-      expect(find.byType(NavigationDestination), findsNWidgets(4));
+      expect(find.byType(NavigationDestination), findsNWidgets(3));
       expect(find.text(t.navAccount), findsNothing);
+      expect(find.text(t.navBookings), findsNothing);
       await tester.pumpWidget(const SizedBox());
     });
 
@@ -469,7 +528,7 @@ void main() {
       seed(null);
       await tester.pumpWidget(const GuidaTourApp());
       await tester.pump(const Duration(milliseconds: 100));
-      expect(find.byType(NavigationDestination), findsNWidgets(5));
+      expect(find.byType(NavigationDestination), findsNWidgets(4));
       expect(find.text(t.navAccount), findsWidgets);
       await tester.pumpWidget(const SizedBox());
     });

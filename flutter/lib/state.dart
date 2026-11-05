@@ -8,6 +8,7 @@ import 'api_client.dart';
 import 'models.dart';
 
 const _cityPrefKey = 'city';
+const _seenAnswersKey = 'seenAnswers';
 
 /// Stato applicativo: dati pubblici cache-ati localmente, dati dell'utente
 /// caricati dal backend dopo il login (Supabase Auth + API GuidaTour).
@@ -58,9 +59,29 @@ class AppState extends ChangeNotifier {
       'momento rispondendo STOP.';
 
   /// Da chiamare una volta all'avvio dell'app.
+  /// Risposte (richiesta:stato) già viste nel carrello.
+  Set<String> _seenAnswers = {};
+
+  static String _answerKey(BookingRequest r) => '${r.id}:${r.status}';
+
+  /// Richieste confermate o rifiutate che il turista non ha ancora visto.
+  bool isNewAnswer(BookingRequest r) =>
+      r.status != 'inviata' && !_seenAnswers.contains(_answerKey(r));
+
+  int get unseenAnswers => myRequests.where(isNewAnswer).length;
+
+  Future<void> markAnswersSeen() async {
+    if (unseenAnswers == 0) return;
+    _seenAnswers = {..._seenAnswers, ...myRequests.map(_answerKey)};
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_seenAnswersKey, _seenAnswers.toList());
+  }
+
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     city = prefs.getString(_cityPrefKey);
+    _seenAnswers = {...?prefs.getStringList(_seenAnswersKey)};
     await Future.wait([_loadTours(), _loadGuides()]);
     ready = true;
     notifyListeners();
