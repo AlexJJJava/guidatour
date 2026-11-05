@@ -134,7 +134,7 @@ const tests = [
   ['Backend online', 'Admin', 3, 'Superato', 'Registrazioni, consensi, limiti del ruolo'],
   ['Backend online', 'Tentativi di scavalcare i ruoli', 6, 'Superato', 'Revoca consensi provata solo su id inesistente: nel database non ci sono consensi'],
   ['Backend online', 'Foto profilo', 5, 'Superato', 'Caricamento, rimozione, cartelle altrui, formato e indirizzi esterni'],
-  ['App Flutter', 'Pagine, intestazione e footer, FAQ, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 47, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
+  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 50, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
   ['Non coperto', 'Rifiuto di una registrazione', 0, 'Da provare', 'Approvazione provata a mano, rifiuto no'],
   ['Non coperto', 'Prova end-to-end nel browser', 0, 'Da provare', 'Clic reali sul sito pubblicato'],
 ];
@@ -200,6 +200,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['05/11/2026', 'Copertina più bassa', 'Sottotitolo su una riga su schermo largo, spazi ridotti, foto tagliata dal cielo e non dal fondo (40 px in meno a 1920 e 1280)', 'Test app, prova sul sito'],
   ['05/11/2026', 'Intestazione e footer ovunque', 'Pagine interne con intestazione e footer, niente freccia: logo e marchio del footer portano a Scopri; footer solo con FAQ; nuova pagina FAQ', 'Test app, prova sul sito'],
   ['05/11/2026', 'Locandina PDF', 'Scarica e stampa la locandina A4 con QR, dati del tour e organizzatore', 'Test app'],
   ['02/11/2026', 'Account dal pallino', 'Chi è collegato apre Account dal pallino; il menu non lo mostra più', 'Test app'],
