@@ -282,6 +282,43 @@ void main() {
     }
   });
 
+  group('una sola intestazione', () {
+    Finder bars(Size size) => find.byWidgetPredicate((w) =>
+        '${w.runtimeType}' == (size.width >= 1024 ? '_TopBar' : '_MobileTopBar'));
+
+    for (final size in const [Size(1920, 1080), Size(412, 915)]) {
+      testWidgets('dopo il login dalla pagina di accesso (${size.width})',
+          (tester) async {
+        sized(tester, size);
+        seed(null);
+        await tester.pumpWidget(const GuidaTourApp());
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(bars(size), findsOneWidget);
+        // Come nell'app: l'utente apre una pagina, poi fa l'accesso.
+        await tester.tap(find.text(t.navAccount).last);
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.scrollUntilVisible(
+            find.byKey(const ValueKey('footer-faq')), 400,
+            scrollable: find.byType(Scrollable).first);
+        await tester.tap(find.byKey(const ValueKey('footer-faq')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        appState.currentUser = user(Role.turista);
+        appState.notifyListeners();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(bars(size), findsOneWidget);
+        // E anche dopo il logout.
+        appState.currentUser = null;
+        appState.notifyListeners();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(bars(size), findsOneWidget);
+        await tester.pumpWidget(const SizedBox());
+      });
+    }
+  });
+
   group('barra su telefono', () {
     testWidgets('il turista ha tutte le voci', (tester) async {
       sized(tester, const Size(412, 915));

@@ -223,12 +223,20 @@ class _AppShellState extends State<AppShell> {
   /// Pagine aperte sopra quella del menu (0 = solo quella del menu).
   int _depth = 0;
 
-  late final _observer = _DepthObserver((depth) {
-    if (depth == _depth) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) setState(() => _depth = depth);
+  /// Un contatore per ogni navigatore: quello vecchio, sostituito senza
+  /// chiudere le sue pagine, non deve più contare.
+  late var _observer = _newObserver();
+
+  _DepthObserver _newObserver() {
+    late final _DepthObserver observer;
+    observer = _DepthObserver((depth) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || observer != _observer || depth == _depth) return;
+        setState(() => _depth = depth);
+      });
     });
-  });
+    return observer;
+  }
 
   /// AppShell può ricostruirsi: il link va aperto una volta sola.
   static bool _linkOpened = false;
@@ -270,6 +278,7 @@ class _AppShellState extends State<AppShell> {
   void _reset(int i) {
     _index = i;
     _navKey = GlobalKey<NavigatorState>();
+    _observer = _newObserver();
     _depth = 0;
   }
 
