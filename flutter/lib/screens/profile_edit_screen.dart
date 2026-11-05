@@ -125,6 +125,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     return Scaffold(
       body: PageBody(
         title: t.editProfile,
+        subtitle: t.pageProfileSub,
+        icon: Icons.edit_outlined,
         maxWidth: 640,
         child: Form(
           key: _key,

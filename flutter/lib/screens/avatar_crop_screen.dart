@@ -17,8 +17,8 @@ const _maxDecodedSide = 2048;
 Matrix4 coverTransform(Size image, double side) {
   final scale = side / math.min(image.width, image.height);
   return Matrix4.diagonal3Values(scale, scale, scale)
-    ..setTranslationRaw((side - image.width * scale) / 2,
-        (side - image.height * scale) / 2, 0);
+    ..setTranslationRaw(
+        (side - image.width * scale) / 2, (side - image.height * scale) / 2, 0);
 }
 
 /// Parte dell'immagine visibile nel riquadro con questa trasformazione.
@@ -99,7 +99,8 @@ class _AvatarCropScreenState extends State<AvatarCropScreen> {
       Rect.fromLTWH(0, 0, avatarSize.toDouble(), avatarSize.toDouble()),
       Paint()..filterQuality = FilterQuality.high,
     );
-    final cropped = await recorder.endRecording().toImage(avatarSize, avatarSize);
+    final cropped =
+        await recorder.endRecording().toImage(avatarSize, avatarSize);
     final data = await cropped.toByteData(format: ui.ImageByteFormat.png);
     cropped.dispose();
     if (!mounted) return;
@@ -118,6 +119,7 @@ class _AvatarCropScreenState extends State<AvatarCropScreen> {
               : PageBody(
                   maxWidth: 420,
                   title: t.avatarCropTitle,
+                  icon: Icons.crop,
                   child: LayoutBuilder(builder: (context, c) {
                     final side = math.min(c.maxWidth, 360.0);
                     if (side != _side) {

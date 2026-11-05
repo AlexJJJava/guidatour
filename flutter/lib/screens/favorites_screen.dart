@@ -29,12 +29,10 @@ class FavoritesScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(t.favoritesTitle,
-                  style: const TextStyle(
-                      fontFamily: kSerif,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: kInk)),
+              PageHeader(
+                  title: t.favoritesTitle,
+                  icon: Icons.favorite_outline,
+                  subtitle: t.pageFavoritesSub),
               const SizedBox(height: 20),
               if (favs.isEmpty)
                 EmptyState(

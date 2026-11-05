@@ -40,12 +40,10 @@ class _SentBookings extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(t.bookingsTitleSent,
-              style: const TextStyle(
-                  fontFamily: kSerif,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: kInk)),
+          PageHeader(
+              title: t.bookingsTitleSent,
+              icon: Icons.event_note_outlined,
+              subtitle: t.pageBookingsSentSub),
           const SizedBox(height: 20),
           if (reqs.isEmpty)
             EmptyState(icon: Icons.event_busy, message: t.historyEmpty)
@@ -91,12 +89,10 @@ class _ReceivedBookings extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(t.bookingsTitleReceived,
-              style: const TextStyle(
-                  fontFamily: kSerif,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: kInk)),
+          PageHeader(
+              title: t.bookingsTitleReceived,
+              icon: Icons.inbox_outlined,
+              subtitle: t.pageBookingsReceivedSub),
           const SizedBox(height: 20),
           if (reqs.isEmpty)
             EmptyState(icon: Icons.mail_outline, message: t.noRequestsReceived),

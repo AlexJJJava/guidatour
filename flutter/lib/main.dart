@@ -497,8 +497,8 @@ class _AppShellState extends State<AppShell> {
                   const _MobileTopBar(solid: true),
                   const Padding(
                     padding: EdgeInsets.fromLTRB(12, 8, 12, 0),
-                    child:
-                        Align(alignment: Alignment.centerRight, child: CityPicker()),
+                    child: Align(
+                        alignment: Alignment.centerRight, child: CityPicker()),
                   ),
                 ],
                 Expanded(child: inner),
@@ -730,7 +730,9 @@ class _MobileTopBar extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         color: solid ? kNight : null,
         padding: EdgeInsets.fromLTRB(
-            20, solid ? MediaQuery.paddingOf(context).top + 10 : 14, 16,
+            20,
+            solid ? MediaQuery.paddingOf(context).top + 10 : 14,
+            16,
             solid ? 10 : 0),
         child: Row(
           children: [

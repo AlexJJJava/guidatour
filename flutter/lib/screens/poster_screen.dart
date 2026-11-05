@@ -36,7 +36,8 @@ class PosterScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _pdf(BuildContext context, String link, {required bool print}) async {
+  Future<void> _pdf(BuildContext context, String link,
+      {required bool print}) async {
     final t = l10n(context);
     final data = _data(context, link);
     final name = 'locandina-${tour.id}.pdf';
@@ -61,6 +62,7 @@ class PosterScreen extends StatelessWidget {
       body: PageBody(
         maxWidth: 560,
         title: t.qrAndPoster,
+        icon: Icons.qr_code_2,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

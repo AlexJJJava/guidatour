@@ -28,6 +28,16 @@ const kCream = Color(0xFFFBF7F0);
 /// Card, riquadri e sezioni alternate.
 const kSurface = Colors.white;
 const kSand = Color(0xFFF6EEDF);
+
+/// Sfondo delle pagine interne: giallo chiaro, le schede bianche risaltano.
+const kPageYellow = Color(0xFFFCF1D4);
+
+/// Fascia dorata delle intestazioni di pagina.
+const kHeaderGradient = LinearGradient(
+  colors: [Color(0xFFF2C36B), Color(0xFFF8DFA8)],
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+);
 const kLine = Color(0xFFEAE2D3);
 
 /// Blu notte di intestazione e footer.
@@ -190,55 +200,117 @@ class PageBody extends StatelessWidget {
     required this.child,
     this.maxWidth = 1240,
     this.title,
+    this.subtitle,
+    this.icon,
   });
   final Widget child;
   final double maxWidth;
+
+  /// Con il titolo la pagina apre con l'intestazione dorata.
   final String? title;
+  final String? subtitle;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.of(context).size.width >= kDesktopWidth;
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 26, wide ? 48 : 20, 40),
-          sliver: SliverToBoxAdapter(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxWidth),
-                child: title == null
-                    ? child
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(title!,
-                              style: const TextStyle(
-                                  fontFamily: kSerif,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w700,
-                                  color: kInk)),
-                          const SizedBox(height: 18),
-                          child,
-                        ],
-                      ),
+    // Material e non ColoredBox: caselle e voci di elenco disegnano l'effetto
+    // al tocco sulla superficie.
+    return Material(
+      color: kPageYellow,
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding:
+                EdgeInsets.fromLTRB(wide ? 48 : 20, 26, wide ? 48 : 20, 40),
+            sliver: SliverToBoxAdapter(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: title == null
+                      ? child
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            PageHeader(
+                                title: title!,
+                                icon: icon ?? Icons.article_outlined,
+                                subtitle: subtitle),
+                            const SizedBox(height: 18),
+                            child,
+                          ],
+                        ),
+                ),
               ),
             ),
           ),
-        ),
-        // Il footer sta in fondo allo schermo se la pagina è corta, altrimenti
-        // dopo il contenuto. Calcolato sullo spazio libero, non sui testi.
-        SliverLayoutBuilder(
-          builder: (context, c) => SliverToBoxAdapter(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                  minHeight: math.max(
-                      0, c.viewportMainAxisExtent - c.precedingScrollExtent)),
-              child: const Align(
-                  alignment: Alignment.bottomCenter, child: SiteFooter()),
+          // Il footer sta in fondo allo schermo se la pagina è corta, altrimenti
+          // dopo il contenuto. Calcolato sullo spazio libero, non sui testi.
+          SliverLayoutBuilder(
+            builder: (context, c) => SliverToBoxAdapter(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                    minHeight: math.max(
+                        0, c.viewportMainAxisExtent - c.precedingScrollExtent)),
+                child: const Align(
+                    alignment: Alignment.bottomCenter, child: SiteFooter()),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Intestazione di pagina: fascia dorata con icona, titolo e una riga che
+/// spiega a cosa serve la pagina.
+class PageHeader extends StatelessWidget {
+  const PageHeader(
+      {super.key, required this.title, required this.icon, this.subtitle});
+  final String title;
+  final IconData icon;
+  final String? subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final narrow = MediaQuery.sizeOf(context).width < 600;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(narrow ? 16 : 22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(kRadius),
+        gradient: kHeaderGradient,
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(narrow ? 9 : 12),
+            decoration:
+                const BoxDecoration(color: kNight, shape: BoxShape.circle),
+            child: Icon(icon, color: kGold, size: narrow ? 22 : 28),
+          ),
+          SizedBox(width: narrow ? 12 : 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: TextStyle(
+                        fontFamily: kSerif,
+                        fontSize: narrow ? 22 : 26,
+                        fontWeight: FontWeight.w700,
+                        color: kInk)),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Text(subtitle!,
+                      style: const TextStyle(color: kInk, height: 1.35)),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -264,7 +336,8 @@ class SiteFooter extends StatelessWidget {
       ),
     );
     final disclaimer = Text(t.platformDisclaimer,
-        style: const TextStyle(fontSize: 12, height: 1.5, color: Colors.white54));
+        style:
+            const TextStyle(fontSize: 12, height: 1.5, color: Colors.white54));
     final links = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -284,8 +357,8 @@ class SiteFooter extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: kNight,
-      padding: EdgeInsets.fromLTRB(wide ? 48 : 20, wide ? 16 : 22, wide ? 48 : 20,
-          wide ? 14 : 20),
+      padding: EdgeInsets.fromLTRB(
+          wide ? 48 : 20, wide ? 16 : 22, wide ? 48 : 20, wide ? 14 : 20),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: kContentWidth),
@@ -637,7 +710,10 @@ class InfoBanner extends StatelessWidget {
 /// Riquadro bianco con titolo e icona su cerchio dorato, bordo dorato in alto.
 class GoldPanel extends StatelessWidget {
   const GoldPanel(
-      {super.key, required this.title, required this.icon, required this.child});
+      {super.key,
+      required this.title,
+      required this.icon,
+      required this.child});
   final String title;
   final IconData icon;
   final Widget child;
@@ -855,8 +931,8 @@ class UserAvatar extends StatelessWidget {
       foregroundImage: url == null ? null : NetworkImage(url),
       onForegroundImageError: url == null ? null : (_, __) {},
       child: Text(user.initials,
-          style: TextStyle(
-              fontSize: radius * 0.8, fontWeight: FontWeight.w700)),
+          style:
+              TextStyle(fontSize: radius * 0.8, fontWeight: FontWeight.w700)),
     );
   }
 }

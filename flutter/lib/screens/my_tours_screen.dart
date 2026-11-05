@@ -28,12 +28,10 @@ class MyToursScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(t.dashTabMyTours,
-                  style: const TextStyle(
-                      fontFamily: kSerif,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: kInk)),
+              PageHeader(
+                  title: t.dashTabMyTours,
+                  icon: Icons.map_outlined,
+                  subtitle: t.pageMyToursSub),
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: () => Navigator.of(context).push(

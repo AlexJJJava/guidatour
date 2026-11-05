@@ -49,15 +49,12 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                  appState.city == null
+              PageHeader(
+                  title: appState.city == null
                       ? t.searchTitleItaly
                       : t.searchTitle(cityLabel(context, appState.city!)),
-                  style: const TextStyle(
-                      fontFamily: kSerif,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w700,
-                      color: kInk)),
+                  icon: Icons.travel_explore,
+                  subtitle: t.pageSearchSub),
               const SizedBox(height: 16),
               TextField(
                 controller: _controller,

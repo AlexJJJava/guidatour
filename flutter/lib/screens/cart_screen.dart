@@ -55,12 +55,10 @@ class _CartBodyState extends State<_CartBody> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(t.cartTitle,
-              style: const TextStyle(
-                  fontFamily: kSerif,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: kInk)),
+          PageHeader(
+              title: t.cartTitle,
+              icon: Icons.shopping_cart_outlined,
+              subtitle: t.pageCartSub),
           const SizedBox(height: 16),
           InfoBanner(t.cartNoPaymentInfo),
           const SizedBox(height: 16),

@@ -43,8 +43,8 @@ Future<Uint8List> buildPosterPdf(PosterData d) async {
   final regular = await _font('Inter-Regular');
   final bold = await _font('Inter-Bold');
   final serif = await _font('PlayfairDisplay-Bold');
-  final photo =
-      pw.MemoryImage((await rootBundle.load(d.imageAsset)).buffer.asUint8List());
+  final photo = pw.MemoryImage(
+      (await rootBundle.load(d.imageAsset)).buffer.asUint8List());
 
   final doc = pw.Document(title: d.title, author: 'GuidaTour');
   doc.addPage(

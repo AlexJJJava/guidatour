@@ -21,8 +21,8 @@ const _heroPhotoBottom = 0.867;
 
 /// Allineamento verticale che tiene [_heroPhotoBottom] sul fondo.
 double heroPhotoAlignmentY(Size box) {
-  final scale = math.max(box.width / _heroPhotoSize.width,
-      box.height / _heroPhotoSize.height);
+  final scale = math.max(
+      box.width / _heroPhotoSize.width, box.height / _heroPhotoSize.height);
   final shown = _heroPhotoSize.height * scale;
   final free = shown - box.height;
   if (free <= 0) return 0;
@@ -190,7 +190,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
-
 }
 
 /// Fascia a tutta larghezza con il contenuto centrato.
@@ -237,8 +236,7 @@ class _Hero extends StatelessWidget {
               builder: (context, c) => Image.asset(
                 _heroPhoto,
                 fit: BoxFit.cover,
-                alignment:
-                    Alignment(0.9, heroPhotoAlignmentY(c.biggest)),
+                alignment: Alignment(0.9, heroPhotoAlignmentY(c.biggest)),
               ),
             ),
           ),
@@ -729,7 +727,6 @@ class _Feature extends StatelessWidget {
       );
 }
 
-
 /// Invito finale su foto panoramica.
 class _CtaBand extends StatelessWidget {
   const _CtaBand({required this.wide, required this.onBook});
@@ -804,4 +801,3 @@ class _CtaBand extends StatelessWidget {
     );
   }
 }
-

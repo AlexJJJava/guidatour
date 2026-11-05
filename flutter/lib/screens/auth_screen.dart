@@ -34,6 +34,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _hidden = true;
   bool _terms = false;
   bool _busy = false;
+
   /// Ruoli professionali scelti; nessuno = turista.
   final Set<Role> _roles = {};
 
@@ -54,9 +55,11 @@ class _AuthScreenState extends State<AuthScreen> {
     }
     setState(() => _busy = true);
     final msg = _register
-        ? await appState.registerWithPassword(
-            _name.text, _email.text, _password.text,
-            [for (final r in professionalRoles) if (_roles.contains(r)) r])
+        ? await appState
+            .registerWithPassword(_name.text, _email.text, _password.text, [
+            for (final r in professionalRoles)
+              if (_roles.contains(r)) r
+          ])
         : await appState.loginWithPassword(_email.text, _password.text);
     if (!mounted) return;
     setState(() => _busy = false);
@@ -81,12 +84,9 @@ class _AuthScreenState extends State<AuthScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(_register ? t.authCreateAccountTitle : t.authLoginTitle,
-                style: const TextStyle(
-                    fontFamily: kSerif,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: kInk)),
+            PageHeader(
+                title: _register ? t.authCreateAccountTitle : t.authLoginTitle,
+                icon: Icons.lock_outline),
             const SizedBox(height: 8),
             Text(t.authIntro, style: const TextStyle(color: kMuted)),
             if (!_register) ...[

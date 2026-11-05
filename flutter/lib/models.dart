@@ -32,7 +32,10 @@ List<Role> _rolesFrom(Map<String, dynamic> j, Role role) {
       .where((r) => r.isProfessional)
       .toSet();
   if (list != null && list.isNotEmpty) {
-    return [for (final r in professionalRoles) if (list.contains(r)) r];
+    return [
+      for (final r in professionalRoles)
+        if (list.contains(r)) r
+    ];
   }
   return role.isProfessional ? [role] : const [];
 }

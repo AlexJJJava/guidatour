@@ -23,6 +23,8 @@ class FaqScreen extends StatelessWidget {
       body: PageBody(
         maxWidth: 760,
         title: t.faqTitle,
+        subtitle: t.pageFaqSub,
+        icon: Icons.help_outline,
         child: Column(
           children: [
             for (final (q, a) in faqs)

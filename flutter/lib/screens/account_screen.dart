@@ -145,11 +145,7 @@ class _ProfileHeader extends StatelessWidget {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(kRadius),
-        gradient: LinearGradient(
-          colors: [kGold.withValues(alpha: 0.75), kSand],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: kHeaderGradient,
       ),
       child: Row(
         children: [

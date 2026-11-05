@@ -65,12 +65,10 @@ class DashboardOverviewScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(t.dashTabOverview,
-                  style: const TextStyle(
-                      fontFamily: kSerif,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: kInk)),
+              PageHeader(
+                  title: t.dashTabOverview,
+                  icon: Icons.dashboard_outlined,
+                  subtitle: t.pageDashboardSub),
               const SizedBox(height: 20),
               Wrap(spacing: 12, runSpacing: 12, children: [
                 _StatTile(

@@ -49,9 +49,9 @@ class TourDetailScreen extends StatelessWidget {
     final fav = appState.isFavorite(tour.id);
     final inCart = appState.inCart(tour.id);
     final favButton = IconButton(
-            tooltip: fav ? t.favRemoveTooltip : t.favAddTooltip,
-            icon: Icon(fav ? Icons.favorite : Icons.favorite_border,
-                color: fav ? Colors.red : null),
+      tooltip: fav ? t.favRemoveTooltip : t.favAddTooltip,
+      icon: Icon(fav ? Icons.favorite : Icons.favorite_border,
+          color: fav ? Colors.red : null),
       onPressed: () async {
         if (_needsTourist(context)) return;
         try {

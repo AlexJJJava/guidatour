@@ -201,6 +201,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
     return Scaffold(
       body: PageBody(
         title: _isEdit ? t.editTour : t.newTour,
+        icon: Icons.add_location_alt_outlined,
         maxWidth: 680,
         child: Form(
           key: _key,
@@ -213,7 +214,8 @@ class _TourFormScreenState extends State<TourFormScreen> {
               TextFormField(
                 controller: _title,
                 decoration: InputDecoration(
-                    labelText: t.fieldTourTitle, border: const OutlineInputBorder()),
+                    labelText: t.fieldTourTitle,
+                    border: const OutlineInputBorder()),
                 validator: required,
               ),
               const SizedBox(height: 14),
@@ -223,7 +225,8 @@ class _TourFormScreenState extends State<TourFormScreen> {
                     labelText: t.fieldCity, border: const OutlineInputBorder()),
                 items: [
                   for (final c in tourCities)
-                    DropdownMenuItem(value: c, child: Text(cityLabel(context, c))),
+                    DropdownMenuItem(
+                        value: c, child: Text(cityLabel(context, c))),
                 ],
                 onChanged: (v) => setState(() => _city = v!),
               ),
@@ -231,10 +234,12 @@ class _TourFormScreenState extends State<TourFormScreen> {
               DropdownButtonFormField<String>(
                 initialValue: _category,
                 decoration: InputDecoration(
-                    labelText: t.fieldCategory, border: const OutlineInputBorder()),
+                    labelText: t.fieldCategory,
+                    border: const OutlineInputBorder()),
                 items: [
                   for (final c in categories)
-                    DropdownMenuItem(value: c, child: Text(categoryLabel(context, c))),
+                    DropdownMenuItem(
+                        value: c, child: Text(categoryLabel(context, c))),
                 ],
                 onChanged: (v) => setState(() => _category = v!),
               ),
@@ -242,10 +247,12 @@ class _TourFormScreenState extends State<TourFormScreen> {
               DropdownButtonFormField<String>(
                 initialValue: _language,
                 decoration: InputDecoration(
-                    labelText: t.fieldLanguage, border: const OutlineInputBorder()),
+                    labelText: t.fieldLanguage,
+                    border: const OutlineInputBorder()),
                 items: [
                   for (final l in tourLanguages)
-                    DropdownMenuItem(value: l, child: Text(languageLabel(context, l))),
+                    DropdownMenuItem(
+                        value: l, child: Text(languageLabel(context, l))),
                 ],
                 onChanged: (v) => setState(() => _language = v!),
               ),
@@ -253,7 +260,8 @@ class _TourFormScreenState extends State<TourFormScreen> {
               OutlinedButton.icon(
                 onPressed: _pickDate,
                 icon: const Icon(Icons.event),
-                label: Text(_start == null ? t.fieldDateTime : fmtDate(_start!)),
+                label:
+                    Text(_start == null ? t.fieldDateTime : fmtDate(_start!)),
               ),
               const SizedBox(height: 14),
               LayoutBuilder(builder: (context, c) {
@@ -269,7 +277,8 @@ class _TourFormScreenState extends State<TourFormScreen> {
                       child: TextFormField(
                         controller: _duration,
                         decoration: InputDecoration(
-                            labelText: t.fieldDuration, border: const OutlineInputBorder()),
+                            labelText: t.fieldDuration,
+                            border: const OutlineInputBorder()),
                         validator: required,
                       ),
                     ),
@@ -294,7 +303,8 @@ class _TourFormScreenState extends State<TourFormScreen> {
                         controller: _seats,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
-                            labelText: t.fieldSeats, border: const OutlineInputBorder()),
+                            labelText: t.fieldSeats,
+                            border: const OutlineInputBorder()),
                         validator: (v) => (int.tryParse(v ?? '') ?? 0) < 1
                             ? t.validationAtLeastOne
                             : null,
@@ -316,7 +326,8 @@ class _TourFormScreenState extends State<TourFormScreen> {
                 controller: _description,
                 maxLines: 4,
                 decoration: InputDecoration(
-                    labelText: t.fieldDescription, border: const OutlineInputBorder()),
+                    labelText: t.fieldDescription,
+                    border: const OutlineInputBorder()),
                 validator: required,
               ),
               const SizedBox(height: 18),
@@ -347,7 +358,8 @@ class _TourFormScreenState extends State<TourFormScreen> {
                 controlAffinity: ListTileControlAffinity.leading,
                 value: _declaration,
                 onChanged: (v) => setState(() => _declaration = v ?? false),
-                title: Text(t.formDeclaration, style: const TextStyle(fontSize: 13)),
+                title: Text(t.formDeclaration,
+                    style: const TextStyle(fontSize: 13)),
               ),
               const SizedBox(height: 8),
               FilledButton(

@@ -342,7 +342,8 @@ class AppState extends ChangeNotifier {
   Future<List<(Guide, int)>> loadAdminProfessionals() async {
     final json = await api.get('/admin/professionals') as Map;
     return [
-      for (final p in (json['professionals'] as List).cast<Map<String, dynamic>>())
+      for (final p
+          in (json['professionals'] as List).cast<Map<String, dynamic>>())
         (Guide.fromProfileJson(p), (p['tours'] as num? ?? 0).toInt()),
     ];
   }
@@ -506,8 +507,8 @@ class AppState extends ChangeNotifier {
   /// Tour aperto da un link: può non essere tra i futuri già caricati.
   Future<Tour?> fetchTour(String id) async {
     try {
-      final tour = Tour.fromJson(
-          await api.get('/tours/$id') as Map<String, dynamic>);
+      final tour =
+          Tour.fromJson(await api.get('/tours/$id') as Map<String, dynamic>);
       _cacheTour(tour);
       notifyListeners();
       return tour;

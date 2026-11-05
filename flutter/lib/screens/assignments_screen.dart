@@ -28,12 +28,10 @@ class AssignmentsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(t.dashTabAssignments,
-                  style: const TextStyle(
-                      fontFamily: kSerif,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: kInk)),
+              PageHeader(
+                  title: t.dashTabAssignments,
+                  icon: Icons.swap_horiz,
+                  subtitle: t.pageAssignmentsSub),
               const SizedBox(height: 16),
               InfoBanner(t.assignmentInfoBanner),
               const SizedBox(height: 20),
