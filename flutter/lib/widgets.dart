@@ -254,27 +254,17 @@ class SiteFooter extends StatelessWidget {
     final wide = MediaQuery.sizeOf(context).width >= 700;
     const heading = TextStyle(
         fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white);
-    final brand = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          key: const ValueKey('footer-brand'),
-          onTap: shell?.goHome,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: BrandLogo(tagline: t.footerTagline),
-          ),
-        ),
-        const SizedBox(height: 16),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 380),
-          child: Text(t.platformDisclaimer,
-              style: const TextStyle(
-                  fontSize: 12, height: 1.5, color: Colors.white54)),
-        ),
-      ],
+    final brand = InkWell(
+      key: const ValueKey('footer-brand'),
+      onTap: shell?.goHome,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: BrandLogo(tagline: t.footerTagline),
+      ),
     );
+    final disclaimer = Text(t.platformDisclaimer,
+        style: const TextStyle(fontSize: 12, height: 1.5, color: Colors.white54));
     final links = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -294,29 +284,43 @@ class SiteFooter extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: kNight,
-      padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 22, wide ? 48 : 20, 20),
+      padding: EdgeInsets.fromLTRB(wide ? 48 : 20, wide ? 16 : 22, wide ? 48 : 20,
+          wide ? 14 : 20),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: kContentWidth),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Su schermo largo una fascia sola: marchio, avvertenza accanto
+              // e link utili in fondo a destra.
               if (wide)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(flex: 3, child: brand),
-                    Expanded(flex: 2, child: links),
+                    brand,
+                    const SizedBox(width: 36),
+                    Flexible(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 520),
+                        child: disclaimer,
+                      ),
+                    ),
+                    const Spacer(),
+                    const SizedBox(width: 36),
+                    links,
                   ],
                 )
               else ...[
                 brand,
+                const SizedBox(height: 12),
+                disclaimer,
                 const SizedBox(height: 14),
                 links,
               ],
-              const SizedBox(height: 14),
+              SizedBox(height: wide ? 10 : 14),
               const Divider(color: Colors.white12, height: 1),
-              const SizedBox(height: 12),
+              SizedBox(height: wide ? 10 : 12),
               Text('© ${DateTime.now().year} guidatour. ${t.footerRights}',
                   style: const TextStyle(fontSize: 12, color: Colors.white54)),
             ],

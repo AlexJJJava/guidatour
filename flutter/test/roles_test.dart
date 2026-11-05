@@ -282,6 +282,16 @@ void main() {
     }
   });
 
+  testWidgets('la home non mostra più la lista delle guide', (tester) async {
+    sized(tester, const Size(1920, 4000));
+    seed(user(Role.turista), owner: user(Role.guida));
+    await tester.pumpWidget(const GuidaTourApp());
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text(t.guidesTitle, skipOffstage: false), findsNothing);
+    expect(find.byType(SiteFooter, skipOffstage: false), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   group('una sola intestazione', () {
     Finder bars(Size size) => find.byWidgetPredicate((w) =>
         '${w.runtimeType}' == (size.width >= 1024 ? '_TopBar' : '_MobileTopBar'));

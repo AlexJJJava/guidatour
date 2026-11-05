@@ -99,8 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 _Section(color: kCream, child: _categories(context, wide)),
                 if (user == null || !user.role.isProfessional)
                   _ProSection(wide: wide, onStart: onOpenAccount),
-                if (appState.guides.isNotEmpty)
-                  _Section(color: kSurface, child: _guides(context, wide)),
                 const _Section(
                     color: kCream, child: WhatsAppOptInCard(source: 'Home')),
                 _CtaBand(wide: wide, onBook: onOpenSearch),
@@ -193,32 +191,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _guides(BuildContext context, bool wide) {
-    final t = l10n(context);
-    final local = appState.city == null
-        ? const <Guide>[]
-        : appState.guides.where((g) => g.city == appState.city).toList();
-    final guides = (local.isEmpty ? appState.guides : local).take(3).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SectionHeading(title: t.guidesTitle),
-        const SizedBox(height: 10),
-        LayoutBuilder(builder: (context, c) {
-          final cols = c.maxWidth >= 820 ? 3 : 1;
-          const gap = 20.0;
-          final w = (c.maxWidth - gap * (cols - 1)) / cols;
-          return Wrap(
-            spacing: gap,
-            runSpacing: gap,
-            children: [
-              for (final g in guides) SizedBox(width: w, child: _GuideCard(g)),
-            ],
-          );
-        }),
-      ],
-    );
-  }
 }
 
 /// Fascia a tutta larghezza con il contenuto centrato.
@@ -757,93 +729,6 @@ class _Feature extends StatelessWidget {
       );
 }
 
-class _GuideCard extends StatelessWidget {
-  const _GuideCard(this.guide);
-  final Guide guide;
-
-  @override
-  Widget build(BuildContext context) {
-    final initials = guide.name
-        .split(' ')
-        .where((p) => p.isNotEmpty)
-        .take(2)
-        .map((p) => p[0].toUpperCase())
-        .join();
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: kSurface,
-        borderRadius: BorderRadius.circular(kRadius),
-        border: Border.all(color: kLine),
-        boxShadow: [
-          BoxShadow(
-              color: kInk.withValues(alpha: 0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4)),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 38,
-            backgroundColor: kSand,
-            child: Text(initials,
-                style: const TextStyle(
-                    fontFamily: kSerif,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: kPrimary)),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(guide.name,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontFamily: kSerif,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: kInk)),
-                    ),
-                    if (guide.verified) ...[
-                      const SizedBox(width: 6),
-                      const Icon(Icons.verified, size: 16, color: kPrimary),
-                    ],
-                  ],
-                ),
-                Text(roleLabel(context, guide.role),
-                    style: const TextStyle(fontSize: 12, color: kMuted)),
-                if (guide.bio.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(guide.bio,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 13, height: 1.4, color: kInk)),
-                ],
-                const SizedBox(height: 8),
-                Text(
-                    guide.languages
-                        .map((l) => languageLabel(context, l))
-                        .join(' · '),
-                    style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: kPrimary)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// Invito finale su foto panoramica.
 class _CtaBand extends StatelessWidget {
