@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../l10n/labels.dart';
 import '../models.dart';
+import '../poster_pdf.dart';
 import '../state.dart';
 import '../widgets.dart';
 
@@ -14,6 +16,41 @@ const _paperInk = Color(0xFF1E2A33);
 class PosterScreen extends StatelessWidget {
   const PosterScreen({super.key, required this.tour});
   final Tour tour;
+
+  PosterData _data(BuildContext context, String link) {
+    final t = l10n(context);
+    final guide = appState.guideById(tour.guideId);
+    return PosterData(
+      kicker: 'GUIDATOUR · ${cityLabel(context, tour.city).toUpperCase()}',
+      title: tour.title,
+      when:
+          '${fmtDate(tour.start)} · ${tour.duration} · ${languageLabel(context, tour.language)}',
+      meetingPoint: t.detailMeetingPoint(tour.meetingPoint),
+      price: fmtPrice(tour.price),
+      byline: t.posterByGuide(guide?.name ?? '',
+          guide == null ? '' : roleLabel(context, guide.role)),
+      scanHint: t.posterScanHint,
+      link: link,
+      imageAsset: categoryImage(tour.category),
+      notice: guide?.role == Role.accompagnatore ? t.accompagnatoreNotice : null,
+    );
+  }
+
+  Future<void> _pdf(BuildContext context, String link, {required bool print}) async {
+    final t = l10n(context);
+    final data = _data(context, link);
+    final name = 'locandina-${tour.id}.pdf';
+    try {
+      final bytes = await buildPosterPdf(data);
+      if (print) {
+        await Printing.layoutPdf(onLayout: (_) async => bytes, name: name);
+      } else {
+        await Printing.sharePdf(bytes: bytes, filename: name);
+      }
+    } catch (_) {
+      if (context.mounted) snack(context, t.posterPdfError);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +120,24 @@ class PosterScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                FilledButton.icon(
+                  onPressed: () => _pdf(context, link, print: false),
+                  icon: const Icon(Icons.picture_as_pdf_outlined),
+                  label: Text(t.posterDownloadPdf),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () => _pdf(context, link, print: true),
+                  icon: const Icon(Icons.print_outlined),
+                  label: Text(t.posterPrint),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             SelectableText(link, textAlign: TextAlign.center),
             const SizedBox(height: 12),
             OutlinedButton.icon(
@@ -108,9 +163,6 @@ class PosterScreen extends StatelessWidget {
               icon: const Icon(Icons.qr_code_scanner),
               label: Text(t.simulateScan),
             ),
-            Text(t.posterPdfComingSoon,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: kMuted)),
           ],
         ),
       ),

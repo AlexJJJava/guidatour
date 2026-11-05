@@ -420,7 +420,9 @@
       }
     }
   },
-  "posterPdfComingSoon": "L’esportazione PDF della locandina sarà aggiunta nel prossimo passo.",
+  "posterDownloadPdf": "Scarica PDF",
+  "posterPrint": "Stampa",
+  "posterPdfError": "Non siamo riusciti a creare il PDF. Riprova.",
   "whatsappInvalidPhone": "Inserisci il numero in formato internazionale, es. +393331234567.",
   "whatsappNeedConsent": "Serve il consenso esplicito per procedere.",
   "whatsappDone": "Fatto! Riceverai su WhatsApp la lista aggiornata dei tour a Roma. Puoi annullare in qualsiasi momento rispondendo STOP.",

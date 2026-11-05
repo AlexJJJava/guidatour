@@ -7,7 +7,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test:roles": "tsx --test test/roles.test.ts"
+    "test:roles": "tsx --test test/roles.test.ts",
+    "docs:excel": "node scripts/excel.cjs"
   },
   "engines": {
     "node": ">=18"
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
+    "exceljs": "^4.4.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }
