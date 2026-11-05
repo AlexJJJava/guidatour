@@ -116,7 +116,7 @@ const pages = [
   ['QR e locandina (PDF da scaricare o stampare)', N, N, P, P, P, N],
   ['Assegnazioni', N, N, P, P, P, N],
   ['Gestione: panoramica, professionisti, tour, approvazioni, WhatsApp', N, N, N, N, N, P],
-  ['Account e profilo (foto inclusa), dal pallino se collegati', L, P, P, P, P, P],
+  ['Account e profilo (foto e ruoli inclusi), dal pallino se collegati', L, P, P, P, P, P],
   ['FAQ (dal footer)', P, P, P, P, P, P],
 ];
 colours(sheet('Pagine per ruolo', 'Sì = visibile. Con accesso = la voce porta alla pagina di login. No = non disponibile.',
@@ -134,6 +134,7 @@ const ops = [
   ['Confermare o rifiutare richieste', N, N, P, P, P, N],
   ['Proporre tour ad altri professionisti', N, N, P, 'Sì (da decidere)', P, N],
   ['Ricevere proposte', N, N, P, 'Solo accompagnamento e pacchetti', P, N],
+  ['Chiedere ruoli professionali dal profilo', N, P, P, P, P, P],
   ['Approvare registrazioni', N, N, N, N, N, P],
   ['Sospendere o riattivare professionisti', N, N, N, N, N, P],
   ['Eliminare tour di altri', N, N, N, N, N, P],
@@ -149,13 +150,14 @@ const tests = [
   ['Backend online', 'Guida', 8, 'Superato', 'Tour, richieste, cessione, dati altrui protetti'],
   ['Backend online', 'Accompagnatore', 7, 'Superato', 'Categorie, parole riservate, pacchetti, proposte'],
   ['Backend online', 'Tour operator', 3, 'Superato', 'Pacchetti pubblicati da tour operator approvato'],
+  ['Backend online', 'Ruoli dal profilo', 5, 'In attesa della migrazione 0008', 'Togliere subito, aggiungere con approvazione, rifiuto che mantiene i ruoli, turista che chiede un ruolo, nessuna scrittura diretta'],
   ['Backend online', 'Gestione (admin)', 4, 'Superato', 'Panoramica ed elenchi; accesso negato agli altri ruoli; eliminazione tour, sospensione e riattivazione'],,
   ['Backend online', 'Più ruoli', 5, 'Superato', 'Guida + accompagnatore: visite e accompagnamenti senza blocchi, niente pacchetti, cessioni, elenchi per ruolo.'],
   ['Backend online', 'Professionista non approvato', 3, 'Superato', 'Guida rifiutata: niente funzioni professionali, preferiti, carrello e richieste come turista, assente dagli elenchi'],
   ['Backend online', 'Admin', 3, 'Superato', 'Registrazioni, consensi, limiti del ruolo'],
   ['Backend online', 'Tentativi di scavalcare i ruoli', 6, 'Superato', 'Revoca consensi provata solo su id inesistente: nel database non ci sono consensi'],
   ['Backend online', 'Foto profilo', 5, 'Superato', 'Caricamento, rimozione, cartelle altrui, formato e indirizzi esterni'],
-  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, Gestione admin, Account e profilo, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 70, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
+  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, ruoli dal profilo, login senza cambio pagina, menu lingua, Gestione admin, Account e profilo, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 83, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
   ['Non coperto', 'Prova end-to-end nel browser', 0, 'Da provare', 'Clic reali sul sito pubblicato'],
 ];
 const wsT = sheet('Test', 'Esiti del 2 novembre 2026. Comando backend: npm run test:roles (cartella nodeBE).',
@@ -220,6 +222,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['05/11/2026', 'Ruoli dal profilo, login senza cambio pagina, fix lingua', 'In Modifica profilo si scelgono più ruoli: togliere vale subito, i nuovi passano dall’admin (migrazione 0008); Account e Gestione mostrano i ruoli in attesa. Login e logout restano sulla pagina se consentita. Il menu lingua non duplica più l’intestazione', 'Test app; test backend in attesa della 0008'],
   ['05/11/2026', 'Sfondo giallo e pagine ridisegnate', 'Sfondo giallo chiaro e intestazione dorata con icona e spiegazione in tutte le pagine interne; Prenotazioni, Assegnazioni, Panoramica e I miei tour a schede bianche con stato colorato e foto', 'Test app, schermate sul sito'],
   ['05/11/2026', 'Migrazioni 0006 e 0007 attive', 'Ruoli multipli e area Gestione attivi; account di prova Guida + Accompagnatore (Marta Neri) con accesso rapido', 'Tutti i test backend superati, nessuno saltato'],
   ['05/11/2026', 'Area Gestione, Account e profilo', 'Voce Gestione per l’admin con Panoramica, Professionisti (sospendi/riattiva), Tour (elimina), Approvazioni, WhatsApp; Account e Modifica profilo ridisegnati con il giallo del tema (migrazione 0007)', 'Test app e backend (2 in attesa della 0007), schermate sul sito'],
