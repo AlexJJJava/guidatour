@@ -136,9 +136,6 @@ export function tourBlockReason(author: Profile, t: TourInput): string | null {
         'pacchetto turistico, che solo un tour operator verificato può pubblicare.'
       )
     }
-    if (!author.verified) {
-      return 'I pacchetti completi richiedono un profilo Tour operator verificato.'
-    }
   }
   if (author.role === 'accompagnatore') {
     if (t.category !== 'Accompagnamento') {

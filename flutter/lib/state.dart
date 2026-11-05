@@ -45,10 +45,6 @@ class AppState extends ChangeNotifier {
   Guide? currentUser;
   bool ready = false;
 
-  /// Stato di approvazione dell'ultimo accesso respinto ('in_attesa' o
-  /// 'rifiutato'): la schermata di accesso mostra l'avviso.
-  String? approvalNotice;
-
   /// Registrazioni professionali in attesa (solo per gli admin).
   int pendingRegistrations = 0;
 
@@ -137,18 +133,7 @@ class AppState extends ChangeNotifier {
   Future<void> _loadMyProfile() async {
     try {
       final json = await api.get('/me') as Map<String, dynamic>;
-      final profile = Guide.fromProfileJson(json);
-      if (profile.role.isProfessional &&
-          !profile.isApproved &&
-          !profile.isAdmin) {
-        // Non approvato: niente sessione finché un admin non decide.
-        approvalNotice = profile.approvalStatus;
-        currentUser = null;
-        await Supabase.instance.client.auth.signOut();
-        notifyListeners();
-        return;
-      }
-      currentUser = profile;
+      currentUser = Guide.fromProfileJson(json);
     } catch (_) {
       currentUser = null;
       notifyListeners();
@@ -282,8 +267,6 @@ class AppState extends ChangeNotifier {
 
   /// Restituisce un messaggio di errore, o null se l'accesso è riuscito.
   Future<String?> loginWithPassword(String email, String password) async {
-    approvalNotice = null;
-    notifyListeners();
     try {
       await Supabase.instance.client.auth
           .signInWithPassword(email: email.trim(), password: password);
@@ -299,8 +282,6 @@ class AppState extends ChangeNotifier {
   /// oppure null se la registrazione ha avviato subito una sessione valida.
   Future<String?> registerWithPassword(
       String name, String email, String password, Role role) async {
-    approvalNotice = null;
-    notifyListeners();
     try {
       final res = await Supabase.instance.client.auth.signUp(
         email: email.trim(),

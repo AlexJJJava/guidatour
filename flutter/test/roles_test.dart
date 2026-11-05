@@ -397,7 +397,6 @@ void main() {
         'Guida',
         'Accompagnatore',
         'Tour operator',
-        'T.O. non verificato',
         'Admin',
       ]) {
         expect(find.widgetWithText(OutlinedButton, label), findsOneWidget,
@@ -479,22 +478,65 @@ void main() {
       expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
     });
 
-    testWidgets('il tour operator non verificato viene bloccato',
+    testWidgets('ogni tour operator approvato può creare pacchetti',
         (tester) async {
       await open(tester, user(Role.tourOperator, verified: false));
       await tester.tap(find.byType(FilterChip).first);
       await tester.pump();
-      expect(find.text(t.formBlockNotVerified), findsOneWidget);
-    });
-
-    testWidgets('il tour operator verificato può creare pacchetti',
-        (tester) async {
-      await open(tester, user(Role.tourOperator));
-      await tester.tap(find.byType(FilterChip).first);
-      await tester.pump();
-      expect(find.text(t.formBlockNotVerified), findsNothing);
       expect(find.byIcon(Icons.warning_amber_rounded), findsNothing);
     });
+  });
+
+  group('professionista non approvato', () {
+    Guide fromMe(String role, String approval) => Guide.fromProfileJson({
+          'id': 'p1',
+          'name': 'Paola Rossi',
+          'email': 'p@example.com',
+          'role': role,
+          'approvalStatus': approval,
+        });
+
+    test('in attesa o rifiutato è un turista', () {
+      for (final approval in ['in_attesa', 'rifiutato']) {
+        for (final role in ['guida', 'accompagnatore', 'tourOperator']) {
+          final u = fromMe(role, approval);
+          expect(u.role, Role.turista, reason: '$role $approval');
+          expect(u.requestedRole, roleFromString(role));
+        }
+      }
+    });
+
+    test('approvato ha il suo ruolo', () {
+      final u = fromMe('accompagnatore', 'approvato');
+      expect(u.role, Role.accompagnatore);
+      expect(u.requestedRole, isNull);
+      expect(fromMe('turista', 'approvato').requestedRole, isNull);
+    });
+
+    for (final approval in ['in_attesa', 'rifiutato']) {
+      testWidgets('$approval: pagine del turista e avviso in Account',
+          (tester) async {
+        sized(tester, const Size(1920, 1080));
+        seed(fromMe('guida', approval));
+        await tester.pumpWidget(const GuidaTourApp());
+        await tester.pump(const Duration(milliseconds: 100));
+        for (final p in turistaPages) {
+          expect(navLabel(p), findsOneWidget, reason: p);
+        }
+        expect(navLabel(t.dashTabMyTours), findsNothing);
+        expect(find.byIcon(Icons.shopping_cart_outlined), findsWidgets);
+        await tester.tap(find.byKey(const ValueKey('user-avatar')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(find.byKey(const ValueKey('requested-role')), findsOneWidget);
+        expect(
+            find.text(approval == 'rifiutato'
+                ? t.accountRoleRejected(t.roleGuida)
+                : t.accountRolePending(t.roleGuida)),
+            findsOneWidget);
+        await tester.pumpWidget(const SizedBox());
+      });
+    }
   });
 
   group('pallino utente', () {

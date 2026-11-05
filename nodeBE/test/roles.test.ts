@@ -388,18 +388,14 @@ describe('accompagnatore turistico', () => {
 })
 
 describe('tour operator', () => {
-  test('pacchetti solo se verificato', async () => {
+  test('pubblica pacchetti perché approvato', async () => {
     const r = await api('/tours', {
       token: tokens.operator,
       body: tourBody({ accessories: ['Cena / ristorante'] }),
     })
-    if (profiles.operator.verified) {
-      assert.equal(r.status, 201, JSON.stringify(r.json))
-      assert.equal(r.json.isPackage, true)
-      created.push({ id: r.json.id, owner: 'operator' })
-    } else {
-      assert.equal(r.status, 422)
-    }
+    assert.equal(r.status, 201, JSON.stringify(r.json))
+    assert.equal(r.json.isPackage, true)
+    created.push({ id: r.json.id, owner: 'operator' })
   })
 
   test('crea tour senza servizi accessori', async () => {
@@ -409,6 +405,49 @@ describe('tour operator', () => {
   test('non accede alle funzioni admin', async () => {
     const r = await api('/admin/registrations', { token: tokens.operator })
     assert.equal(r.status, 403)
+  })
+})
+
+describe('professionista non approvato', () => {
+  // Guida registrata e rifiutata dall'admin: si comporta da turista.
+  let token = ''
+  let id = ''
+  before(async () => {
+    token = await login('alessio.damico+rifiutato1@gmail.com')
+    const me = await api('/me', { token })
+    id = me.json.id
+    assert.equal(me.json.role, 'guida')
+    assert.notEqual(me.json.approvalStatus, 'approvato')
+  })
+
+  test('non usa le funzioni professionali', async () => {
+    assert.equal((await api('/tours', { token, body: tourBody() })).status, 403)
+    assert.equal((await api('/me/dashboard', { token })).status, 403)
+    assert.equal((await api('/requests/received', { token })).status, 403)
+    assert.equal((await api('/assignments', { token })).status, 403)
+  })
+
+  test('usa preferiti, carrello e richieste come un turista', async () => {
+    const tour = await newTour('guida')
+    const fav = await api(`/me/favorites/${tour.id}`, { method: 'PUT', token })
+    assert.ok(fav.status < 300)
+    assert.ok((await api(`/me/favorites/${tour.id}`, { method: 'DELETE', token })).status < 300)
+    const cart = await api('/me/cart', { token, body: { tourId: tour.id, people: 1 } })
+    assert.ok(cart.status < 300, JSON.stringify(cart.json))
+    assert.ok((await api(`/me/cart/${tour.id}`, { method: 'DELETE', token })).status < 300)
+    const req = await api(`/tours/${tour.id}/requests`, { token, body: requestBody })
+    assert.equal(req.status, 201, JSON.stringify(req.json))
+  })
+
+  test('non compare tra i professionisti e non riceve proposte', async () => {
+    const { json } = await api('/guides')
+    assert.ok(!json.guides.some((g: { id: string }) => g.id === id))
+    const tour = await newTour('guida')
+    const p = await api('/assignments', {
+      token: tokens.guida,
+      body: { tourId: tour.id, toGuideId: id },
+    })
+    assert.ok(p.status >= 400, 'proposta a un professionista non approvato')
   })
 })
 

@@ -27,6 +27,7 @@ class Guide {
     this.approvalStatus = 'approvato',
     this.createdAt,
     this.avatarUrl,
+    this.requestedRole,
   });
   final String id;
   final String name;
@@ -44,6 +45,10 @@ class Guide {
   final String approvalStatus;
   final DateTime? createdAt;
   final String? avatarUrl;
+
+  /// Ruolo professionale chiesto alla registrazione e non ancora approvato
+  /// (o rifiutato): finché non c'è l'approvazione l'utente è un turista.
+  final Role? requestedRole;
 
   /// Prima lettera di nome e cognome, per il pallino senza foto.
   String get initials {
@@ -69,12 +74,25 @@ class Guide {
         city: j['city'] as String? ?? 'Roma',
       );
 
-  /// Dal proprio profilo (`GET /me`): dati completi.
-  factory Guide.fromProfileJson(Map<String, dynamic> j) => Guide(
+  /// Dal proprio profilo (`GET /me`): dati completi. Un professionista non
+  /// ancora approvato usa l'app come turista.
+  factory Guide.fromProfileJson(Map<String, dynamic> j) {
+    final role = roleFromString(j['role'] as String?);
+    final approval = j['approvalStatus'] as String? ?? 'approvato';
+    final waiting = role.isProfessional && approval != 'approvato';
+    return Guide._fromProfileJson(j,
+        role: waiting ? Role.turista : role,
+        requestedRole: waiting ? role : null);
+  }
+
+  factory Guide._fromProfileJson(Map<String, dynamic> j,
+          {required Role role, Role? requestedRole}) =>
+      Guide(
         id: j['id'] as String,
         name: j['name'] as String? ?? '',
         email: j['email'] as String? ?? '',
-        role: roleFromString(j['role'] as String?),
+        role: role,
+        requestedRole: requestedRole,
         verified: j['verified'] as bool? ?? false,
         languages:
             (j['languages'] as List?)?.cast<String>() ?? const ['Italiano'],

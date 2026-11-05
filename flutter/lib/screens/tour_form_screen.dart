@@ -95,9 +95,6 @@ class _TourFormScreenState extends State<TourFormScreen> {
             _accessories.map((a) => accessoryLabel(context, a)).join(', '),
             roleLabel(context, role));
       }
-      if (!_user.verified) {
-        return t.formBlockNotVerified;
-      }
     }
     if (role == Role.accompagnatore) {
       final text = '${_title.text} ${_description.text}'.toLowerCase();
