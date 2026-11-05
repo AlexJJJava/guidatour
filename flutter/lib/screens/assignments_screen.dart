@@ -26,7 +26,7 @@ class AssignmentsScreen extends StatelessWidget {
         return PageBody(
           maxWidth: 900,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               PageHeader(
                   title: t.dashTabAssignments,
@@ -36,15 +36,17 @@ class AssignmentsScreen extends StatelessWidget {
               InfoBanner(t.assignmentInfoBanner),
               const SizedBox(height: 20),
               SectionHeading(title: t.received),
-              if (received.isEmpty) Text(t.noProposalsReceived),
+              if (received.isEmpty)
+                EmptyState(
+                    icon: Icons.move_to_inbox_outlined,
+                    message: t.noProposalsReceived),
               for (final a in received)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(appState.tourById(a.tourId)?.title ?? ''),
-                  subtitle: Text(t.fromGuideStatus(
-                      appState.guideById(a.fromGuideId)?.name ?? '',
-                      assignmentStatusLabel(context, a.status))),
-                  trailing: a.status == AssignmentStatus.proposto
+                _AssignmentCard(
+                  tour: appState.tourById(a.tourId),
+                  status: a.status,
+                  who: appState.guideById(a.fromGuideId)?.name ?? '',
+                  incoming: true,
+                  actions: a.status == AssignmentStatus.proposto
                       ? Wrap(spacing: 4, children: [
                           IconButton(
                             tooltip: t.reject,
@@ -79,15 +81,16 @@ class AssignmentsScreen extends StatelessWidget {
                 ),
               const SizedBox(height: 20),
               SectionHeading(title: t.sent),
-              if (sent.isEmpty) Text(t.noProposalsSent),
+              if (sent.isEmpty)
+                EmptyState(
+                    icon: Icons.outbox_outlined, message: t.noProposalsSent),
               for (final a in sent)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(appState.tourById(a.tourId)?.title ?? ''),
-                  subtitle: Text(t.toGuideStatus(
-                      appState.guideById(a.toGuideId)?.name ?? '',
-                      assignmentStatusLabel(context, a.status))),
-                  trailing: a.status == AssignmentStatus.proposto
+                _AssignmentCard(
+                  tour: appState.tourById(a.tourId),
+                  status: a.status,
+                  who: appState.guideById(a.toGuideId)?.name ?? '',
+                  incoming: false,
+                  actions: a.status == AssignmentStatus.proposto
                       ? TextButton(
                           onPressed: () async {
                             try {
@@ -103,6 +106,79 @@ class AssignmentsScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Proposta di cessione: tour, collega, stato e azioni.
+class _AssignmentCard extends StatelessWidget {
+  const _AssignmentCard({
+    required this.tour,
+    required this.status,
+    required this.who,
+    required this.incoming,
+    required this.actions,
+  });
+  final Tour? tour;
+  final AssignmentStatus status;
+  final String who;
+  final bool incoming;
+  final Widget? actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = l10n(context);
+    final label = assignmentStatusLabel(context, status);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: tour == null
+                  ? Container(width: 56, height: 56, color: kSand)
+                  : Image.asset(categoryImage(tour!.category),
+                      width: 56, height: 56, fit: BoxFit.cover),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(tour?.title ?? t.tourUnavailable,
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(incoming ? Icons.call_received : Icons.call_made,
+                          size: 16, color: kPrimary),
+                      const SizedBox(width: 4),
+                      Flexible(
+                          child: Text(who,
+                              style: const TextStyle(
+                                  color: kMuted, fontSize: 13))),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            actions ??
+                StatusPill(label,
+                    tone: switch (status) {
+                      AssignmentStatus.accettato ||
+                      AssignmentStatus.completato =>
+                        PillTone.ok,
+                      AssignmentStatus.rifiutato ||
+                      AssignmentStatus.annullato =>
+                        PillTone.alert,
+                      _ => PillTone.waiting,
+                    }),
+          ],
+        ),
+      ),
     );
   }
 }

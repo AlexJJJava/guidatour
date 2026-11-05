@@ -27,6 +27,29 @@ class BookingsScreen extends StatelessWidget {
   }
 }
 
+/// Etichetta colorata dello stato di una richiesta.
+Widget _statusPill(BuildContext context, String status) => StatusPill(
+      requestStatusLabel(context, status),
+      tone: switch (status) {
+        'confermata' => PillTone.ok,
+        'rifiutata' => PillTone.alert,
+        _ => PillTone.waiting,
+      },
+    );
+
+/// Miniatura della categoria del tour, a sinistra delle schede.
+Widget _thumb(Tour? tour) => ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: tour == null
+          ? Container(
+              width: 64,
+              height: 64,
+              color: kSand,
+              child: const Icon(Icons.event_busy, color: kMuted))
+          : Image.asset(categoryImage(tour.category),
+              width: 64, height: 64, fit: BoxFit.cover),
+    );
+
 /// Richieste inviate dal turista per i propri tour (storico).
 class _SentBookings extends StatelessWidget {
   const _SentBookings();
@@ -37,37 +60,57 @@ class _SentBookings extends StatelessWidget {
     final reqs = appState.myRequests;
     return PageBody(
       maxWidth: 900,
+      title: t.bookingsTitleSent,
+      subtitle: t.pageBookingsSentSub,
+      icon: Icons.event_note_outlined,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PageHeader(
-              title: t.bookingsTitleSent,
-              icon: Icons.event_note_outlined,
-              subtitle: t.pageBookingsSentSub),
-          const SizedBox(height: 20),
           if (reqs.isEmpty)
             EmptyState(icon: Icons.event_busy, message: t.historyEmpty)
           else
             for (final r in reqs)
               Builder(builder: (context) {
                 final tour = appState.tourById(r.tourId);
-                final color = switch (r.status) {
-                  'confermata' => kPrimary,
-                  'rifiutata' => Colors.red,
-                  _ => kMuted,
-                };
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.history),
-                  title: Text(tour?.title ?? t.tourUnavailable),
-                  subtitle: Text(tour == null
-                      ? t.historyLine(fmtDate(r.createdAt), r.people)
-                      : t.historyLineWithTourDate(
-                          fmtDate(r.createdAt), r.people, fmtDate(tour.start))),
-                  trailing: Text(requestStatusLabel(context, r.status),
-                      style:
-                          TextStyle(color: color, fontWeight: FontWeight.w700)),
-                  onTap: tour == null ? null : () => openTour(context, tour),
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: tour == null ? null : () => openTour(context, tour),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          _thumb(tour),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(tour?.title ?? t.tourUnavailable,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15)),
+                                const SizedBox(height: 4),
+                                Text(
+                                    tour == null
+                                        ? t.historyLine(
+                                            fmtDate(r.createdAt), r.people)
+                                        : t.historyLineWithTourDate(
+                                            fmtDate(r.createdAt),
+                                            r.people,
+                                            fmtDate(tour.start)),
+                                    style: const TextStyle(
+                                        color: kMuted, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          _statusPill(context, r.status),
+                        ],
+                      ),
+                    ),
+                  ),
                 );
               }),
         ],
@@ -86,43 +129,98 @@ class _ReceivedBookings extends StatelessWidget {
     final reqs = appState.requests;
     return PageBody(
       maxWidth: 900,
+      title: t.bookingsTitleReceived,
+      subtitle: t.pageBookingsReceivedSub,
+      icon: Icons.inbox_outlined,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PageHeader(
-              title: t.bookingsTitleReceived,
-              icon: Icons.inbox_outlined,
-              subtitle: t.pageBookingsReceivedSub),
-          const SizedBox(height: 20),
           if (reqs.isEmpty)
             EmptyState(icon: Icons.mail_outline, message: t.noRequestsReceived),
           for (final r in reqs)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.mail_outline),
-              title: Text(t.nameAndPeople(r.name, r.people)),
-              subtitle: Text('${appState.tourById(r.tourId)?.title}\n${r.email}'
-                  '${r.phone.isEmpty ? '' : ' · ${r.phone}'}'
-                  '${r.message.isEmpty ? '' : '\n“${r.message}”'}'),
-              isThreeLine: true,
-              trailing: r.status == 'inviata'
-                  ? Wrap(spacing: 4, children: [
-                      IconButton(
-                        tooltip: t.reject,
-                        icon: const Icon(Icons.close, color: Colors.red),
-                        onPressed: () => runOrSnack(context,
-                            () => appState.setRequestStatus(r, 'rifiutata')),
+            Builder(builder: (context) {
+              final tour = appState.tourById(r.tourId);
+              return Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          _thumb(tour),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(t.nameAndPeople(r.name, r.people),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15)),
+                                Text(tour?.title ?? t.tourUnavailable,
+                                    style: const TextStyle(color: kPrimary)),
+                                Text(
+                                    '${r.email}'
+                                    '${r.phone.isEmpty ? '' : ' · ${r.phone}'}',
+                                    style: const TextStyle(
+                                        color: kMuted, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                          if (r.status != 'inviata') ...[
+                            const SizedBox(width: 10),
+                            _statusPill(context, r.status),
+                          ],
+                        ],
                       ),
-                      IconButton(
-                        tooltip: t.confirm,
-                        icon: const Icon(Icons.check, color: kPrimary),
-                        onPressed: () => runOrSnack(context,
-                            () => appState.setRequestStatus(r, 'confermata')),
-                      ),
-                    ])
-                  : Text(requestStatusLabel(context, r.status),
-                      style: const TextStyle(fontWeight: FontWeight.w700)),
-            ),
+                      if (r.message.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: kPageYellow,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text('“${r.message}”',
+                              style: const TextStyle(
+                                  fontStyle: FontStyle.italic, height: 1.4)),
+                        ),
+                      ],
+                      if (r.status == 'inviata') ...[
+                        const SizedBox(height: 12),
+                        Wrap(
+                          alignment: WrapAlignment.end,
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.red),
+                              onPressed: () => runOrSnack(
+                                  context,
+                                  () => appState.setRequestStatus(
+                                      r, 'rifiutata')),
+                              icon: const Icon(Icons.close, size: 18),
+                              label: Text(t.reject),
+                            ),
+                            FilledButton.icon(
+                              onPressed: () => runOrSnack(
+                                  context,
+                                  () => appState.setRequestStatus(
+                                      r, 'confermata')),
+                              icon: const Icon(Icons.check, size: 18),
+                              label: Text(t.confirm),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            }),
         ],
       ),
     );

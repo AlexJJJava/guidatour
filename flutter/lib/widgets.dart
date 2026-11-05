@@ -707,6 +707,32 @@ class InfoBanner extends StatelessWidget {
   }
 }
 
+enum PillTone { waiting, ok, alert }
+
+/// Etichetta arrotondata per gli stati (in attesa, confermata, rifiutata...).
+class StatusPill extends StatelessWidget {
+  const StatusPill(this.label, {super.key, this.tone = PillTone.waiting});
+  final String label;
+  final PillTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final (bg, fg) = switch (tone) {
+      PillTone.ok => (const Color(0xFFDDF1E3), const Color(0xFF1F6B3A)),
+      PillTone.alert => (const Color(0xFFFBE3E1), const Color(0xFFA32A20)),
+      PillTone.waiting => (const Color(0xFFF8E3B5), kOnGold),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      child: Text(label,
+          style:
+              TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: fg)),
+    );
+  }
+}
+
 /// Riquadro bianco con titolo e icona su cerchio dorato, bordo dorato in alto.
 class GoldPanel extends StatelessWidget {
   const GoldPanel(
