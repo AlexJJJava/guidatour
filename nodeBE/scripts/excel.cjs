@@ -150,7 +150,7 @@ const tests = [
   ['Backend online', 'Guida', 8, 'Superato', 'Tour, richieste, cessione, dati altrui protetti'],
   ['Backend online', 'Accompagnatore', 7, 'Superato', 'Categorie, parole riservate, pacchetti, proposte'],
   ['Backend online', 'Tour operator', 3, 'Superato', 'Pacchetti pubblicati da tour operator approvato'],
-  ['Backend online', 'Ruoli dal profilo', 5, 'In attesa della migrazione 0008', 'Togliere subito, aggiungere con approvazione, rifiuto che mantiene i ruoli, turista che chiede un ruolo, nessuna scrittura diretta'],
+  ['Backend online', 'Ruoli dal profilo', 5, 'Superato', 'Togliere subito, aggiungere con approvazione, rifiuto che mantiene i ruoli, turista che chiede un ruolo, nessuna scrittura diretta'],
   ['Backend online', 'Gestione (admin)', 4, 'Superato', 'Panoramica ed elenchi; accesso negato agli altri ruoli; eliminazione tour, sospensione e riattivazione'],,
   ['Backend online', 'Più ruoli', 5, 'Superato', 'Guida + accompagnatore: visite e accompagnamenti senza blocchi, niente pacchetti, cessioni, elenchi per ruolo.'],
   ['Backend online', 'Professionista non approvato', 3, 'Superato', 'Guida rifiutata: niente funzioni professionali, preferiti, carrello e richieste come turista, assente dagli elenchi'],
@@ -222,7 +222,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
-  ['05/11/2026', 'Ruoli dal profilo, login senza cambio pagina, fix lingua', 'In Modifica profilo si scelgono più ruoli: togliere vale subito, i nuovi passano dall’admin (migrazione 0008); Account e Gestione mostrano i ruoli in attesa. Login e logout restano sulla pagina se consentita. Il menu lingua non duplica più l’intestazione', 'Test app; test backend in attesa della 0008'],
+  ['05/11/2026', 'Ruoli dal profilo, login senza cambio pagina, fix lingua', 'In Modifica profilo si scelgono più ruoli: togliere vale subito, i nuovi passano dall’admin (migrazione 0008); Account e Gestione mostrano i ruoli in attesa. Login e logout restano sulla pagina se consentita. Il menu lingua non duplica più l’intestazione', 'Test app e backend (migrazione 0008 attiva)'],
   ['05/11/2026', 'Sfondo giallo e pagine ridisegnate', 'Sfondo giallo chiaro e intestazione dorata con icona e spiegazione in tutte le pagine interne; Prenotazioni, Assegnazioni, Panoramica e I miei tour a schede bianche con stato colorato e foto', 'Test app, schermate sul sito'],
   ['05/11/2026', 'Migrazioni 0006 e 0007 attive', 'Ruoli multipli e area Gestione attivi; account di prova Guida + Accompagnatore (Marta Neri) con accesso rapido', 'Tutti i test backend superati, nessuno saltato'],
   ['05/11/2026', 'Area Gestione, Account e profilo', 'Voce Gestione per l’admin con Panoramica, Professionisti (sospendi/riattiva), Tour (elimina), Approvazioni, WhatsApp; Account e Modifica profilo ridisegnati con il giallo del tema (migrazione 0007)', 'Test app e backend (2 in attesa della 0007), schermate sul sito'],
