@@ -59,32 +59,42 @@ function colours(ws, ref, rules) {
 const YES = [['Sì', 'D9F0DF'], ['No', 'F8D9D6'], ['Con accesso', 'FDEFC8']];
 const PRO = 'Scopri, Tour, Scheda tour, Panoramica, I miei tour, Assegnazioni, Prenotazioni, Account (dal pallino in alto a destra)';
 
-sheet('Ruoli', "Situazione dell'app al 5 novembre 2026, ricavata dal codice. Scheda tour = pagina che si apre toccando un tour.",
-  ['Ruolo', 'Pagine visibili', 'Cosa può fare', 'Cosa non può fare', 'Accesso rapido di prova'], [
-  ['Visitatore (senza account)', "Scopri, Tour, Scheda tour, Accesso/Registrazione. Preferiti, Prenotazioni e Account portano all'accesso",
+const wsR = sheet('Ruoli', "Situazione dell'app al 5 novembre 2026, ricavata dal codice. Scheda tour = pagina che si apre toccando un tour.",
+  ['Ruolo', 'Approvazione admin', 'Pagine visibili', 'Cosa può fare', 'Cosa non può fare', 'Accesso rapido di prova'], [
+  ['Visitatore (senza account)', 'No: non serve un account', "Scopri, Tour, Scheda tour, Accesso/Registrazione. Preferiti, Prenotazioni e Account portano all'accesso",
     'Cercare e filtrare i tour; scegliere città e lingua; inviare una richiesta di prenotazione; iscriversi a WhatsApp; registrarsi',
     'Salvare preferiti; usare il carrello; vedere lo storico', 'Non serve'],
-  ['Turista', 'Scopri, Tour, Scheda tour, Preferiti, Prenotazioni, Carrello, Account (dal pallino in alto a destra)',
+  ['Turista', 'No: attivo subito dopo la registrazione', 'Scopri, Tour, Scheda tour, Preferiti, Prenotazioni, Carrello, Account (dal pallino in alto a destra)',
     'Tutto quello del visitatore; salvare i preferiti; inviare più richieste dal carrello; vedere storico e stato delle richieste; modificare il profilo',
     'Pubblicare tour; aprire dashboard, richieste ricevute e assegnazioni', 'Turista'],
-  ['Guida turistica', PRO,
+  ['Guida turistica', 'Sì: fino ad allora è un turista', PRO,
     'Pubblicare, modificare ed eliminare le proprie visite; generare QR e locandina; confermare o rifiutare le richieste; proporre tour ad altri professionisti; accettare o rifiutare le proposte',
     'Pubblicare pacchetti o servizi accessori; proporre visite guidate a un accompagnatore; toccare tour e richieste altrui', 'Guida'],
-  ['Accompagnatore turistico', PRO,
+  ['Accompagnatore turistico', 'Sì: fino ad allora è un turista', PRO,
     'Pubblicare, modificare ed eliminare attività di accompagnamento; generare QR e locandina; gestire richieste; accettare o rifiutare proposte di accompagnamento o pacchetti',
     "Pubblicare visite guidate, pacchetti o testi su beni culturali; presentarsi come guida abilitata (l'avviso compare nel modulo e nella scheda pubblica)", 'Accompagnatore'],
-  ['Tour operator', PRO, 'Le stesse funzioni della guida; pubblicare pacchetti completi con cena, transfer, biglietti, hotel o esperienze food',
+  ['Tour operator', 'Sì: fino ad allora è un turista; vale anche per i pacchetti', PRO, 'Le stesse funzioni della guida; pubblicare pacchetti completi con cena, transfer, biglietti, hotel o esperienze food',
     'Toccare tour e richieste altrui', 'Tour operator'],
-  ['Admin', 'Scopri, Tour, Scheda tour, Preferiti, Prenotazioni, Carrello, Approvazioni, Account dal pallino (account di prova con ruolo turista)',
+  ['Admin', 'No: lo nomina il gestore da Supabase', 'Scopri, Tour, Scheda tour, Preferiti, Prenotazioni, Carrello, Approvazioni, Account dal pallino (account di prova con ruolo turista)',
     'Approvare o rifiutare guide, accompagnatori e tour operator; consultare i consensi WhatsApp; usare le funzioni del proprio ruolo',
     'Pubblicare tour, se il ruolo è turista. Sospendere utenti e rimuovere tour (non ancora sviluppati)', 'Admin'],
-], [26, 44, 58, 50, 18]);
+], [26, 24, 44, 58, 50, 18]);
+
+// Sì in verde (ruolo da approvare), No in grigio.
+wsR.addConditionalFormatting({
+  ref: 'B5:B10',
+  rules: [
+    { type: 'beginsWith', operator: 'beginsWith', text: 'Sì', priority: 1,
+      style: { fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFFDEFC8' } }, font: { bold: true } } },
+    { type: 'beginsWith', operator: 'beginsWith', text: 'No', priority: 2,
+      style: { fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFEEF0F2' } } } },
+  ],
+});
 
 // Regola unica: guide, accompagnatori e tour operator ottengono il ruolo solo con
 // l'approvazione dell'admin; prima (o se rifiutati) sono turisti.
-const wsR = wb.getWorksheet('Ruoli');
 wsR.getCell(12, 1).value = "Chi si registra come guida, accompagnatore o tour operator è un turista finché l'admin non lo approva (anche se rifiutato); in Account vede lo stato della richiesta. L'approvazione vale anche come verifica: ogni tour operator approvato può pubblicare pacchetti.";
-wsR.mergeCells(12, 1, 12, 5);
+wsR.mergeCells(12, 1, 12, 6);
 wsR.getCell(12, 1).font = { name: 'Arial', size: 10, italic: true, color: { argb: 'FF5B6470' } };
 wsR.getCell(12, 1).alignment = { wrapText: true, vertical: 'top' };
 wsR.getRow(12).height = 32;
@@ -206,6 +216,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['05/11/2026', 'Excel: colonna approvazione', 'Nel foglio Ruoli la colonna "Approvazione admin": la richiedono guida, accompagnatore e tour operator', '—'],
   ['05/11/2026', 'Non approvati = turisti', 'Professionisti in attesa o rifiutati usano l’app come turisti con avviso in Account; pacchetti per ogni tour operator approvato; tolto l’accesso rapido T.O. non verificato', 'Test app e backend'],
   ['05/11/2026', 'Footer più basso, home senza guide', 'Footer su una fascia (marchio, avvertenza accanto, link utili a destra), circa 60 px in meno; tolta dalla home la lista delle guide', 'Test app, prova sul sito'],
   ['05/11/2026', 'Fix intestazione doppia', 'Dopo il login o il logout la home mostrava due intestazioni', 'Test app (riproduce il bug)'],
