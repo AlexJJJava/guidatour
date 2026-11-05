@@ -10,7 +10,7 @@ import 'package:guidatour/l10n/labels.dart';
 import 'package:guidatour/l10n/locale_controller.dart';
 import 'package:guidatour/main.dart';
 import 'package:guidatour/models.dart';
-import 'package:guidatour/screens/approvals_screen.dart';
+import 'package:guidatour/screens/admin_screen.dart';
 import 'package:guidatour/screens/avatar_crop_screen.dart';
 import 'package:guidatour/screens/account_screen.dart';
 import 'package:guidatour/screens/auth_screen.dart';
@@ -19,6 +19,7 @@ import 'package:guidatour/screens/cart_screen.dart';
 import 'package:guidatour/screens/faq_screen.dart';
 import 'package:guidatour/screens/favorites_screen.dart';
 import 'package:guidatour/screens/my_tours_screen.dart';
+import 'package:guidatour/screens/profile_edit_screen.dart';
 import 'package:guidatour/screens/tour_detail_screen.dart';
 import 'package:guidatour/screens/tour_form_screen.dart';
 import 'package:guidatour/state.dart';
@@ -109,7 +110,7 @@ final proPages = [
 final allPages = {
   ...turistaPages,
   ...proPages,
-  t.navApprovals,
+  t.navManage,
   t.navAccount,
 };
 
@@ -136,6 +137,10 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
     await loadFonts();
+    // Il primo evento di accesso (nessuna sessione) arriva subito dopo:
+    // lo si lascia passare, così non azzera l'utente preparato dal test.
+    appState.notifyListeners();
+    await Future<void>.delayed(const Duration(milliseconds: 50));
     localeController.value = const Locale('it');
   });
 
@@ -155,13 +160,13 @@ void main() {
       (
         'admin',
         user(Role.turista, isAdmin: true),
-        [...turistaPages, t.navApprovals],
+        [...turistaPages, t.navManage],
         true
       ),
       (
         'admin con ruolo guida',
         user(Role.guida, isAdmin: true),
-        [...proPages, t.navApprovals],
+        [...proPages, t.navManage],
         false
       ),
     ];
@@ -213,7 +218,11 @@ void main() {
         // Intestazione con il logo e il pallino.
         expect(find.byType(BrandLogo), findsWidgets);
         expect(find.byKey(const ValueKey('user-avatar')), findsOneWidget);
-        // Footer con il solo link FAQ e senza scelta della lingua.
+        // Footer con il solo link FAQ e senza scelta della lingua (in fondo:
+        // su telefono si scorre).
+        await tester.scrollUntilVisible(
+            find.byKey(const ValueKey('footer-brand')), 300,
+            scrollable: find.byType(Scrollable).last);
         final footer = find.byType(SiteFooter);
         expect(footer, findsOneWidget);
         expect(find.descendant(of: footer, matching: find.byType(LanguagePicker)),
@@ -576,9 +585,9 @@ void main() {
       seed(multi(['guida', 'accompagnatore']));
       await tester.pumpWidget(page(const AccountScreen()));
       await tester.pump();
-      expect(
-          find.textContaining('${t.roleGuida} · ${t.roleAccompagnatore}'),
-          findsOneWidget);
+      // Un'etichetta per ruolo nella fascia in alto.
+      expect(find.text(t.roleGuida), findsOneWidget);
+      expect(find.text(t.roleAccompagnatore), findsOneWidget);
     });
 
     testWidgets('Approvazioni mostra i ruoli chiesti', (tester) async {
@@ -749,13 +758,97 @@ void main() {
     });
   });
 
-  group('approvazioni', () {
-    testWidgets('la pagina si apre per l\'admin', (tester) async {
+  group('gestione (admin)', () {
+    testWidgets('ha le cinque schede e si apre sulla panoramica',
+        (tester) async {
       sized(tester, const Size(1280, 1600));
       seed(user(Role.turista, isAdmin: true));
-      await tester.pumpWidget(page(const ApprovalsScreen()));
+      await tester.pumpWidget(page(const AdminScreen()));
       await tester.pump();
-      expect(find.text(t.approvalsTitle), findsOneWidget);
+      expect(find.text(t.adminTitle), findsOneWidget);
+      for (final label in [
+        t.adminTabOverview,
+        t.adminTabProfessionals,
+        t.adminTabTours,
+        t.adminTabApprovals,
+        t.adminTabWhatsapp,
+      ]) {
+        expect(find.text(label), findsOneWidget, reason: label);
+      }
+    });
+
+    testWidgets('la scheda Approvazioni mostra le richieste', (tester) async {
+      sized(tester, const Size(1280, 1600));
+      seed(user(Role.turista, isAdmin: true));
+      await tester.pumpWidget(page(const AdminScreen(initialTab: 3)));
+      await tester.pump();
+      expect(find.text(t.approvalsIntro), findsOneWidget);
+      expect(find.text(t.approvalsPending), findsOneWidget);
+    });
+
+    testWidgets('il menu dice Gestione, non Approvazioni', (tester) async {
+      sized(tester, const Size(1920, 1080));
+      seed(user(Role.turista, isAdmin: true));
+      await tester.pumpWidget(const GuidaTourApp());
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(navLabel(t.navManage), findsOneWidget);
+      expect(navLabel(t.navApprovals), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('account', () {
+    testWidgets('turista: numeri, profilo e azioni', (tester) async {
+      sized(tester, const Size(1280, 1600));
+      seed(user(Role.turista));
+      await tester.pumpWidget(page(const AccountScreen()));
+      await tester.pump();
+      for (final s in [
+        t.accountStatFavorites,
+        t.accountStatRequests,
+        t.accountStatCart,
+        t.accountProfileSection,
+        t.accountBioEmpty,
+        t.editProfile,
+        t.logout,
+      ]) {
+        expect(find.text(s), findsWidgets, reason: s);
+      }
+      expect(find.byType(GoldPanel), findsNWidgets(2));
+    });
+
+    testWidgets('professionista: tour e richieste ricevute', (tester) async {
+      sized(tester, const Size(1280, 1600));
+      seed(user(Role.guida));
+      await tester.pumpWidget(page(const AccountScreen()));
+      await tester.pump();
+      expect(find.text(t.accountStatTours), findsOneWidget);
+      expect(find.text(t.accountStatReceived), findsOneWidget);
+      expect(find.text(t.accountStatFavorites), findsNothing);
+    });
+
+    testWidgets('sospeso: avviso dedicato', (tester) async {
+      sized(tester, const Size(1280, 1600));
+      seed(Guide.fromProfileJson({
+        'id': 's1',
+        'name': 'Sara Sospesa',
+        'email': 's@example.com',
+        'role': 'guida',
+        'approvalStatus': 'sospeso',
+      }));
+      await tester.pumpWidget(page(const AccountScreen()));
+      await tester.pump();
+      expect(find.text(t.accountRoleSuspended(t.roleGuida)), findsOneWidget);
+    });
+
+    testWidgets('modifica profilo a riquadri', (tester) async {
+      sized(tester, const Size(1280, 2000));
+      seed(user(Role.guida));
+      await tester.pumpWidget(page(const ProfileEditScreen()));
+      await tester.pump();
+      expect(find.text(t.profilePhotoSection), findsOneWidget);
+      expect(find.text(t.profileDataSection), findsOneWidget);
+      expect(find.text(t.fieldLanguagesSpoken), findsOneWidget);
     });
   });
 }

@@ -10,7 +10,7 @@ import 'package:guidatour/l10n/locale_controller.dart';
 import 'package:guidatour/main.dart';
 import 'package:guidatour/models.dart';
 import 'package:guidatour/screens/account_screen.dart';
-import 'package:guidatour/screens/approvals_screen.dart';
+import 'package:guidatour/screens/admin_screen.dart';
 import 'package:guidatour/screens/assignments_screen.dart';
 import 'package:guidatour/screens/auth_screen.dart';
 import 'package:guidatour/screens/bookings_screen.dart';
@@ -204,7 +204,7 @@ void main() {
         await check('form tour $tag', page(const TourFormScreen(), locale));
         await check('profilo $tag', page(const ProfileEditScreen(), locale));
         seed(admin);
-        await check('approvazioni $tag', page(const ApprovalsScreen(), locale));
+        await check('approvazioni $tag', page(const AdminScreen(), locale));
       }
     }
     FlutterError.onError = previous;

@@ -634,6 +634,63 @@ class InfoBanner extends StatelessWidget {
   }
 }
 
+/// Riquadro bianco con titolo e icona su cerchio dorato, bordo dorato in alto.
+class GoldPanel extends StatelessWidget {
+  const GoldPanel(
+      {super.key, required this.title, required this.icon, required this.child});
+  final String title;
+  final IconData icon;
+  final Widget child;
+
+  @override
+  // Material e non un Container colorato: le voci al tocco (ListTile) devono
+  // poter disegnare l'effetto sulla superficie.
+  Widget build(BuildContext context) => Material(
+        color: kSurface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(kRadius),
+          side: const BorderSide(color: kLine),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(height: 4, color: kGold),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                            color: kGold.withValues(alpha: 0.3),
+                            shape: BoxShape.circle),
+                        child: Icon(icon, size: 18, color: kPrimary),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(title,
+                            style: const TextStyle(
+                                fontFamily: kSerif,
+                                fontSize: 19,
+                                fontWeight: FontWeight.w700,
+                                color: kInk)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  child,
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
 /// Stato vuoto curato (icona + messaggio) al posto di un semplice testo.
 class EmptyState extends StatelessWidget {
   const EmptyState({super.key, required this.icon, required this.message});

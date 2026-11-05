@@ -88,8 +88,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     final user = appState.currentUser ?? _user;
     return Column(
       children: [
-        UserAvatar(user: user, radius: 52),
-        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.all(3),
+          decoration: const BoxDecoration(color: kGold, shape: BoxShape.circle),
+          child: UserAvatar(user: user, radius: 52),
+        ),
+        const SizedBox(height: 12),
         if (_photoBusy)
           const CircularProgressIndicator(color: kPrimary)
         else
@@ -111,7 +115,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 ),
             ],
           ),
-        const SizedBox(height: 18),
       ],
     );
   }
@@ -122,57 +125,76 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     return Scaffold(
       body: PageBody(
         title: t.editProfile,
-        maxWidth: 560,
+        maxWidth: 640,
         child: Form(
           key: _key,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _photo(context),
-              TextFormField(
-                controller: _name,
-                decoration: InputDecoration(
-                    labelText: t.fieldName, border: const OutlineInputBorder()),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? t.validationRequired : null,
+              GoldPanel(
+                title: t.profilePhotoSection,
+                icon: Icons.photo_camera_outlined,
+                child: _photo(context),
               ),
-              const SizedBox(height: 14),
-              TextFormField(
-                controller: _bio,
-                maxLines: 4,
-                decoration: InputDecoration(
-                    labelText: t.fieldBio, border: const OutlineInputBorder()),
-              ),
-              if (_user.role.isProfessional) ...[
-                const SizedBox(height: 14),
-                DropdownButtonFormField<String>(
-                  initialValue: _city,
-                  decoration: InputDecoration(
-                      labelText: t.fieldCity,
-                      border: const OutlineInputBorder()),
-                  items: [
-                    for (final c in tourCities)
-                      DropdownMenuItem(
-                          value: c, child: Text(cityLabel(context, c))),
-                  ],
-                  onChanged: (v) => setState(() => _city = v!),
-                ),
-              ],
-              const SizedBox(height: 18),
-              Text(t.fieldLanguagesSpoken,
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final l in tourLanguages)
-                    FilterChip(
-                      label: Text(languageLabel(context, l)),
-                      selected: _languages.contains(l),
-                      onSelected: (v) => setState(
-                          () => v ? _languages.add(l) : _languages.remove(l)),
+              const SizedBox(height: 16),
+              GoldPanel(
+                title: t.profileDataSection,
+                icon: Icons.badge_outlined,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextFormField(
+                      controller: _name,
+                      decoration: InputDecoration(
+                          labelText: t.fieldName,
+                          border: const OutlineInputBorder()),
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? t.validationRequired
+                          : null,
                     ),
-                ],
+                    const SizedBox(height: 14),
+                    TextFormField(
+                      controller: _bio,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                          labelText: t.fieldBio,
+                          border: const OutlineInputBorder()),
+                    ),
+                    if (_user.role.isProfessional) ...[
+                      const SizedBox(height: 14),
+                      DropdownButtonFormField<String>(
+                        initialValue: _city,
+                        decoration: InputDecoration(
+                            labelText: t.fieldCity,
+                            border: const OutlineInputBorder()),
+                        items: [
+                          for (final c in tourCities)
+                            DropdownMenuItem(
+                                value: c, child: Text(cityLabel(context, c))),
+                        ],
+                        onChanged: (v) => setState(() => _city = v!),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              GoldPanel(
+                title: t.fieldLanguagesSpoken,
+                icon: Icons.translate,
+                child: Wrap(
+                  runSpacing: 6,
+                  spacing: 8,
+                  children: [
+                    for (final l in tourLanguages)
+                      FilterChip(
+                        label: Text(languageLabel(context, l)),
+                        selected: _languages.contains(l),
+                        onSelected: (v) => setState(
+                            () => v ? _languages.add(l) : _languages.remove(l)),
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
               FilledButton(

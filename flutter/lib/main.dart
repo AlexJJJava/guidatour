@@ -9,7 +9,7 @@ import 'l10n/labels.dart';
 import 'l10n/locale_controller.dart';
 import 'models.dart';
 import 'screens/account_screen.dart';
-import 'screens/approvals_screen.dart';
+import 'screens/admin_screen.dart';
 import 'screens/assignments_screen.dart';
 import 'screens/bookings_screen.dart';
 import 'screens/cart_screen.dart';
@@ -347,10 +347,10 @@ class _AppShellState extends State<AppShell> {
     }
     if (user != null && user.isAdmin) {
       items.add((
-        t.navApprovals,
+        t.navManage,
         Icons.how_to_reg_outlined,
         Icons.how_to_reg,
-        const ApprovalsScreen(),
+        const AdminScreen(),
       ));
     }
     if (user == null) {
@@ -389,7 +389,7 @@ class _AppShellState extends State<AppShell> {
         if (collapsed)
           NavigationDestination(
             icon: Badge(
-              isLabelVisible: hidden.any((i) => i.$4 is ApprovalsScreen) &&
+              isLabelVisible: hidden.any((i) => i.$4 is AdminScreen) &&
                   appState.pendingRegistrations > 0,
               label: Text('${appState.pendingRegistrations}'),
               child: const Icon(Icons.menu),
@@ -529,7 +529,7 @@ const _maxBottomItems = 5;
 /// degli admin.
 Widget _navIcon(IconData icon, Widget? page) {
   final pending = appState.pendingRegistrations;
-  if (page is! ApprovalsScreen || pending == 0) return Icon(icon);
+  if (page is! AdminScreen || pending == 0) return Icon(icon);
   return Badge(label: Text('$pending'), child: Icon(icon));
 }
 
@@ -601,7 +601,7 @@ class _NavLinks extends StatelessWidget {
   final ValueChanged<int> onSelect;
 
   String _label(_NavItem item) =>
-      item.$4 is ApprovalsScreen && appState.pendingRegistrations > 0
+      item.$4 is AdminScreen && appState.pendingRegistrations > 0
           ? '${item.$1} (${appState.pendingRegistrations})'
           : item.$1;
 

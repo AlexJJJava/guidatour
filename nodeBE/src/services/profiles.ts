@@ -6,7 +6,7 @@ export const ROLES = ['turista', 'guida', 'accompagnatore', 'tourOperator'] as c
 export type Role = (typeof ROLES)[number]
 
 // Le registrazioni professionali restano in_attesa finché un admin non decide.
-export const APPROVAL_STATUSES = ['in_attesa', 'approvato', 'rifiutato'] as const
+export const APPROVAL_STATUSES = ['in_attesa', 'approvato', 'rifiutato', 'sospeso'] as const
 export type ApprovalStatus = (typeof APPROVAL_STATUSES)[number]
 
 export interface Profile {
@@ -138,7 +138,7 @@ export async function listRegistrations(db: Db, status: ApprovalStatus): Promise
 export async function setApprovalStatus(
   db: Db,
   userId: string,
-  status: 'approvato' | 'rifiutato',
+  status: 'approvato' | 'rifiutato' | 'sospeso',
 ): Promise<void> {
   unwrap(await db.rpc('set_approval_status', { p_user: userId, p_status: status }))
 }

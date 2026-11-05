@@ -5,16 +5,16 @@ import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
 
-/// Solo admin: approva o rifiuta le registrazioni di guide, accompagnatori e
-/// tour operator. Finché non sono approvati non possono accedere.
-class ApprovalsScreen extends StatefulWidget {
-  const ApprovalsScreen({super.key});
+/// Scheda della Gestione: approva o rifiuta le registrazioni di guide,
+/// accompagnatori e tour operator. Finché non sono approvati sono turisti.
+class ApprovalsPanel extends StatefulWidget {
+  const ApprovalsPanel({super.key});
 
   @override
-  State<ApprovalsScreen> createState() => _ApprovalsScreenState();
+  State<ApprovalsPanel> createState() => _ApprovalsPanelState();
 }
 
-class _ApprovalsScreenState extends State<ApprovalsScreen> {
+class _ApprovalsPanelState extends State<ApprovalsPanel> {
   String _status = 'in_attesa';
   late Future<List<Guide>> _future = appState.loadRegistrations(_status);
 
@@ -38,79 +38,69 @@ class _ApprovalsScreenState extends State<ApprovalsScreen> {
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
-    return PageBody(
-      maxWidth: 860,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(t.approvalsTitle,
-              style: const TextStyle(
-                  fontFamily: kSerif,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: kInk)),
-          const SizedBox(height: 6),
-          Text(t.approvalsIntro, style: const TextStyle(color: kMuted)),
-          const SizedBox(height: 18),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SegmentedButton<String>(
-              segments: [
-                ButtonSegment(
-                    value: 'in_attesa', label: Text(t.approvalsPending)),
-                ButtonSegment(
-                    value: 'approvato', label: Text(t.approvalsApproved)),
-                ButtonSegment(
-                    value: 'rifiutato', label: Text(t.approvalsRejected)),
-              ],
-              selected: {_status},
-              showSelectedIcon: false,
-              onSelectionChanged: (s) {
-                _status = s.first;
-                _reload();
-              },
-            ),
-          ),
-          const SizedBox(height: 18),
-          FutureBuilder<List<Guide>>(
-            future: _future,
-            builder: (context, snap) {
-              if (snap.connectionState != ConnectionState.done) {
-                return const Padding(
-                  padding: EdgeInsets.all(32),
-                  child:
-                      Center(child: CircularProgressIndicator(color: kPrimary)),
-                );
-              }
-              if (snap.hasError) {
-                return InfoBanner('${snap.error}', warning: true);
-              }
-              final list = snap.data!;
-              if (list.isEmpty) {
-                return EmptyState(
-                    icon: Icons.how_to_reg_outlined, message: t.approvalsEmpty);
-              }
-              return Column(
-                children: [
-                  for (final g in list)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _RegistrationCard(
-                        guide: g,
-                        onApprove: g.approvalStatus == 'approvato'
-                            ? null
-                            : () => _decide(g, 'approvato'),
-                        onReject: g.approvalStatus == 'rifiutato'
-                            ? null
-                            : () => _decide(g, 'rifiutato'),
-                      ),
-                    ),
-                ],
-              );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(t.approvalsIntro, style: const TextStyle(color: kMuted)),
+        const SizedBox(height: 18),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SegmentedButton<String>(
+            segments: [
+              ButtonSegment(
+                  value: 'in_attesa', label: Text(t.approvalsPending)),
+              ButtonSegment(
+                  value: 'approvato', label: Text(t.approvalsApproved)),
+              ButtonSegment(
+                  value: 'rifiutato', label: Text(t.approvalsRejected)),
+            ],
+            selected: {_status},
+            showSelectedIcon: false,
+            onSelectionChanged: (s) {
+              _status = s.first;
+              _reload();
             },
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 18),
+        FutureBuilder<List<Guide>>(
+          future: _future,
+          builder: (context, snap) {
+            if (snap.connectionState != ConnectionState.done) {
+              return const Padding(
+                padding: EdgeInsets.all(32),
+                child:
+                    Center(child: CircularProgressIndicator(color: kPrimary)),
+              );
+            }
+            if (snap.hasError) {
+              return InfoBanner('${snap.error}', warning: true);
+            }
+            final list = snap.data!;
+            if (list.isEmpty) {
+              return EmptyState(
+                  icon: Icons.how_to_reg_outlined, message: t.approvalsEmpty);
+            }
+            return Column(
+              children: [
+                for (final g in list)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _RegistrationCard(
+                      guide: g,
+                      onApprove: g.approvalStatus == 'approvato'
+                          ? null
+                          : () => _decide(g, 'approvato'),
+                      onReject: g.approvalStatus == 'rifiutato'
+                          ? null
+                          : () => _decide(g, 'rifiutato'),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }

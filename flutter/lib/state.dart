@@ -333,6 +333,47 @@ class AppState extends ChangeNotifier {
     await Future.wait([refreshPendingRegistrations(), _loadGuides()]);
   }
 
+  // --- Admin: gestione ---
+
+  Future<Map<String, dynamic>> loadAdminOverview() async =>
+      await api.get('/admin/overview') as Map<String, dynamic>;
+
+  /// Professionisti approvati o sospesi, con il numero dei loro tour.
+  Future<List<(Guide, int)>> loadAdminProfessionals() async {
+    final json = await api.get('/admin/professionals') as Map;
+    return [
+      for (final p in (json['professionals'] as List).cast<Map<String, dynamic>>())
+        (Guide.fromProfileJson(p), (p['tours'] as num? ?? 0).toInt()),
+    ];
+  }
+
+  Future<void> setSuspended(String userId, bool suspended) async {
+    await api.post('/admin/professionals/$userId', {'suspended': suspended});
+    await Future.wait([_loadGuides(), _loadTours()]);
+  }
+
+  Future<List<AdminTour>> loadAdminTours() async {
+    final json = await api.get('/admin/tours') as Map;
+    return [
+      for (final j in (json['tours'] as List).cast<Map<String, dynamic>>())
+        AdminTour.fromJson(j),
+    ];
+  }
+
+  Future<void> adminDeleteTour(String id) async {
+    await api.delete('/admin/tours/$id');
+    tours.removeWhere((t) => t.id == id);
+    notifyListeners();
+  }
+
+  Future<void> loadConsents() async {
+    final json = await api.get('/consents') as Map;
+    consents = (json['consents'] as List)
+        .map((j) => WhatsAppConsent.fromJson(j as Map<String, dynamic>))
+        .toList();
+    notifyListeners();
+  }
+
   // --- Tour ---
   Future<Tour> addTour({
     required String title,

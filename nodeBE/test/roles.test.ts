@@ -537,6 +537,88 @@ describe('admin', () => {
   })
 })
 
+describe('gestione (admin)', () => {
+  test('panoramica, professionisti e tour per l\'admin', async () => {
+    const token = tokens.admin
+    const o = await api('/admin/overview', { token })
+    assert.equal(o.status, 200, JSON.stringify(o.json))
+    for (const k of ['professionals', 'pending', 'tourists', 'tours', 'upcomingTours', 'consents']) {
+      assert.equal(typeof o.json[k], 'number', k)
+    }
+    const pros = await api('/admin/professionals', { token })
+    assert.equal(pros.status, 200)
+    assert.ok(pros.json.professionals.some((p: { id: string }) => p.id === ids.guida))
+    const tour = await newTour('guida')
+    const tours = await api('/admin/tours', { token })
+    assert.equal(tours.status, 200)
+    const mine = tours.json.tours.find((t: { id: string }) => t.id === tour.id)
+    assert.ok(mine, 'tour assente dalla lista admin')
+    assert.ok(mine.guideName, 'manca il nome di chi organizza')
+  })
+
+  test('nessun altro ruolo apre la gestione', async () => {
+    for (const who of ['turista', 'guida', 'accompagnatore', 'operator'] as Who[]) {
+      for (const [path, c] of [
+        ['/admin/overview', {}],
+        ['/admin/professionals', {}],
+        ['/admin/tours', {}],
+        [`/admin/professionals/${ids.guida}`, { body: { suspended: true } }],
+        [`/admin/tours/test-inesistente`, { method: 'DELETE' }],
+      ] as [string, Call][]) {
+        assert.equal((await api(path, { ...c, token: tokens[who] })).status, 403, `${who} ${path}`)
+      }
+    }
+  })
+
+  // Servono le policy della migrazione 0007.
+  let migrated = false
+  before(async () => {
+    const tour = await newTour('guida')
+    const r = await api(`/admin/tours/${tour.id}`, { method: 'DELETE', token: tokens.admin })
+    migrated = r.status === 204
+  })
+  const ready = (t: { skip: (m: string) => void }) => {
+    if (!migrated) t.skip('serve la migrazione 0007')
+    return migrated
+  }
+
+  test("l'admin elimina il tour di un altro", async (t) => {
+    if (!ready(t)) return
+    const tour = await newTour('guida')
+    const r = await api(`/admin/tours/${tour.id}`, { method: 'DELETE', token: tokens.admin })
+    assert.equal(r.status, 204)
+    assert.equal((await api(`/tours/${tour.id}`)).status, 404)
+  })
+
+  test('sospeso: torna turista e i suoi tour spariscono, riattivato tornano', async (t) => {
+    if (!ready(t)) return
+    const token = tokens.admin
+    const tour = await newTour('operator')
+    const suspend = await api(`/admin/professionals/${ids.operator}`, {
+      token,
+      body: { suspended: true },
+    })
+    try {
+      assert.equal(suspend.status, 204, JSON.stringify(suspend.json))
+      const me = await api('/me', { token: tokens.operator })
+      assert.equal(me.json.approvalStatus, 'sospeso')
+      assert.equal((await api('/tours', { token: tokens.operator, body: tourBody() })).status, 403)
+      assert.equal((await api(`/tours/${tour.id}`)).status, 404, 'tour ancora visibile')
+      const { json } = await api('/guides')
+      assert.ok(!json.guides.some((g: { id: string }) => g.id === ids.operator))
+      // Chi è sospeso continua a vedere i propri tour (per esempio per eliminarli).
+      assert.equal((await api(`/tours/${tour.id}`, { token: tokens.operator })).status, 200)
+    } finally {
+      const back = await api(`/admin/professionals/${ids.operator}`, {
+        token,
+        body: { suspended: false },
+      })
+      assert.equal(back.status, 204)
+    }
+    assert.equal((await api(`/tours/${tour.id}`)).status, 200, 'tour non tornato visibile')
+  })
+})
+
 describe('tentativi di scavalcare i ruoli', () => {
   test('nessuno approva registrazioni al posto dell\'admin', async () => {
     for (const who of ['turista', 'guida', 'accompagnatore', 'operator'] as Who[]) {

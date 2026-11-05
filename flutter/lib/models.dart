@@ -151,6 +151,19 @@ class Guide {
       );
 }
 
+/// Tour visto dall'admin: con il nome e lo stato di chi lo organizza.
+class AdminTour {
+  AdminTour(this.tour, this.guideName, this.guideStatus);
+  final Tour tour;
+  final String guideName;
+  final String guideStatus;
+
+  factory AdminTour.fromJson(Map<String, dynamic> j) => AdminTour(
+      Tour.fromJson(j),
+      j['guideName'] as String? ?? '',
+      j['guideStatus'] as String? ?? 'approvato');
+}
+
 /// Servizi accessori che possono trasformare un tour in pacchetto turistico (BR-014G).
 const accessoryServices = [
   'Cena / ristorante',

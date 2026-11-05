@@ -111,7 +111,9 @@ export async function listSent(db: Db, userId: string): Promise<BookingRequest[]
   const rows = unwrap(
     await db
       .from('booking_requests')
-      .select(SELECT_WITH_TOUR)
+      // Senza !inner: la richiesta resta nello storico anche se il tour non è
+      // più visibile (organizzatore sospeso).
+      .select('*, tours(id, title, start_at, guide_id)')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .returns<RequestRow[]>(),
