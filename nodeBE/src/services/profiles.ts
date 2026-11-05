@@ -126,9 +126,13 @@ export async function requireAdmin(db: Db, userId: string): Promise<Profile> {
 
 // Registrazioni professionali per la pagina delle approvazioni (solo admin:
 // la policy profiles_select_admin rende visibili i profili altrui).
-export async function listRegistrations(db: Db, status: ApprovalStatus): Promise<Profile[]> {
+export async function listRegistrations(
+  db: Db,
+  status: ApprovalStatus | 'tutte',
+): Promise<Profile[]> {
   const query = () =>
     db.from('profiles').select('*').neq('role', 'turista').order('created_at', { ascending: false })
+  if (status === 'tutte') return unwrap(await query().returns<ProfileRow[]>()).map(toProfile)
   // "In attesa" comprende i professionisti che hanno chiesto nuovi ruoli.
   if (status === 'in_attesa') {
     const both = await query()

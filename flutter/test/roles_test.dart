@@ -1015,13 +1015,42 @@ void main() {
       }
     });
 
-    testWidgets('la scheda Approvazioni mostra le richieste', (tester) async {
+    testWidgets('la scheda Approvazioni parte da Tutte, poi i filtri',
+        (tester) async {
       sized(tester, const Size(1280, 1600));
       seed(user(Role.turista, isAdmin: true));
       await tester.pumpWidget(page(const AdminScreen(initialTab: 3)));
       await tester.pump();
       expect(find.text(t.approvalsIntro), findsOneWidget);
-      expect(find.text(t.approvalsPending), findsOneWidget);
+      final seg = tester.widget<SegmentedButton<String>>(
+          find.byType(SegmentedButton<String>));
+      expect(seg.selected, {'tutte'});
+      expect(seg.segments.map((s) => s.value).toList(),
+          ['tutte', 'in_attesa', 'approvato', 'rifiutato']);
+    });
+
+    test('lo stato mostrato segue la richiesta', () {
+      Guide g(String status, [List<String> pending = const []]) =>
+          Guide.fromProfileJson({
+            'id': 'x',
+            'name': 'X',
+            'email': 'x@e.it',
+            'role': 'guida',
+            'roles': ['guida'],
+            'pendingRoles': pending,
+            'approvalStatus': status,
+          });
+      // Senza contesto: si confrontano solo i toni.
+      PillTone tone(Guide x) => x.pendingRoles.isNotEmpty
+          ? PillTone.waiting
+          : switch (x.approvalStatus) {
+              'approvato' => PillTone.ok,
+              'rifiutato' || 'sospeso' => PillTone.alert,
+              _ => PillTone.waiting,
+            };
+      expect(tone(g('approvato')), PillTone.ok);
+      expect(tone(g('approvato', ['tourOperator'])), PillTone.waiting);
+      expect(tone(g('rifiutato')), PillTone.alert);
     });
 
     testWidgets('il menu dice Gestione, non Approvazioni', (tester) async {

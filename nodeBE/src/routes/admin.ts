@@ -29,7 +29,7 @@ admin.get('/overview', async (c) => c.json(await getOverview(c.get('db'))))
 admin.get('/registrations', async (c) => {
   const { status } = parseQuery(
     c,
-    z.object({ status: z.enum(APPROVAL_STATUSES).default('in_attesa') }),
+    z.object({ status: z.enum([...APPROVAL_STATUSES, 'tutte']).default('tutte') }),
   )
   return c.json({ registrations: await listRegistrations(c.get('db'), status) })
 })

@@ -517,6 +517,13 @@ describe('più ruoli', () => {
 describe('admin', () => {
   test('consulta registrazioni e consensi', async () => {
     const token = tokens.admin
+    // Tutte: registrazioni di ogni stato, dalla più recente.
+    const all = await api('/admin/registrations?status=tutte', { token })
+    assert.equal(all.status, 200)
+    const states = new Set(all.json.registrations.map((p: { approvalStatus: string }) => p.approvalStatus))
+    assert.ok(states.has('approvato') && states.has('rifiutato'), [...states].join(','))
+    const dates = all.json.registrations.map((p: { createdAt: string }) => p.createdAt)
+    assert.deepEqual(dates, [...dates].sort().reverse(), 'non in ordine di data')
     for (const s of ['in_attesa', 'approvato', 'rifiutato']) {
       assert.equal((await api(`/admin/registrations?status=${s}`, { token })).status, 200)
     }
