@@ -7,7 +7,12 @@ name: Deploy backend su Render
 on:
   push:
     branches: [main]
-    paths: ["nodeBE/**", ".github/workflows/deploy-backend.yml"]
+    # Script dell'Excel e test non girano su Render: non serve ridistribuire.
+    paths:
+      - "nodeBE/**"
+      - "!nodeBE/scripts/**"
+      - "!nodeBE/test/**"
+      - ".github/workflows/deploy-backend.yml"
   workflow_dispatch:
 
 jobs:
