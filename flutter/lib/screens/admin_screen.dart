@@ -292,9 +292,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     onTap: () => widget.onOpenTab(2)),
                 _AdminStat(
                     t.adminStatRequests, n('requests'), Icons.mail_outline),
-                _AdminStat(
-                    t.adminStatViews,
-                    '${n('visits')} · ${n('scans')}',
+                _AdminStat(t.adminStatViews, '${n('visits')} · ${n('scans')}',
                     Icons.qr_code_2),
                 _AdminStat(t.adminStatConsents, n('consents'),
                     Icons.chat_bubble_outline,
@@ -431,6 +429,7 @@ class _ProfessionalsTabState extends State<_ProfessionalsTab> {
                   icon: Icons.badge_outlined, message: t.adminNoProfessionals);
             }
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (final (g, tours) in list)
                   _ProCard(guide: g, tours: tours, onToggle: () => _toggle(g)),
@@ -470,55 +469,68 @@ class _ProCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
         padding: const EdgeInsets.all(14),
-        child: Wrap(
-          spacing: 14,
-          runSpacing: 10,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          alignment: WrapAlignment.spaceBetween,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 620),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  UserAvatar(user: guide, radius: 24),
-                  const SizedBox(width: 12),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        child: _CardRow(
+          action: action,
+          info: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              UserAvatar(user: guide, radius: 24),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        Wrap(
-                          spacing: 8,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Text(guide.name,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700, fontSize: 15)),
-                            _StatusChip(
-                                suspended ? t.adminSuspended : t.adminActive,
-                                alert: suspended),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Text(rolesLabel(context, roles),
-                            style: const TextStyle(color: kPrimary)),
-                        Text(
-                            '${guide.email} · ${cityLabel(context, guide.city)}'
-                            ' · ${t.adminToursCount(tours)}',
-                            style:
-                                const TextStyle(color: kMuted, fontSize: 12)),
+                        Text(guide.name,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 15)),
+                        _StatusChip(
+                            suspended ? t.adminSuspended : t.adminActive,
+                            alert: suspended),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(rolesLabel(context, roles),
+                        style: const TextStyle(color: kPrimary)),
+                    Text(
+                        '${guide.email} · ${cityLabel(context, guide.city)}'
+                        ' · ${t.adminToursCount(tours)}',
+                        style: const TextStyle(color: kMuted, fontSize: 12)),
+                  ],
+                ),
               ),
-            ),
-            action,
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+/// Dati a sinistra e azioni a destra; su schermo stretto le azioni vanno sotto.
+class _CardRow extends StatelessWidget {
+  const _CardRow({required this.info, required this.action});
+  final Widget info;
+  final Widget action;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, c) => c.maxWidth >= 560
+            ? Row(
+                children: [
+                  Expanded(child: info),
+                  const SizedBox(width: 12),
+                  action,
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [info, const SizedBox(height: 10), action],
+              ),
+      );
 }
 
 class _TourRow extends StatelessWidget {
@@ -535,71 +547,57 @@ class _TourRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Wrap(
-          spacing: 12,
-          runSpacing: 8,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          alignment: WrapAlignment.spaceBetween,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 640),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(categoryImage(tour.category),
-                        width: 56, height: 56, fit: BoxFit.cover),
-                  ),
-                  const SizedBox(width: 12),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        child: _CardRow(
+          info: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(categoryImage(tour.category),
+                    width: 56, height: 56, fit: BoxFit.cover),
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        Wrap(
-                          spacing: 8,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Text(tour.title,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700)),
-                            if (past) _StatusChip(t.adminPast),
-                          ],
-                        ),
-                        Text(
-                            '${fmtDate(tour.start)} · ${categoryLabel(context, tour.category)}'
-                            '${organizer == null ? '' : ' · $organizer'}',
+                        Text(tour.title,
                             style:
-                                const TextStyle(color: kMuted, fontSize: 12)),
-                        Text(
-                            t.adminViewsValue(
-                                '${tour.visits}', '${tour.scans}'),
-                            style:
-                                const TextStyle(color: kMuted, fontSize: 12)),
+                                const TextStyle(fontWeight: FontWeight.w700)),
+                        if (past) _StatusChip(t.adminPast),
                       ],
                     ),
-                  ),
-                ],
+                    Text(
+                        '${fmtDate(tour.start)} · ${categoryLabel(context, tour.category)}'
+                        '${organizer == null ? '' : ' · $organizer'}',
+                        style: const TextStyle(color: kMuted, fontSize: 12)),
+                    Text(t.adminViewsValue('${tour.visits}', '${tour.scans}'),
+                        style: const TextStyle(color: kMuted, fontSize: 12)),
+                  ],
+                ),
               ),
-            ),
-            Wrap(
-              spacing: 8,
-              children: [
-                if (!past)
-                  OutlinedButton(
-                      onPressed: () => openTour(context, tour),
-                      child: Text(t.adminOpen)),
-                if (onDelete != null)
-                  OutlinedButton.icon(
-                    style:
-                        OutlinedButton.styleFrom(foregroundColor: Colors.red),
-                    onPressed: onDelete,
-                    icon: const Icon(Icons.delete_outline, size: 18),
-                    label: Text(t.deleteTour),
-                  ),
-              ],
-            ),
-          ],
+            ],
+          ),
+          action: Wrap(
+            spacing: 8,
+            children: [
+              if (!past)
+                OutlinedButton(
+                    onPressed: () => openTour(context, tour),
+                    child: Text(t.adminOpen)),
+              if (onDelete != null)
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                  onPressed: onDelete,
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  label: Text(t.deleteTour),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -670,6 +668,7 @@ class _ToursTabState extends State<_ToursTab> {
                   icon: Icons.map_outlined, message: t.adminNoTours);
             }
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (final e in list)
                   _TourRow(
@@ -714,6 +713,7 @@ class _ConsentsTabState extends State<_ConsentsTab> {
                   icon: Icons.chat_bubble_outline, message: t.adminNoConsents);
             }
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (final c in appState.consents)
                   Card(

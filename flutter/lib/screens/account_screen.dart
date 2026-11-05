@@ -21,8 +21,8 @@ class AccountScreen extends StatelessWidget {
         if (user == null) return const AuthScreen();
         final t = l10n(context);
         final pro = user.role.isProfessional;
-        void edit() => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const ProfileEditScreen()));
+        void edit() => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const ProfileEditScreen()));
         return PageBody(
           maxWidth: 760,
           child: Column(
@@ -45,20 +45,20 @@ class AccountScreen extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 18),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
+              // Tre riquadri che riempiono la riga.
+              _CountRow(
                 children: pro
                     ? [
                         _Count(t.accountStatTours, appState.myTours.length,
                             Icons.map_outlined),
-                        _Count(t.accountStatReceived,
-                            appState.requests.length, Icons.inbox_outlined),
+                        _Count(t.accountStatReceived, appState.requests.length,
+                            Icons.inbox_outlined),
                         _Count(t.accountStatAssignments,
                             appState.assignments.length, Icons.swap_horiz),
                       ]
                     : [
-                        _Count(t.accountStatFavorites,
+                        _Count(
+                            t.accountStatFavorites,
                             appState.favoriteTours.length,
                             Icons.favorite_border),
                         _Count(t.accountStatRequests,
@@ -91,7 +91,8 @@ class AccountScreen extends StatelessWidget {
                             .map((l) => languageLabel(context, l))
                             .join(', ')),
                     if (pro)
-                      _Fact(Icons.place_outlined, cityLabel(context, user.city)),
+                      _Fact(
+                          Icons.place_outlined, cityLabel(context, user.city)),
                     if (user.createdAt != null)
                       _Fact(Icons.event_outlined,
                           t.accountMemberSince(fmtDate(user.createdAt!))),
@@ -228,6 +229,22 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
+class _CountRow extends StatelessWidget {
+  const _CountRow({required this.children});
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) const SizedBox(width: 12),
+            Expanded(child: children[i]),
+          ],
+        ],
+      );
+}
+
 class _Count extends StatelessWidget {
   const _Count(this.label, this.value, this.icon);
   final String label;
@@ -236,9 +253,7 @@ class _Count extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
     return Container(
-      width: width < 600 ? (width - 64) / 3 : 228,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: kSurface,
@@ -254,8 +269,7 @@ class _Count extends StatelessWidget {
               style: const TextStyle(
                   fontSize: 22, fontWeight: FontWeight.w800, color: kInk)),
           Text(label,
-              maxLines: 2,
-              style: const TextStyle(color: kMuted, fontSize: 12)),
+              maxLines: 2, style: const TextStyle(color: kMuted, fontSize: 12)),
         ],
       ),
     );
