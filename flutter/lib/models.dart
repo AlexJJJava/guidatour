@@ -12,6 +12,31 @@ extension RoleLabel on Role {
 Role roleFromString(String? s) =>
     Role.values.firstWhere((r) => r.name == s, orElse: () => Role.turista);
 
+/// Ruoli professionali, nell'ordine in cui si mostrano.
+const professionalRoles = [Role.guida, Role.accompagnatore, Role.tourOperator];
+
+/// Ruolo principale fra quelli scelti (come nel database): guida, poi tour
+/// operator, poi accompagnatore.
+Role primaryRole(Iterable<Role> roles) => roles.contains(Role.guida)
+    ? Role.guida
+    : roles.contains(Role.tourOperator)
+        ? Role.tourOperator
+        : roles.contains(Role.accompagnatore)
+            ? Role.accompagnatore
+            : Role.turista;
+
+/// Ruoli professionali dal JSON; prima della migrazione 0006 c'è solo `role`.
+List<Role> _rolesFrom(Map<String, dynamic> j, Role role) {
+  final list = (j['roles'] as List?)
+      ?.map((r) => roleFromString(r as String?))
+      .where((r) => r.isProfessional)
+      .toSet();
+  if (list != null && list.isNotEmpty) {
+    return [for (final r in professionalRoles) if (list.contains(r)) r];
+  }
+  return role.isProfessional ? [role] : const [];
+}
+
 class Guide {
   Guide({
     required this.id,
@@ -27,12 +52,18 @@ class Guide {
     this.approvalStatus = 'approvato',
     this.createdAt,
     this.avatarUrl,
-    this.requestedRole,
-  });
+    List<Role>? roles,
+    this.requestedRoles = const [],
+  }) : roles = roles ?? (role.isProfessional ? [role] : const []);
   final String id;
   final String name;
   final String email;
+
+  /// Ruolo principale; per i controlli usare [roles] e [has].
   final Role role;
+
+  /// Ruoli professionali (vuoto per un turista).
+  final List<Role> roles;
   final String provider;
   final bool verified;
   final List<String> languages;
@@ -46,9 +77,15 @@ class Guide {
   final DateTime? createdAt;
   final String? avatarUrl;
 
-  /// Ruolo professionale chiesto alla registrazione e non ancora approvato
-  /// (o rifiutato): finché non c'è l'approvazione l'utente è un turista.
-  final Role? requestedRole;
+  /// Ruoli professionali chiesti alla registrazione e non ancora approvati
+  /// (o rifiutati): finché non c'è l'approvazione l'utente è un turista.
+  final List<Role> requestedRoles;
+
+  bool has(Role r) => roles.contains(r);
+
+  /// Solo accompagnatore: niente visite guidate né testi su beni culturali.
+  bool get onlyAccompagnatore =>
+      has(Role.accompagnatore) && !has(Role.guida) && !has(Role.tourOperator);
 
   /// Prima lettera di nome e cognome, per il pallino senza foto.
   String get initials {
@@ -67,6 +104,7 @@ class Guide {
         name: j['name'] as String? ?? '',
         email: '',
         role: roleFromString(j['role'] as String?),
+        roles: _rolesFrom(j, roleFromString(j['role'] as String?)),
         verified: j['verified'] as bool? ?? false,
         languages:
             (j['languages'] as List?)?.cast<String>() ?? const ['Italiano'],
@@ -78,21 +116,26 @@ class Guide {
   /// ancora approvato usa l'app come turista.
   factory Guide.fromProfileJson(Map<String, dynamic> j) {
     final role = roleFromString(j['role'] as String?);
+    final roles = _rolesFrom(j, role);
     final approval = j['approvalStatus'] as String? ?? 'approvato';
-    final waiting = role.isProfessional && approval != 'approvato';
+    final waiting = roles.isNotEmpty && approval != 'approvato';
     return Guide._fromProfileJson(j,
         role: waiting ? Role.turista : role,
-        requestedRole: waiting ? role : null);
+        roles: waiting ? const [] : roles,
+        requestedRoles: waiting ? roles : const []);
   }
 
   factory Guide._fromProfileJson(Map<String, dynamic> j,
-          {required Role role, Role? requestedRole}) =>
+          {required Role role,
+          required List<Role> roles,
+          required List<Role> requestedRoles}) =>
       Guide(
         id: j['id'] as String,
         name: j['name'] as String? ?? '',
         email: j['email'] as String? ?? '',
         role: role,
-        requestedRole: requestedRole,
+        roles: roles,
+        requestedRoles: requestedRoles,
         verified: j['verified'] as bool? ?? false,
         languages:
             (j['languages'] as List?)?.cast<String>() ?? const ['Italiano'],

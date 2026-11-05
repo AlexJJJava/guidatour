@@ -18,6 +18,7 @@ export interface Profile {
   verified: boolean
   isAdmin: boolean
   approvalStatus: ApprovalStatus
+  roles: Role[]
   avatarUrl: string | null
   languages: string[]
   bio: string
@@ -30,6 +31,8 @@ export interface PublicProfile {
   id: string
   name: string
   role: Role
+  // Tutti i ruoli professionali; `role` è il principale.
+  roles: Role[]
   verified: boolean
   languages: string[]
   bio: string
@@ -46,6 +49,8 @@ type ProfileRow = {
   is_admin: boolean
   // Assente finché la migrazione 0004 non è applicata.
   approval_status?: ApprovalStatus
+  // Assente finché la migrazione 0006 non è applicata.
+  roles?: Role[] | null
   // Assente finché la migrazione 0005 non è applicata.
   avatar_url?: string | null
   languages: string[]
@@ -54,7 +59,20 @@ type ProfileRow = {
   created_at: string
 }
 
-const PUBLIC_PROFILE_COLUMNS = 'id, name, role, verified, languages, bio, city'
+// La vista espone solo colonne pubbliche; con '*' include anche `roles` dalla 0006.
+const PUBLIC_PROFILE_COLUMNS = '*'
+
+/** Ruoli professionali di un profilo, anche prima della migrazione 0006. */
+export const rolesOf = (p: { role: Role; roles?: Role[] | null }): Role[] =>
+  p.roles?.length ? p.roles : p.role === 'turista' ? [] : [p.role]
+
+const toPublic = (p: PublicProfile): PublicProfile => ({ ...p, roles: rolesOf(p) })
+
+/** Solo accompagnatore: niente visite guidate né testi su beni culturali. */
+export const onlyAccompagnatore = (p: { role: Role; roles?: Role[] | null }) => {
+  const roles = rolesOf(p)
+  return roles.includes('accompagnatore') && !roles.includes('guida') && !roles.includes('tourOperator')
+}
 
 const toProfile = (r: ProfileRow): Profile => ({
   id: r.id,
@@ -65,6 +83,7 @@ const toProfile = (r: ProfileRow): Profile => ({
   verified: r.verified,
   isAdmin: r.is_admin,
   approvalStatus: r.approval_status ?? 'approvato',
+  roles: rolesOf(r),
   avatarUrl: r.avatar_url ?? null,
   languages: r.languages,
   bio: r.bio,
@@ -72,7 +91,7 @@ const toProfile = (r: ProfileRow): Profile => ({
   createdAt: r.created_at,
 })
 
-export const isProfessional = (p: { role: Role }) => p.role !== 'turista'
+export const isProfessional = (p: { role: Role; roles?: Role[] | null }) => rolesOf(p).length > 0
 
 export async function getMyProfile(db: Db, userId: string): Promise<Profile> {
   const row = unwrap(
@@ -152,9 +171,10 @@ export async function updateMyProfile(
 }
 
 export async function listProfessionals(db: Db, role?: Role): Promise<PublicProfile[]> {
-  let query = db.from('public_profiles').select(PUBLIC_PROFILE_COLUMNS).order('name')
-  if (role) query = query.eq('role', role)
-  return unwrap(await query.returns<PublicProfile[]>())
+  const rows = unwrap(
+    await db.from('public_profiles').select(PUBLIC_PROFILE_COLUMNS).order('name').returns<PublicProfile[]>(),
+  ).map(toPublic)
+  return role ? rows.filter((p) => p.roles.includes(role)) : rows
 }
 
 export async function getPublicProfile(db: Db, id: string): Promise<PublicProfile> {
@@ -166,7 +186,7 @@ export async function getPublicProfile(db: Db, id: string): Promise<PublicProfil
       .maybeSingle<PublicProfile>(),
   )
   if (!row) throw notFound('Profilo')
-  return row
+  return toPublic(row)
 }
 
 export async function getPublicProfiles(
@@ -182,5 +202,5 @@ export async function getPublicProfiles(
       .in('id', unique)
       .returns<PublicProfile[]>(),
   )
-  return new Map(rows.map((p) => [p.id, p]))
+  return new Map(rows.map((p) => [p.id, toPublic(p)]))
 }

@@ -65,7 +65,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
   void initState() {
     super.initState();
     if (_isEdit) _declaration = true;
-    if (!_isEdit && _user.role == Role.accompagnatore) {
+    if (!_isEdit && _user.onlyAccompagnatore) {
       _category = 'Accompagnamento';
     }
   }
@@ -88,15 +88,14 @@ class _TourFormScreenState extends State<TourFormScreen> {
   /// Restituisce il motivo del blocco, o null se si può pubblicare.
   String? _blockReason(BuildContext context) {
     final t = l10n(context);
-    final role = _user.role;
     if (_accessories.isNotEmpty) {
-      if (role != Role.tourOperator) {
+      if (!_user.has(Role.tourOperator)) {
         return t.formBlockAccessoriesNotOperator(
             _accessories.map((a) => accessoryLabel(context, a)).join(', '),
-            roleLabel(context, role));
+            rolesLabel(context, _user.roles));
       }
     }
-    if (role == Role.accompagnatore) {
+    if (_user.onlyAccompagnatore) {
       final text = '${_title.text} ${_description.text}'.toLowerCase();
       if (_category != 'Accompagnamento') {
         return t.formBlockAccompagnatoreCategory;
@@ -187,9 +186,15 @@ class _TourFormScreenState extends State<TourFormScreen> {
   Widget build(BuildContext context) {
     final t = l10n(context);
     final block = _blockReason(context);
-    final categories = _user.role == Role.accompagnatore
-        ? const ['Accompagnamento']
-        : tourCategories.where((c) => c != 'Accompagnamento').toList();
+    // L'accompagnamento a chi è accompagnatore, le altre categorie a guide e
+    // tour operator.
+    final categories = [
+      for (final c in tourCategories)
+        if (c == 'Accompagnamento'
+            ? _user.has(Role.accompagnatore)
+            : !_user.onlyAccompagnatore)
+          c,
+    ];
     if (!categories.contains(_category)) _category = categories.first;
     String? required(String? v) =>
         (v == null || v.trim().isEmpty) ? t.validationRequired : null;
@@ -203,7 +208,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              InfoBanner(t.formPublishingAs(roleLabel(context, _user.role))),
+              InfoBanner(t.formPublishingAs(rolesLabel(context, _user.roles))),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _title,
@@ -329,7 +334,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
                     ),
                 ],
               ),
-              if (_user.role == Role.accompagnatore) ...[
+              if (_user.onlyAccompagnatore) ...[
                 const SizedBox(height: 14),
                 InfoBanner(t.accompagnatoreNotice),
               ],

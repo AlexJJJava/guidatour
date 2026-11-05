@@ -34,16 +34,18 @@ class AccountScreen extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                   user.role.isProfessional
-                      ? '${roleLabel(context, user.role)} · ${t.verifiedSuffix}'
+                      ? '${rolesLabel(context, user.roles)} · ${t.verifiedSuffix}'
                       : user.email,
                   style: const TextStyle(color: kMuted)),
-              if (user.requestedRole case final requested?) ...[
+              if (user.requestedRoles.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 InfoBanner(
                   key: const ValueKey('requested-role'),
                   user.approvalStatus == 'rifiutato'
-                      ? t.accountRoleRejected(roleLabel(context, requested))
-                      : t.accountRolePending(roleLabel(context, requested)),
+                      ? t.accountRoleRejected(
+                          rolesLabel(context, user.requestedRoles))
+                      : t.accountRolePending(
+                          rolesLabel(context, user.requestedRoles)),
                   warning: user.approvalStatus == 'rifiutato',
                 ),
               ],

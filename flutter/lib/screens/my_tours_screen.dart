@@ -145,7 +145,13 @@ class _TourCard extends StatelessWidget {
   Future<void> _propose(BuildContext context, Tour tour) async {
     final t = l10n(context);
     final candidates = appState.guides
-        .where((g) => g.id != user.id && g.role == Role.guida)
+        // Le visite guidate non vanno a chi è solo accompagnatore.
+        .where((g) =>
+            g.id != user.id &&
+            g.roles.isNotEmpty &&
+            (!g.onlyAccompagnatore ||
+                tour.category == 'Accompagnamento' ||
+                tour.isPackage))
         .toList();
     final chosen = await showDialog<Guide>(
       context: context,

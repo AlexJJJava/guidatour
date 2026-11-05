@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:guidatour/app_config.dart';
 import 'package:guidatour/l10n/gen/app_localizations.dart';
+import 'package:guidatour/l10n/labels.dart';
 import 'package:guidatour/l10n/locale_controller.dart';
 import 'package:guidatour/main.dart';
 import 'package:guidatour/models.dart';
@@ -487,6 +488,113 @@ void main() {
     });
   });
 
+  group('più ruoli', () {
+    Guide multi(List<String> roles, {String approval = 'approvato'}) =>
+        Guide.fromProfileJson({
+          'id': 'm1',
+          'name': 'Marta Neri',
+          'email': 'm@example.com',
+          'role': primaryRole(roles.map(roleFromString)).name,
+          'roles': roles,
+          'approvalStatus': approval,
+        });
+
+    test('i ruoli arrivano tutti, con il principale', () {
+      final u = multi(['accompagnatore', 'guida']);
+      expect(u.roles, [Role.guida, Role.accompagnatore]);
+      expect(u.role, Role.guida);
+      expect(u.onlyAccompagnatore, isFalse);
+      expect(multi(['accompagnatore']).onlyAccompagnatore, isTrue);
+      expect(multi(['accompagnatore', 'tourOperator']).onlyAccompagnatore,
+          isFalse);
+    });
+
+    test('in attesa: turista con tutti i ruoli chiesti', () {
+      final u = multi(['guida', 'tourOperator'], approval: 'in_attesa');
+      expect(u.role, Role.turista);
+      expect(u.roles, isEmpty);
+      expect(u.requestedRoles, [Role.guida, Role.tourOperator]);
+    });
+
+    test('il ruolo principale segue la priorità', () {
+      expect(primaryRole([Role.accompagnatore, Role.tourOperator]),
+          Role.tourOperator);
+      expect(primaryRole([Role.accompagnatore]), Role.accompagnatore);
+      expect(primaryRole(const []), Role.turista);
+    });
+
+    testWidgets('guida e accompagnatore: tutte le categorie, senza avviso',
+        (tester) async {
+      sized(tester, const Size(1280, 2400));
+      seed(multi(['guida', 'accompagnatore']));
+      await tester.pumpWidget(page(const TourFormScreen()));
+      await tester.pump();
+      expect(find.text(t.accompagnatoreNotice), findsNothing);
+      await tester.tap(find.byWidgetPredicate(
+          (w) => '${w.runtimeType}'.startsWith('DropdownButton<String>')).at(1));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text('Visita guidata'), findsWidgets);
+      expect(find.text('Accompagnamento'), findsWidgets);
+    });
+
+    testWidgets('pacchetti solo con il ruolo tour operator', (tester) async {
+      sized(tester, const Size(1280, 2400));
+      seed(multi(['guida', 'accompagnatore']));
+      await tester.pumpWidget(page(const TourFormScreen()));
+      await tester.pump();
+      await tester.tap(find.byType(FilterChip).first);
+      await tester.pump();
+      expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      seed(multi(['guida', 'tourOperator']));
+      await tester.pumpWidget(page(const TourFormScreen()));
+      await tester.pump();
+      await tester.tap(find.byType(FilterChip).first);
+      await tester.pump();
+      expect(find.byIcon(Icons.warning_amber_rounded), findsNothing);
+    });
+
+    testWidgets('in registrazione si scelgono più profili', (tester) async {
+      sized(tester, const Size(1280, 2000));
+      seed(null);
+      await tester.pumpWidget(page(const AuthScreen()));
+      await tester.pump();
+      await tester.tap(find.text(t.authNoAccount));
+      await tester.pump();
+      expect(find.byType(CheckboxListTile), findsNWidgets(4));
+      expect(find.text(t.authRolesTourist), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('role-guida')));
+      await tester.tap(find.byKey(const ValueKey('role-accompagnatore')));
+      await tester.pump();
+      expect(
+          find.text(t.authRolesPro('${t.roleGuida} · ${t.roleAccompagnatore}')),
+          findsOneWidget);
+    });
+
+    testWidgets('Account mostra tutti i ruoli', (tester) async {
+      sized(tester, const Size(1280, 1600));
+      seed(multi(['guida', 'accompagnatore']));
+      await tester.pumpWidget(page(const AccountScreen()));
+      await tester.pump();
+      expect(
+          find.textContaining('${t.roleGuida} · ${t.roleAccompagnatore}'),
+          findsOneWidget);
+    });
+
+    testWidgets('Approvazioni mostra i ruoli chiesti', (tester) async {
+      sized(tester, const Size(1280, 1600));
+      final u = multi(['guida', 'tourOperator'], approval: 'in_attesa');
+      expect(
+          find.textContaining(t.roleGuida), findsNothing); // prima di montare
+      seed(user(Role.turista, isAdmin: true));
+      await tester.pumpWidget(page(Builder(
+          builder: (context) => Text(rolesLabel(context,
+              u.requestedRoles.isEmpty ? u.roles : u.requestedRoles)))));
+      expect(find.text('${t.roleGuida} · ${t.roleTourOperator}'),
+          findsOneWidget);
+    });
+  });
+
   group('professionista non approvato', () {
     Guide fromMe(String role, String approval) => Guide.fromProfileJson({
           'id': 'p1',
@@ -501,7 +609,8 @@ void main() {
         for (final role in ['guida', 'accompagnatore', 'tourOperator']) {
           final u = fromMe(role, approval);
           expect(u.role, Role.turista, reason: '$role $approval');
-          expect(u.requestedRole, roleFromString(role));
+          expect(u.requestedRoles, [roleFromString(role)]);
+          expect(u.roles, isEmpty);
         }
       }
     });
@@ -509,8 +618,9 @@ void main() {
     test('approvato ha il suo ruolo', () {
       final u = fromMe('accompagnatore', 'approvato');
       expect(u.role, Role.accompagnatore);
-      expect(u.requestedRole, isNull);
-      expect(fromMe('turista', 'approvato').requestedRole, isNull);
+      expect(u.requestedRoles, isEmpty);
+      expect(u.roles, [Role.accompagnatore]);
+      expect(fromMe('turista', 'approvato').requestedRoles, isEmpty);
     });
 
     for (final approval in ['in_attesa', 'rifiutato']) {

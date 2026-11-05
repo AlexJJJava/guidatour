@@ -33,7 +33,8 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _hidden = true;
   bool _terms = false;
   bool _busy = false;
-  Role _role = Role.turista;
+  /// Ruoli professionali scelti; nessuno = turista.
+  final Set<Role> _roles = {};
 
   @override
   void dispose() {
@@ -53,7 +54,8 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _busy = true);
     final msg = _register
         ? await appState.registerWithPassword(
-            _name.text, _email.text, _password.text, _role)
+            _name.text, _email.text, _password.text,
+            [for (final r in professionalRoles) if (_roles.contains(r)) r])
         : await appState.loginWithPassword(_email.text, _password.text);
     if (!mounted) return;
     setState(() => _busy = false);
@@ -182,25 +184,36 @@ class _AuthScreenState extends State<AuthScreen> {
               const SizedBox(height: 16),
               Text(t.authRoleTitle,
                   style: const TextStyle(fontWeight: FontWeight.w700)),
-              RadioGroup<Role>(
-                groupValue: _role,
-                onChanged: (v) => setState(() => _role = v!),
-                child: Column(
-                  children: [
-                    for (final r in Role.values)
-                      RadioListTile<Role>(
-                        contentPadding: EdgeInsets.zero,
-                        value: r,
-                        title: Text(roleLabel(context, r)),
-                        subtitle: Text(switch (r) {
-                          Role.turista => t.authRoleDescTurista,
-                          Role.guida => t.authRoleDescGuida,
-                          Role.accompagnatore => t.authRoleDescAccompagnatore,
-                          Role.tourOperator => t.authRoleDescTourOperator,
-                        }),
-                      ),
-                  ],
+              const SizedBox(height: 4),
+              Text(t.authRolesHint,
+                  style: const TextStyle(fontSize: 13, color: kMuted)),
+              for (final r in professionalRoles)
+                CheckboxListTile(
+                  key: ValueKey('role-${r.name}'),
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: _roles.contains(r),
+                  onChanged: (v) => setState(
+                      () => v == true ? _roles.add(r) : _roles.remove(r)),
+                  title: Text(roleLabel(context, r)),
+                  subtitle: Text(switch (r) {
+                    Role.guida => t.authRoleDescGuida,
+                    Role.accompagnatore => t.authRoleDescAccompagnatore,
+                    _ => t.authRoleDescTourOperator,
+                  }),
                 ),
+              Padding(
+                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                child: Text(
+                    _roles.isEmpty
+                        ? t.authRolesTourist
+                        : t.authRolesPro(rolesLabel(context, [
+                            for (final r in professionalRoles)
+                              if (_roles.contains(r)) r
+                          ])),
+                    key: const ValueKey('roles-summary'),
+                    style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.w600)),
               ),
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,

@@ -18,6 +18,11 @@ String roleLabel(BuildContext context, Role role) {
   };
 }
 
+/// Ruoli professionali di una persona, o "Turista" se non ne ha.
+String rolesLabel(BuildContext context, List<Role> roles) => roles.isEmpty
+    ? roleLabel(context, Role.turista)
+    : roles.map((r) => roleLabel(context, r)).join(' · ');
+
 String categoryLabel(BuildContext context, String category) {
   final t = l10n(context);
   return switch (category) {

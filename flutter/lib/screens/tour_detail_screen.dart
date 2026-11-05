@@ -135,7 +135,7 @@ class TourDetailScreen extends StatelessWidget {
                       .map((a) => accessoryLabel(context, a))
                       .join(', '))),
             ],
-            if (guide?.role == Role.accompagnatore) ...[
+            if (guide?.onlyAccompagnatore == true) ...[
               const SizedBox(height: 16),
               InfoBanner(t.accompagnatoreNotice),
             ],
@@ -150,7 +150,7 @@ class TourDetailScreen extends StatelessWidget {
                 title: Text(guide?.name ?? '',
                     style: const TextStyle(fontWeight: FontWeight.w700)),
                 subtitle: Text(
-                    '${guide == null ? '' : roleLabel(context, guide.role)}'
+                    '${guide == null ? '' : rolesLabel(context, guide.roles)}'
                     '${guide != null && guide.role.isProfessional ? ' · ${t.verifiedSuffix}' : ''}'
                     '\n${guide?.languages.map((l) => languageLabel(context, l)).join(', ')}'),
                 isThreeLine: true,

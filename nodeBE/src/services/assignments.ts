@@ -1,6 +1,11 @@
 import { HttpError, unwrap } from '../errors.js'
 import type { Db } from '../supabase.js'
-import { getPublicProfile, getPublicProfiles, type PublicProfile } from './profiles.js'
+import {
+  getPublicProfile,
+  getPublicProfiles,
+  onlyAccompagnatore,
+  type PublicProfile,
+} from './profiles.js'
 import { getTour } from './tours.js'
 
 // Cambio / cessione tour tra professionisti (BR-011A). Le transizioni di
@@ -77,7 +82,7 @@ export async function proposeAssignment(
     getTour(db, tourId),
     getPublicProfile(db, toGuideId),
   ])
-  if (target.role === 'accompagnatore' && tour.category !== 'Accompagnamento' && !tour.isPackage) {
+  if (onlyAccompagnatore(target) && tour.category !== 'Accompagnamento' && !tour.isPackage) {
     throw new HttpError(
       422,
       'Le visite guidate sono riservate alla guida abilitata: non puoi proporle a un accompagnatore.',

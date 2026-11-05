@@ -558,7 +558,7 @@ class TourCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     if (guide != null)
                       _CardFact(Icons.person_outline,
-                          '${guide.name} · ${roleLabel(context, guide.role)}'),
+                          '${guide.name} · ${rolesLabel(context, guide.roles)}'),
                     const Spacer(),
                     Text.rich(
                       TextSpan(

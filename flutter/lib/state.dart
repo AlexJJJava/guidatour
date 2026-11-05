@@ -281,15 +281,19 @@ class AppState extends ChangeNotifier {
   /// Restituisce un messaggio da mostrare (errore, o avviso di conferma email),
   /// oppure null se la registrazione ha avviato subito una sessione valida.
   Future<String?> registerWithPassword(
-      String name, String email, String password, Role role) async {
+      String name, String email, String password, List<Role> roles) async {
     try {
       final res = await Supabase.instance.client.auth.signUp(
         email: email.trim(),
         password: password,
-        data: {'name': name.trim(), 'role': role.name},
+        data: {
+          'name': name.trim(),
+          'role': primaryRole(roles).name,
+          'roles': [for (final r in roles) r.name],
+        },
       );
       if (res.session == null) {
-        return role.isProfessional
+        return roles.isNotEmpty
             ? 'Account creato: controlla la tua email per confermarlo. Prima di poter accedere, un amministratore dovrà approvare la registrazione.'
             : 'Account creato: controlla la tua email per confermarlo prima di accedere.';
       }

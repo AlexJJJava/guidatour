@@ -126,7 +126,8 @@ class _RegistrationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = l10n(context);
     final details = [
-      roleLabel(context, guide.role),
+      rolesLabel(context,
+          guide.requestedRoles.isEmpty ? guide.roles : guide.requestedRoles),
       guide.email,
       cityLabel(context, guide.city),
       if (guide.createdAt != null)

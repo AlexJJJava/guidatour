@@ -28,11 +28,11 @@ class PosterScreen extends StatelessWidget {
       meetingPoint: t.detailMeetingPoint(tour.meetingPoint),
       price: fmtPrice(tour.price),
       byline: t.posterByGuide(guide?.name ?? '',
-          guide == null ? '' : roleLabel(context, guide.role)),
+          guide == null ? '' : rolesLabel(context, guide.roles)),
       scanHint: t.posterScanHint,
       link: link,
       imageAsset: categoryImage(tour.category),
-      notice: guide?.role == Role.accompagnatore ? t.accompagnatoreNotice : null,
+      notice: guide?.onlyAccompagnatore == true ? t.accompagnatoreNotice : null,
     );
   }
 
@@ -110,7 +110,7 @@ class PosterScreen extends StatelessWidget {
                             guide?.name ?? '',
                             guide == null
                                 ? ''
-                                : roleLabel(context, guide.role)),
+                                : rolesLabel(context, guide.roles)),
                         style: const TextStyle(color: kMuted)),
                     const SizedBox(height: 6),
                     Text(t.posterScanHint,

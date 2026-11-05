@@ -451,6 +451,69 @@ describe('professionista non approvato', () => {
   })
 })
 
+describe('più ruoli', () => {
+  // Guida e accompagnatore insieme, con un'unica approvazione (migrazione 0006).
+  const EMAIL = 'alessio.damico+multi1@gmail.com'
+  let token = ''
+  let roles: string[] = []
+  before(async () => {
+    token = await login(EMAIL).catch(() => '')
+    if (token) roles = (await api('/me', { token })).json.roles ?? []
+  })
+  const ready = (t: { skip: (m: string) => void }) => {
+    if (roles.length < 2) t.skip("account multi1 non ancora creato: serve la migrazione 0006")
+    return roles.length >= 2
+  }
+
+  test('ha guida e accompagnatore', (t) => {
+    if (!ready(t)) return
+    assert.deepEqual([...roles].sort(), ['accompagnatore', 'guida'])
+  })
+
+  test('pubblica sia visite guidate sia accompagnamenti, senza blocchi', async (t) => {
+    if (!ready(t)) return
+    for (const over of [
+      { category: 'Visita guidata', description: 'Visita al Colosseo' },
+      { category: 'Accompagnamento', description: 'Assistenza al museo' },
+    ]) {
+      const r = await api('/tours', { token, body: tourBody(over) })
+      assert.equal(r.status, 201, JSON.stringify(r.json))
+      created.push({ id: r.json.id, owner: 'multi' as Who })
+      tokens['multi' as Who] = token
+    }
+  })
+
+  test('non pubblica pacchetti senza il ruolo tour operator', async (t) => {
+    if (!ready(t)) return
+    const r = await api('/tours', {
+      token,
+      body: tourBody({ accessories: ['Cena / ristorante'] }),
+    })
+    assert.equal(r.status, 422)
+  })
+
+  test('riceve visite guidate in cessione perché è anche guida', async (t) => {
+    if (!ready(t)) return
+    const me = (await api('/me', { token })).json
+    const tour = await newTour('guida', { category: 'Visita guidata' })
+    const p = await api('/assignments', {
+      token: tokens.guida,
+      body: { tourId: tour.id, toGuideId: me.id },
+    })
+    assert.equal(p.status, 201, JSON.stringify(p.json))
+    await api(`/assignments/${p.json.id}/cancel`, { token: tokens.guida, body: {} })
+  })
+
+  test('compare tra le guide e tra gli accompagnatori', async (t) => {
+    if (!ready(t)) return
+    const me = (await api('/me', { token })).json
+    for (const role of ['guida', 'accompagnatore']) {
+      const { json } = await api(`/guides?role=${role}`)
+      assert.ok(json.guides.some((g: { id: string }) => g.id === me.id), role)
+    }
+  })
+})
+
 describe('admin', () => {
   test('consulta registrazioni e consensi', async () => {
     const token = tokens.admin

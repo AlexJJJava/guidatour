@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto'
 import { PUBLIC_SITE_URL } from '../config.js'
 import { HttpError, notFound, unwrap } from '../errors.js'
 import type { Db } from '../supabase.js'
-import { getPublicProfile, type Profile, type PublicProfile } from './profiles.js'
+import { getPublicProfile, type Profile, type PublicProfile, onlyAccompagnatore, rolesOf } from './profiles.js'
 
 // Servizi accessori che trasformano un tour in pacchetto turistico (BR-014G).
 export const ACCESSORY_SERVICES = [
@@ -130,14 +130,14 @@ const toRow = (t: Partial<TourInput>) => ({
  */
 export function tourBlockReason(author: Profile, t: TourInput): string | null {
   if (t.accessories.length > 0) {
-    if (author.role !== 'tourOperator') {
+    if (!rolesOf(author).includes('tourOperator')) {
       return (
         `Con servizi accessori (${t.accessories.join(', ')}) l'offerta diventa un ` +
         'pacchetto turistico, che solo un tour operator verificato può pubblicare.'
       )
     }
   }
-  if (author.role === 'accompagnatore') {
+  if (onlyAccompagnatore(author)) {
     if (t.category !== 'Accompagnamento') {
       return (
         "L'accompagnatore turistico può pubblicare solo attività di accompagnamento, " +
