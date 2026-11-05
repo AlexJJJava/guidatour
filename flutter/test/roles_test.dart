@@ -406,6 +406,7 @@ void main() {
         'Turista',
         'Guida',
         'Accompagnatore',
+        'Guida + Accomp.',
         'Tour operator',
         'Admin',
       ]) {

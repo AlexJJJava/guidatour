@@ -149,8 +149,8 @@ const tests = [
   ['Backend online', 'Guida', 8, 'Superato', 'Tour, richieste, cessione, dati altrui protetti'],
   ['Backend online', 'Accompagnatore', 7, 'Superato', 'Categorie, parole riservate, pacchetti, proposte'],
   ['Backend online', 'Tour operator', 3, 'Superato', 'Pacchetti pubblicati da tour operator approvato'],
-  ['Backend online', 'Gestione (admin)', 4, 'Superati 2, 2 in attesa della migrazione 0007', 'Panoramica ed elenchi; accesso negato agli altri ruoli; eliminazione tour e sospensione/riattivazione dopo la query'],
-  ['Backend online', 'Più ruoli', 5, 'In attesa della migrazione 0006', 'Guida + accompagnatore: visite e accompagnamenti senza blocchi, niente pacchetti, cessioni, elenchi per ruolo. Si attivano dopo la query'],
+  ['Backend online', 'Gestione (admin)', 4, 'Superato', 'Panoramica ed elenchi; accesso negato agli altri ruoli; eliminazione tour, sospensione e riattivazione'],,
+  ['Backend online', 'Più ruoli', 5, 'Superato', 'Guida + accompagnatore: visite e accompagnamenti senza blocchi, niente pacchetti, cessioni, elenchi per ruolo.'],
   ['Backend online', 'Professionista non approvato', 3, 'Superato', 'Guida rifiutata: niente funzioni professionali, preferiti, carrello e richieste come turista, assente dagli elenchi'],
   ['Backend online', 'Admin', 3, 'Superato', 'Registrazioni, consensi, limiti del ruolo'],
   ['Backend online', 'Tentativi di scavalcare i ruoli', 6, 'Superato', 'Revoca consensi provata solo su id inesistente: nel database non ci sono consensi'],
@@ -220,6 +220,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['05/11/2026', 'Migrazioni 0006 e 0007 attive', 'Ruoli multipli e area Gestione attivi; account di prova Guida + Accompagnatore (Marta Neri) con accesso rapido', 'Tutti i test backend superati, nessuno saltato'],
   ['05/11/2026', 'Area Gestione, Account e profilo', 'Voce Gestione per l’admin con Panoramica, Professionisti (sospendi/riattiva), Tour (elimina), Approvazioni, WhatsApp; Account e Modifica profilo ridisegnati con il giallo del tema (migrazione 0007)', 'Test app e backend (2 in attesa della 0007), schermate sul sito'],
   ['05/11/2026', 'Più ruoli per utente', 'In registrazione si scelgono uno o più profili professionali, con un’unica approvazione dell’admin; regole sommate per combinazione (migrazione 0006). Fix: Approvazioni mostrava Turista per le richieste in attesa', 'Test app e backend (5 in attesa della 0006)'],
   ['05/11/2026', 'Excel: colonna approvazione', 'Nel foglio Ruoli la colonna "Approvazione admin": la richiedono guida, accompagnatore e tour operator', '—'],

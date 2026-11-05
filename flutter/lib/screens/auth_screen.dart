@@ -11,6 +11,7 @@ const _demoAccounts = [
   ('Turista', 'alessio.damico+turista1@gmail.com'),
   ('Guida', 'alessio.damico+guida1@gmail.com'),
   ('Accompagnatore', 'alessio.damico+accompagnatore1@gmail.com'),
+  ('Guida + Accomp.', 'alessio.damico+multi1@gmail.com'),
   ('Tour operator', 'alessio.damico+operator1@gmail.com'),
   ('Admin', 'alessio.damico+admin1@gmail.com'),
 ];
