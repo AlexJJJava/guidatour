@@ -220,6 +220,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['05/11/2026', 'Sfondo giallo e pagine ridisegnate', 'Sfondo giallo chiaro e intestazione dorata con icona e spiegazione in tutte le pagine interne; Prenotazioni, Assegnazioni, Panoramica e I miei tour a schede bianche con stato colorato e foto', 'Test app, schermate sul sito'],
   ['05/11/2026', 'Migrazioni 0006 e 0007 attive', 'Ruoli multipli e area Gestione attivi; account di prova Guida + Accompagnatore (Marta Neri) con accesso rapido', 'Tutti i test backend superati, nessuno saltato'],
   ['05/11/2026', 'Area Gestione, Account e profilo', 'Voce Gestione per l’admin con Panoramica, Professionisti (sospendi/riattiva), Tour (elimina), Approvazioni, WhatsApp; Account e Modifica profilo ridisegnati con il giallo del tema (migrazione 0007)', 'Test app e backend (2 in attesa della 0007), schermate sul sito'],
   ['05/11/2026', 'Più ruoli per utente', 'In registrazione si scelgono uno o più profili professionali, con un’unica approvazione dell’admin; regole sommate per combinazione (migrazione 0006). Fix: Approvazioni mostrava Turista per le richieste in attesa', 'Test app e backend (5 in attesa della 0006)'],
