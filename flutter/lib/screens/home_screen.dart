@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 
@@ -9,8 +11,24 @@ import 'search_screen.dart';
 import 'tour_detail_screen.dart';
 import 'whatsapp_optin.dart';
 
-/// Foto di copertina, uguale per tutte le città.
+/// Foto di copertina, uguale per tutte le città (3920×1000 px).
 const _heroPhoto = 'assets/images/hero.jpg';
+const _heroPhotoSize = Size(3920, 1000);
+
+/// Riga della foto che resta sul fondo della copertina (sotto il ponte):
+/// se la copertina è più bassa della foto si taglia il cielo.
+const _heroPhotoBottom = 0.867;
+
+/// Allineamento verticale che tiene [_heroPhotoBottom] sul fondo.
+double heroPhotoAlignmentY(Size box) {
+  final scale = math.max(box.width / _heroPhotoSize.width,
+      box.height / _heroPhotoSize.height);
+  final shown = _heroPhotoSize.height * scale;
+  final free = shown - box.height;
+  if (free <= 0) return 0;
+  final top = (_heroPhotoBottom * shown - box.height).clamp(0.0, free);
+  return top / free * 2 - 1;
+}
 
 void _openSearch(BuildContext context, {String query = '', String? category}) {
   Navigator.of(context).push(
@@ -243,10 +261,13 @@ class _Hero extends StatelessWidget {
         Positioned.fill(
           child: ColoredBox(
             color: kNight,
-            child: Image.asset(
-              _heroPhoto,
-              fit: BoxFit.cover,
-              alignment: const Alignment(0.9, -0.13),
+            child: LayoutBuilder(
+              builder: (context, c) => Image.asset(
+                _heroPhoto,
+                fit: BoxFit.cover,
+                alignment:
+                    Alignment(0.9, heroPhotoAlignmentY(c.biggest)),
+              ),
             ),
           ),
         ),
@@ -275,7 +296,7 @@ class _Hero extends StatelessWidget {
                 children: [
                   Padding(
                     padding: EdgeInsets.fromLTRB(
-                        wide ? 48 : 20, wide ? 16 : 10, wide ? 48 : 20, 0),
+                        wide ? 48 : 20, wide ? 6 : 10, wide ? 48 : 20, 0),
                     child: Center(
                       child: ConstrainedBox(
                         constraints:
@@ -304,12 +325,14 @@ class _Hero extends StatelessWidget {
                                     fontStyle: FontStyle.italic,
                                     fontWeight: FontWeight.w600,
                                     color: kGoldText)),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 6),
+                            // Larga quanto il riquadro di ricerca: su schermo
+                            // largo sta su una riga.
                             Align(
                               alignment: Alignment.centerLeft,
                               child: ConstrainedBox(
                                 constraints:
-                                    const BoxConstraints(maxWidth: 480),
+                                    const BoxConstraints(maxWidth: 880),
                                 child: Text(t.homeHeroSubtitle,
                                     style: const TextStyle(
                                         fontSize: 14,
@@ -317,7 +340,7 @@ class _Hero extends StatelessWidget {
                                         color: Colors.white)),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 10),
                             Align(
                               alignment: Alignment.centerLeft,
                               child: ConstrainedBox(
@@ -329,7 +352,7 @@ class _Hero extends StatelessWidget {
                                         700),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 10),
                             Wrap(
                               spacing: 24,
                               runSpacing: 10,
@@ -382,7 +405,7 @@ class _Hero extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 10),
             ],
           ),
         ),
