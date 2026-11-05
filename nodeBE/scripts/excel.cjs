@@ -75,9 +75,9 @@ const wsR = sheet('Ruoli', "Situazione dell'app al 5 novembre 2026, ricavata dal
     "Pubblicare visite guidate, pacchetti o testi su beni culturali; presentarsi come guida abilitata (l'avviso compare nel modulo e nella scheda pubblica)", 'Accompagnatore'],
   ['Tour operator', 'Sì: fino ad allora è un turista; vale anche per i pacchetti', PRO, 'Le stesse funzioni della guida; pubblicare pacchetti completi con cena, transfer, biglietti, hotel o esperienze food',
     'Toccare tour e richieste altrui', 'Tour operator'],
-  ['Admin', 'No: lo nomina il gestore da Supabase', 'Scopri, Tour, Scheda tour, Preferiti, Prenotazioni, Carrello, Approvazioni, Account dal pallino (account di prova con ruolo turista)',
-    'Approvare o rifiutare guide, accompagnatori e tour operator; consultare i consensi WhatsApp; usare le funzioni del proprio ruolo',
-    'Pubblicare tour, se il ruolo è turista. Sospendere utenti e rimuovere tour (non ancora sviluppati)', 'Admin'],
+  ['Admin', 'No: lo nomina il gestore da Supabase', 'Scopri, Tour, Scheda tour, Preferiti, Prenotazioni, Carrello, Gestione (Panoramica, Professionisti, Tour, Approvazioni, WhatsApp), Account dal pallino (account di prova con ruolo turista)',
+    'Vedere i numeri della piattaforma; approvare o rifiutare le registrazioni; sospendere e riattivare i professionisti; eliminare qualunque tour; consultare e revocare i consensi WhatsApp; usare le funzioni del proprio ruolo',
+    'Pubblicare tour, se il ruolo è turista; leggere i dati personali delle richieste (vede solo i totali)', 'Admin'],
 ], [26, 24, 44, 58, 50, 18]);
 
 // Sì in verde (ruolo da approvare), No in grigio.
@@ -115,7 +115,7 @@ const pages = [
   ['Modulo tour', N, N, P, P, P, N],
   ['QR e locandina (PDF da scaricare o stampare)', N, N, P, P, P, N],
   ['Assegnazioni', N, N, P, P, P, N],
-  ['Approvazioni', N, N, N, N, N, P],
+  ['Gestione: panoramica, professionisti, tour, approvazioni, WhatsApp', N, N, N, N, N, P],
   ['Account e profilo (foto inclusa), dal pallino se collegati', L, P, P, P, P, P],
   ['FAQ (dal footer)', P, P, P, P, P, P],
 ];
@@ -135,6 +135,8 @@ const ops = [
   ['Proporre tour ad altri professionisti', N, N, P, 'Sì (da decidere)', P, N],
   ['Ricevere proposte', N, N, P, 'Solo accompagnamento e pacchetti', P, N],
   ['Approvare registrazioni', N, N, N, N, N, P],
+  ['Sospendere o riattivare professionisti', N, N, N, N, N, P],
+  ['Eliminare tour di altri', N, N, N, N, N, P],
   ['Consultare consensi WhatsApp', N, N, N, N, N, P],
 ];
 colours(sheet('Operazioni per ruolo', "Regole imposte dal backend, non solo dall'app.",
@@ -147,12 +149,13 @@ const tests = [
   ['Backend online', 'Guida', 8, 'Superato', 'Tour, richieste, cessione, dati altrui protetti'],
   ['Backend online', 'Accompagnatore', 7, 'Superato', 'Categorie, parole riservate, pacchetti, proposte'],
   ['Backend online', 'Tour operator', 3, 'Superato', 'Pacchetti pubblicati da tour operator approvato'],
+  ['Backend online', 'Gestione (admin)', 4, 'Superati 2, 2 in attesa della migrazione 0007', 'Panoramica ed elenchi; accesso negato agli altri ruoli; eliminazione tour e sospensione/riattivazione dopo la query'],
   ['Backend online', 'Più ruoli', 5, 'In attesa della migrazione 0006', 'Guida + accompagnatore: visite e accompagnamenti senza blocchi, niente pacchetti, cessioni, elenchi per ruolo. Si attivano dopo la query'],
   ['Backend online', 'Professionista non approvato', 3, 'Superato', 'Guida rifiutata: niente funzioni professionali, preferiti, carrello e richieste come turista, assente dagli elenchi'],
   ['Backend online', 'Admin', 3, 'Superato', 'Registrazioni, consensi, limiti del ruolo'],
   ['Backend online', 'Tentativi di scavalcare i ruoli', 6, 'Superato', 'Revoca consensi provata solo su id inesistente: nel database non ci sono consensi'],
   ['Backend online', 'Foto profilo', 5, 'Superato', 'Caricamento, rimozione, cartelle altrui, formato e indirizzi esterni'],
-  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 64, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
+  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, Gestione admin, Account e profilo, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 70, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
   ['Non coperto', 'Prova end-to-end nel browser', 0, 'Da provare', 'Clic reali sul sito pubblicato'],
 ];
 const wsT = sheet('Test', 'Esiti del 2 novembre 2026. Comando backend: npm run test:roles (cartella nodeBE).',
@@ -170,7 +173,7 @@ const todo = [
   [4, 'MVP', 'Locandina PDF', 'A4 con foto, QR, prezzo e organizzatore; pulsanti Scarica PDF e Stampa', 'Fatto'],
   [5, 'MVP', 'SEO', 'Pagine indicizzabili, sitemap, robots.txt, dati strutturati, titolo del sito', F],
   [6, 'MVP', 'Privacy e termini', 'Pagine vere e cancellazione dei dati su richiesta', F],
-  [7, 'MVP', 'Admin completo', 'Sospensione utenti e rimozione tour (il badge verificato coincide ora con l’approvazione)', F],
+  [7, 'MVP', 'Admin completo', 'Area Gestione: panoramica, sospensione professionisti, eliminazione tour, approvazioni, consensi (migrazione 0007)', 'Fatto'],
   [8, 'MVP', 'Recupero password', "Non presente nell'app", F],
   [9, 'MVP', 'Conferma email e rimozione accessi rapidi', 'Da fare prima del lancio', F],
   [10, 'MVP', 'Hosting sempre attivo', 'Render free si addormenta, i QR devono essere sempre raggiungibili', 'Da decidere'],
@@ -217,6 +220,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['05/11/2026', 'Area Gestione, Account e profilo', 'Voce Gestione per l’admin con Panoramica, Professionisti (sospendi/riattiva), Tour (elimina), Approvazioni, WhatsApp; Account e Modifica profilo ridisegnati con il giallo del tema (migrazione 0007)', 'Test app e backend (2 in attesa della 0007), schermate sul sito'],
   ['05/11/2026', 'Più ruoli per utente', 'In registrazione si scelgono uno o più profili professionali, con un’unica approvazione dell’admin; regole sommate per combinazione (migrazione 0006). Fix: Approvazioni mostrava Turista per le richieste in attesa', 'Test app e backend (5 in attesa della 0006)'],
   ['05/11/2026', 'Excel: colonna approvazione', 'Nel foglio Ruoli la colonna "Approvazione admin": la richiedono guida, accompagnatore e tour operator', '—'],
   ['05/11/2026', 'Non approvati = turisti', 'Professionisti in attesa o rifiutati usano l’app come turisti con avviso in Account; pacchetti per ogni tour operator approvato; tolto l’accesso rapido T.O. non verificato', 'Test app e backend'],
