@@ -133,7 +133,7 @@ export function tourBlockReason(author: Profile, t: TourInput): string | null {
     if (!rolesOf(author).includes('tourOperator')) {
       return (
         `Con servizi accessori (${t.accessories.join(', ')}) l'offerta diventa un ` +
-        'pacchetto turistico, che solo un tour operator verificato può pubblicare.'
+        'pacchetto turistico, che solo un tour operator può pubblicare.'
       )
     }
   }

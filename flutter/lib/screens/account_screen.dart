@@ -205,17 +205,6 @@ class _ProfileHeader extends StatelessWidget {
                             style: const TextStyle(
                                 fontSize: 12, fontWeight: FontWeight.w700)),
                       ),
-                    if (user.role.isProfessional)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.verified, size: 16, color: kInk),
-                          const SizedBox(width: 4),
-                          Text(t.verifiedSuffix,
-                              style: const TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
                     if (user.isAdmin)
                       Container(
                         padding: const EdgeInsets.symmetric(

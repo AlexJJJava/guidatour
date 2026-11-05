@@ -151,7 +151,6 @@ class TourDetailScreen extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w700)),
                 subtitle: Text(
                     '${guide == null ? '' : rolesLabel(context, guide.roles)}'
-                    '${guide != null && guide.role.isProfessional ? ' · ${t.verifiedSuffix}' : ''}'
                     '\n${guide?.languages.map((l) => languageLabel(context, l)).join(', ')}'),
                 isThreeLine: true,
               ),

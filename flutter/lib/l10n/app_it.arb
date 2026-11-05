@@ -60,7 +60,7 @@
   "fieldWhatsappNumber": "Numero WhatsApp",
   "whatsappHint": "+39 …",
   "homeHeroTitle": "Tour e visite guidate, con chi la conosce davvero.",
-  "homeHeroSubtitle": "Guide abilitate, accompagnatori e tour operator verificati. Scegli, scrivi alla guida, parti.",
+  "homeHeroSubtitle": "Guide abilitate, accompagnatori e tour operator. Scegli, scrivi alla guida, parti.",
   "homeSearchCta": "Cerca un tour",
   "homeUpcomingTitle": "Prossimi tour a {city}",
   "@homeUpcomingTitle": {
@@ -111,8 +111,6 @@
   "roleGuida": "Guida turistica",
   "roleAccompagnatore": "Accompagnatore turistico",
   "roleTourOperator": "Tour operator",
-  "verifiedSuffix": "verificato",
-  "unverifiedSuffix": "in attesa di verifica",
   "greetingHello": "Ciao {name}",
   "@greetingHello": {
     "placeholders": {
@@ -355,7 +353,7 @@
   "statusRifiutato": "rifiutato",
   "statusAnnullato": "annullato",
   "statusCompletato": "completato",
-  "formBlockAccessoriesNotOperator": "Con servizi accessori ({accessories}) l’offerta diventa un pacchetto turistico. Il profilo {role} può pubblicare solo la propria visita o attività: rimuovi i servizi accessori oppure usa un profilo Tour operator verificato.",
+  "formBlockAccessoriesNotOperator": "Con servizi accessori ({accessories}) l’offerta diventa un pacchetto turistico. Il profilo {role} può pubblicare solo la propria visita o attività: rimuovi i servizi accessori oppure usa un profilo Tour operator.",
   "@formBlockAccessoriesNotOperator": {
     "placeholders": {
       "accessories": {
@@ -510,7 +508,7 @@
   "faq3Q": "Devo pagare online?",
   "faq3A": "No. Il pagamento si concorda direttamente con chi organizza il tour, secondo le modalità che ti indicherà.",
   "faq4Q": "Che differenza c’è tra guida, accompagnatore e tour operator?",
-  "faq4A": "La guida turistica abilitata svolge visite guidate. L’accompagnatore turistico offre assistenza e supporto ai gruppi, ma non visite guidate specialistiche. Il tour operator verificato può proporre pacchetti con servizi aggiuntivi, come cena o transfer.",
+  "faq4A": "La guida turistica abilitata svolge visite guidate. L’accompagnatore turistico offre assistenza e supporto ai gruppi, ma non visite guidate specialistiche. Il tour operator può proporre pacchetti con servizi aggiuntivi, come cena o transfer.",
   "faq5Q": "Come posso pubblicare i miei tour?",
   "faq5A": "Registrati scegliendo il profilo di guida, accompagnatore o tour operator. Dopo l’approvazione di un amministratore potrai pubblicare i tuoi tour e ricevere le richieste.",
   "faq6Q": "A cosa serve il QR sulle locandine?",
@@ -629,8 +627,6 @@
       }
     }
   },
-  "authPendingApproval": "Il tuo account non è ancora stato approvato. Un amministratore deve verificare la registrazione: riprova più tardi.",
-  "authRejectedApproval": "La tua registrazione non è stata approvata da un amministratore.",
   "cityAllItaly": "Tutta Italia",
   "toursTitleItaly": "Esperienze indimenticabili in Italia",
   "searchTitleItaly": "Tour in Italia"

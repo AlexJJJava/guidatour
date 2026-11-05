@@ -73,7 +73,7 @@ const wsR = sheet('Ruoli', "Situazione dell'app al 5 novembre 2026, ricavata dal
   ['Accompagnatore turistico', 'Sì: fino ad allora è un turista', PRO,
     'Pubblicare, modificare ed eliminare attività di accompagnamento; generare QR e locandina; gestire richieste; accettare o rifiutare proposte di accompagnamento o pacchetti',
     "Pubblicare visite guidate, pacchetti o testi su beni culturali; presentarsi come guida abilitata (l'avviso compare nel modulo e nella scheda pubblica)", 'Accompagnatore'],
-  ['Tour operator', 'Sì: fino ad allora è un turista; vale anche per i pacchetti', PRO, 'Le stesse funzioni della guida; pubblicare pacchetti completi con cena, transfer, biglietti, hotel o esperienze food',
+  ['Tour operator', 'Sì: fino ad allora è un turista', PRO, 'Le stesse funzioni della guida; pubblicare pacchetti completi con cena, transfer, biglietti, hotel o esperienze food',
     'Toccare tour e richieste altrui', 'Tour operator'],
   ['Admin', 'No: lo nomina il gestore da Supabase', 'Scopri, Tour, Scheda tour, Preferiti, Carrello e richieste, Gestione (Panoramica, Professionisti, Tour, Approvazioni, WhatsApp), Account dal pallino (account di prova con ruolo turista)',
     'Vedere i numeri della piattaforma; approvare o rifiutare le registrazioni; sospendere e riattivare i professionisti; eliminare qualunque tour; consultare e revocare i consensi WhatsApp; usare le funzioni del proprio ruolo',
@@ -221,6 +221,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['05/11/2026', 'Tolto "verificato"', 'Non si parla più di tour operator verificato o non verificato: tolte l’etichetta “verificato” da Account e scheda tour e la parola dalle frasi su tour operator e pacchetti (home, modulo tour, FAQ, messaggio del backend)', 'Test app e backend'],
   ['05/11/2026', 'Approvazioni: Tutte di default', 'La scheda Approvazioni parte da Tutte, in ordine di data, con data e stato colorato su ogni registrazione; filtri In attesa, Approvate, Rifiutate. Fix: si approvano i nuovi ruoli di chi è già approvato', 'Test app e backend, schermata sul sito'],
   ['05/11/2026', 'Prenotazioni → Richieste', 'I professionisti hanno la voce Richieste; turista e visitatore non hanno più Prenotazioni: il carrello mostra Da inviare e Richieste inviate e l’icona conta anche le risposte nuove', 'Test app, schermate sul sito'],
   ['05/11/2026', 'Ruoli dal profilo, login senza cambio pagina, fix lingua', 'In Modifica profilo si scelgono più ruoli: togliere vale subito, i nuovi passano dall’admin (migrazione 0008); Account e Gestione mostrano i ruoli in attesa. Login e logout restano sulla pagina se consentita. Il menu lingua non duplica più l’intestazione', 'Test app e backend (migrazione 0008 attiva)'],
