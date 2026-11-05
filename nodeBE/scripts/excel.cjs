@@ -57,14 +57,14 @@ function colours(ws, ref, rules) {
   });
 }
 const YES = [['Sì', 'D9F0DF'], ['No', 'F8D9D6'], ['Con accesso', 'FDEFC8']];
-const PRO = 'Scopri, Tour, Scheda tour, Panoramica, I miei tour, Assegnazioni, Prenotazioni, Account (dal pallino in alto a destra)';
+const PRO = 'Scopri, Tour, Scheda tour, Panoramica, I miei tour, Assegnazioni, Richieste, Account (dal pallino in alto a destra)';
 
 const wsR = sheet('Ruoli', "Situazione dell'app al 5 novembre 2026, ricavata dal codice. Scheda tour = pagina che si apre toccando un tour.",
   ['Ruolo', 'Approvazione admin', 'Pagine visibili', 'Cosa può fare', 'Cosa non può fare', 'Accesso rapido di prova'], [
-  ['Visitatore (senza account)', 'No: non serve un account', "Scopri, Tour, Scheda tour, Accesso/Registrazione. Preferiti, Prenotazioni e Account portano all'accesso",
+  ['Visitatore (senza account)', 'No: non serve un account', "Scopri, Tour, Scheda tour, Accesso/Registrazione. Preferiti e Account portano all'accesso",
     'Cercare e filtrare i tour; scegliere città e lingua; inviare una richiesta di prenotazione; iscriversi a WhatsApp; registrarsi',
     'Salvare preferiti; usare il carrello; vedere lo storico', 'Non serve'],
-  ['Turista', 'No: attivo subito dopo la registrazione', 'Scopri, Tour, Scheda tour, Preferiti, Prenotazioni, Carrello, Account (dal pallino in alto a destra)',
+  ['Turista', 'No: attivo subito dopo la registrazione', 'Scopri, Tour, Scheda tour, Preferiti, Carrello e richieste (icona del carrello), Account (dal pallino in alto a destra)',
     'Tutto quello del visitatore; salvare i preferiti; inviare più richieste dal carrello; vedere storico e stato delle richieste; modificare il profilo',
     'Pubblicare tour; aprire dashboard, richieste ricevute e assegnazioni', 'Turista'],
   ['Guida turistica', 'Sì: fino ad allora è un turista', PRO,
@@ -75,7 +75,7 @@ const wsR = sheet('Ruoli', "Situazione dell'app al 5 novembre 2026, ricavata dal
     "Pubblicare visite guidate, pacchetti o testi su beni culturali; presentarsi come guida abilitata (l'avviso compare nel modulo e nella scheda pubblica)", 'Accompagnatore'],
   ['Tour operator', 'Sì: fino ad allora è un turista; vale anche per i pacchetti', PRO, 'Le stesse funzioni della guida; pubblicare pacchetti completi con cena, transfer, biglietti, hotel o esperienze food',
     'Toccare tour e richieste altrui', 'Tour operator'],
-  ['Admin', 'No: lo nomina il gestore da Supabase', 'Scopri, Tour, Scheda tour, Preferiti, Prenotazioni, Carrello, Gestione (Panoramica, Professionisti, Tour, Approvazioni, WhatsApp), Account dal pallino (account di prova con ruolo turista)',
+  ['Admin', 'No: lo nomina il gestore da Supabase', 'Scopri, Tour, Scheda tour, Preferiti, Carrello e richieste, Gestione (Panoramica, Professionisti, Tour, Approvazioni, WhatsApp), Account dal pallino (account di prova con ruolo turista)',
     'Vedere i numeri della piattaforma; approvare o rifiutare le registrazioni; sospendere e riattivare i professionisti; eliminare qualunque tour; consultare e revocare i consensi WhatsApp; usare le funzioni del proprio ruolo',
     'Pubblicare tour, se il ruolo è turista; leggere i dati personali delle richieste (vede solo i totali)', 'Admin'],
 ], [26, 24, 44, 58, 50, 18]);
@@ -107,9 +107,8 @@ const pages = [
   ['Scheda tour', P, P, P, P, P, P],
   ['Accesso / Registrazione', P, N, N, N, N, N],
   ['Preferiti', L, P, N, N, N, P],
-  ['Prenotazioni: storico inviate', L, P, N, N, N, P],
-  ['Prenotazioni: richieste ricevute', N, N, P, P, P, N],
-  ['Carrello', L, P, N, N, N, P],
+  ['Carrello e richieste inviate (icona del carrello)', L, P, N, N, N, P],
+  ['Richieste ricevute (voce Richieste)', N, N, P, P, P, N],
   ['Panoramica', N, N, P, P, P, N],
   ['I miei tour', N, N, P, P, P, N],
   ['Modulo tour', N, N, P, P, P, N],
@@ -157,7 +156,7 @@ const tests = [
   ['Backend online', 'Admin', 3, 'Superato', 'Registrazioni, consensi, limiti del ruolo'],
   ['Backend online', 'Tentativi di scavalcare i ruoli', 6, 'Superato', 'Revoca consensi provata solo su id inesistente: nel database non ci sono consensi'],
   ['Backend online', 'Foto profilo', 5, 'Superato', 'Caricamento, rimozione, cartelle altrui, formato e indirizzi esterni'],
-  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, ruoli dal profilo, login senza cambio pagina, menu lingua, Gestione admin, Account e profilo, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 83, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
+  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, ruoli dal profilo, login senza cambio pagina, menu lingua, carrello e richieste, Gestione admin, Account e profilo, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 86, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
   ['Non coperto', 'Prova end-to-end nel browser', 0, 'Da provare', 'Clic reali sul sito pubblicato'],
 ];
 const wsT = sheet('Test', 'Esiti del 2 novembre 2026. Comando backend: npm run test:roles (cartella nodeBE).',
@@ -222,6 +221,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['05/11/2026', 'Prenotazioni → Richieste', 'I professionisti hanno la voce Richieste; turista e visitatore non hanno più Prenotazioni: il carrello mostra Da inviare e Richieste inviate e l’icona conta anche le risposte nuove', 'Test app, schermate sul sito'],
   ['05/11/2026', 'Ruoli dal profilo, login senza cambio pagina, fix lingua', 'In Modifica profilo si scelgono più ruoli: togliere vale subito, i nuovi passano dall’admin (migrazione 0008); Account e Gestione mostrano i ruoli in attesa. Login e logout restano sulla pagina se consentita. Il menu lingua non duplica più l’intestazione', 'Test app e backend (migrazione 0008 attiva)'],
   ['05/11/2026', 'Sfondo giallo e pagine ridisegnate', 'Sfondo giallo chiaro e intestazione dorata con icona e spiegazione in tutte le pagine interne; Prenotazioni, Assegnazioni, Panoramica e I miei tour a schede bianche con stato colorato e foto', 'Test app, schermate sul sito'],
   ['05/11/2026', 'Migrazioni 0006 e 0007 attive', 'Ruoli multipli e area Gestione attivi; account di prova Guida + Accompagnatore (Marta Neri) con accesso rapido', 'Tutti i test backend superati, nessuno saltato'],
