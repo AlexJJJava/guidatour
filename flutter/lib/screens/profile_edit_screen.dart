@@ -120,8 +120,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Widget build(BuildContext context) {
     final t = l10n(context);
     return Scaffold(
-      appBar: AppBar(title: Text(t.editProfile)),
       body: PageBody(
+        title: t.editProfile,
         maxWidth: 560,
         child: Form(
           key: _key,

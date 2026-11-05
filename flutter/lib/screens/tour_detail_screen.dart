@@ -48,25 +48,20 @@ class TourDetailScreen extends StatelessWidget {
     final guide = appState.guideById(tour.guideId);
     final fav = appState.isFavorite(tour.id);
     final inCart = appState.inCart(tour.id);
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        actions: [
-          IconButton(
+    final favButton = IconButton(
             tooltip: fav ? t.favRemoveTooltip : t.favAddTooltip,
             icon: Icon(fav ? Icons.favorite : Icons.favorite_border,
                 color: fav ? Colors.red : null),
-            onPressed: () async {
-              if (_needsTourist(context)) return;
-              try {
-                await appState.toggleFavorite(tour.id);
-              } catch (e) {
-                if (context.mounted) snack(context, '$e');
-              }
-            },
-          ),
-        ],
-      ),
+      onPressed: () async {
+        if (_needsTourist(context)) return;
+        try {
+          await appState.toggleFavorite(tour.id);
+        } catch (e) {
+          if (context.mounted) snack(context, '$e');
+        }
+      },
+    );
+    return Scaffold(
       body: PageBody(
         maxWidth: 860,
         child: Column(
@@ -95,13 +90,21 @@ class TourDetailScreen extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     color: kMuted)),
             const SizedBox(height: 6),
-            Text(tour.title,
-                style: const TextStyle(
-                    fontFamily: kSerif,
-                    fontSize: 30,
-                    height: 1.1,
-                    fontWeight: FontWeight.w800,
-                    color: kInk)),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(tour.title,
+                      style: const TextStyle(
+                          fontFamily: kSerif,
+                          fontSize: 30,
+                          height: 1.1,
+                          fontWeight: FontWeight.w800,
+                          color: kInk)),
+                ),
+                favButton,
+              ],
+            ),
             const SizedBox(height: 16),
             Wrap(
               spacing: 20,

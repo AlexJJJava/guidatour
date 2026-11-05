@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'l10n/labels.dart';
 import 'l10n/locale_controller.dart';
 import 'models.dart';
+import 'screens/faq_screen.dart';
 import 'state.dart';
 
 /// Oro scuro: icone, link e accenti su fondo chiaro.
@@ -156,20 +159,168 @@ class BrandLogo extends StatelessWidget {
 }
 
 /// Centra il contenuto e limita la larghezza (browser/tablet).
+/// Azioni della struttura principale, per le pagine e per il footer: tornare
+/// a Scopri e aprire una pagina sotto intestazione e footer.
+class ShellScope extends InheritedWidget {
+  const ShellScope({
+    super.key,
+    required this.goHome,
+    required this.open,
+    required this.root,
+    required super.child,
+  });
+  final VoidCallback goHome;
+  final void Function(Widget page) open;
+
+  /// Pagina della voce di menu scelta.
+  final Widget root;
+
+  static ShellScope? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<ShellScope>();
+
+  @override
+  bool updateShouldNotify(ShellScope oldWidget) => root != oldWidget.root;
+}
+
+/// Contenuto di una pagina: titolo facoltativo, larghezza massima e il footer
+/// in fondo (anche quando il contenuto è corto).
 class PageBody extends StatelessWidget {
-  const PageBody({super.key, required this.child, this.maxWidth = 1240});
+  const PageBody({
+    super.key,
+    required this.child,
+    this.maxWidth = 1240,
+    this.title,
+  });
   final Widget child;
   final double maxWidth;
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.of(context).size.width >= kDesktopWidth;
-    return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 26, wide ? 48 : 20, 40),
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 26, wide ? 48 : 20, 40),
+          sliver: SliverToBoxAdapter(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxWidth),
+                child: title == null
+                    ? child
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(title!,
+                              style: const TextStyle(
+                                  fontFamily: kSerif,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w700,
+                                  color: kInk)),
+                          const SizedBox(height: 18),
+                          child,
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        ),
+        // Il footer sta in fondo allo schermo se la pagina è corta, altrimenti
+        // dopo il contenuto. Calcolato sullo spazio libero, non sui testi.
+        SliverLayoutBuilder(
+          builder: (context, c) => SliverToBoxAdapter(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                  minHeight: math.max(
+                      0, c.viewportMainAxisExtent - c.precedingScrollExtent)),
+              child: const Align(
+                  alignment: Alignment.bottomCenter, child: SiteFooter()),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Footer di tutte le pagine: marchio (porta a Scopri), FAQ e avvertenza.
+class SiteFooter extends StatelessWidget {
+  const SiteFooter({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = l10n(context);
+    final shell = ShellScope.of(context);
+    final wide = MediaQuery.sizeOf(context).width >= 700;
+    const heading = TextStyle(
+        fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white);
+    final brand = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          key: const ValueKey('footer-brand'),
+          onTap: shell?.goHome,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: BrandLogo(tagline: t.footerTagline),
+          ),
+        ),
+        const SizedBox(height: 16),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 380),
+          child: Text(t.platformDisclaimer,
+              style: const TextStyle(
+                  fontSize: 12, height: 1.5, color: Colors.white54)),
+        ),
+      ],
+    );
+    final links = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(t.footerLinks, style: heading),
+        const SizedBox(height: 10),
+        InkWell(
+          key: const ValueKey('footer-faq'),
+          onTap: () => shell?.open(const FaqScreen()),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Text(t.faqTitle,
+                style: const TextStyle(fontSize: 13, color: Colors.white70)),
+          ),
+        ),
+      ],
+    );
+    return Container(
+      width: double.infinity,
+      color: kNight,
+      padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 22, wide ? 48 : 20, 20),
       child: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: child,
+          constraints: const BoxConstraints(maxWidth: kContentWidth),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (wide)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 3, child: brand),
+                    Expanded(flex: 2, child: links),
+                  ],
+                )
+              else ...[
+                brand,
+                const SizedBox(height: 14),
+                links,
+              ],
+              const SizedBox(height: 14),
+              const Divider(color: Colors.white12, height: 1),
+              const SizedBox(height: 12),
+              Text('© ${DateTime.now().year} guidatour. ${t.footerRights}',
+                  style: const TextStyle(fontSize: 12, color: Colors.white54)),
+            ],
+          ),
         ),
       ),
     );

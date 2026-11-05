@@ -197,8 +197,8 @@ class _TourFormScreenState extends State<TourFormScreen> {
     String? required(String? v) =>
         (v == null || v.trim().isEmpty) ? t.validationRequired : null;
     return Scaffold(
-      appBar: AppBar(title: Text(_isEdit ? t.editTour : t.newTour)),
       body: PageBody(
+        title: _isEdit ? t.editTour : t.newTour,
         maxWidth: 680,
         child: Form(
           key: _key,

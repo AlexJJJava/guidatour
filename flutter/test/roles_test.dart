@@ -11,9 +11,11 @@ import 'package:guidatour/main.dart';
 import 'package:guidatour/models.dart';
 import 'package:guidatour/screens/approvals_screen.dart';
 import 'package:guidatour/screens/avatar_crop_screen.dart';
+import 'package:guidatour/screens/account_screen.dart';
 import 'package:guidatour/screens/auth_screen.dart';
 import 'package:guidatour/screens/bookings_screen.dart';
 import 'package:guidatour/screens/cart_screen.dart';
+import 'package:guidatour/screens/faq_screen.dart';
 import 'package:guidatour/screens/favorites_screen.dart';
 import 'package:guidatour/screens/my_tours_screen.dart';
 import 'package:guidatour/screens/tour_detail_screen.dart';
@@ -186,6 +188,96 @@ void main() {
             cart ? findsWidgets : findsNothing,
             reason: 'carrello per $name');
         await tester.pumpWidget(const SizedBox());
+      });
+    }
+  });
+
+  group('intestazione e footer in tutte le pagine', () {
+    for (final (name, size) in const [
+      ('computer', Size(1920, 1080)),
+      ('telefono', Size(412, 915)),
+    ]) {
+      testWidgets('$name: pagina aperta con intestazione, footer e senza freccia',
+          (tester) async {
+        sized(tester, size);
+        seed(user(Role.guida));
+        await tester.pumpWidget(const GuidaTourApp());
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.tap(find.byKey(const ValueKey('user-avatar')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(find.byType(AccountScreen), findsOneWidget);
+        expect(find.byType(BackButton), findsNothing);
+        expect(find.byType(AppBar), findsNothing);
+        // Intestazione con il logo e il pallino.
+        expect(find.byType(BrandLogo), findsWidgets);
+        expect(find.byKey(const ValueKey('user-avatar')), findsOneWidget);
+        // Footer con il solo link FAQ e senza scelta della lingua.
+        final footer = find.byType(SiteFooter);
+        expect(footer, findsOneWidget);
+        expect(find.descendant(of: footer, matching: find.byType(LanguagePicker)),
+            findsNothing);
+        expect(find.descendant(of: footer, matching: find.byType(InkWell)),
+            findsNWidgets(2));
+        // Il marchio nel footer riporta a Scopri.
+        await tester.ensureVisible(find.byKey(const ValueKey('footer-brand')));
+        await tester.tap(find.byKey(const ValueKey('footer-brand')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(find.byType(AccountScreen), findsNothing);
+        await tester.pumpWidget(const SizedBox());
+      });
+
+      testWidgets('$name: FAQ dal footer e ritorno a Scopri dal logo',
+          (tester) async {
+        sized(tester, size);
+        seed(null);
+        await tester.pumpWidget(const GuidaTourApp());
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.scrollUntilVisible(
+            find.byKey(const ValueKey('footer-faq')), 400,
+            scrollable: find.byType(Scrollable).first);
+        await tester.tap(find.byKey(const ValueKey('footer-faq')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(find.byType(FaqScreen), findsOneWidget);
+        expect(find.text(t.faq1Q), findsOneWidget);
+        expect(find.byType(BackButton), findsNothing);
+        expect(find.byType(SiteFooter), findsWidgets);
+        final logo = size.width >= 1024
+            ? find.byType(BrandLogo).first
+            : find.byKey(const ValueKey('header-logo'));
+        await tester.tap(logo);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(find.byType(FaqScreen), findsNothing);
+        await tester.pumpWidget(const SizedBox());
+      });
+    }
+
+    for (final (name, screen) in <(String, Widget)>[
+      ('ricerca', const Scaffold(body: Text('x'))),
+    ]) {
+      testWidgets('ogni voce del menu ha il footer ($name)', (tester) async {
+        sized(tester, const Size(1920, 1080));
+        for (final u in [null, user(Role.turista), user(Role.guida)]) {
+          seed(u);
+          await tester.pumpWidget(const GuidaTourApp());
+          await tester.pump(const Duration(milliseconds: 100));
+          final labels = u?.role.isProfessional == true ? proPages : turistaPages;
+          for (final label in labels.skip(1)) {
+            final link = navLabel(label);
+            if (link.evaluate().isEmpty) continue;
+            await tester.tap(link);
+            await tester.pump(const Duration(milliseconds: 300));
+            expect(find.byType(SiteFooter, skipOffstage: false), findsWidgets,
+                reason: 'manca il footer in $label');
+            expect(find.byType(BrandLogo), findsWidgets,
+                reason: "manca l'intestazione in $label");
+          }
+          await tester.pumpWidget(const SizedBox());
+        }
+        expect(screen, isNotNull);
       });
     }
   });
@@ -389,7 +481,7 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 600));
         expect(find.text(t.editProfile), findsOneWidget);
-        expect(find.byType(BackButton), findsOneWidget);
+        expect(find.byType(BackButton), findsNothing);
         appState.currentUser = null;
         appState.notifyListeners();
         await tester.pump();

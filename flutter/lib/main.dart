@@ -217,6 +217,19 @@ typedef _NavItem = (
 class _AppShellState extends State<AppShell> {
   int _index = 0;
 
+  /// Navigatore delle pagine interne: nuovo a ogni cambio di voce del menu.
+  var _navKey = GlobalKey<NavigatorState>();
+
+  /// Pagine aperte sopra quella del menu (0 = solo quella del menu).
+  int _depth = 0;
+
+  late final _observer = _DepthObserver((depth) {
+    if (depth == _depth) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _depth = depth);
+    });
+  });
+
   /// AppShell può ricostruirsi: il link va aperto una volta sola.
   static bool _linkOpened = false;
 
@@ -233,10 +246,11 @@ class _AppShellState extends State<AppShell> {
     final (id, fromQr) = link;
     final tour = await appState.fetchTour(id);
     if (!mounted) return;
+    final inner = _navKey.currentContext;
     if (tour == null) {
       snack(context, l10n(context).tourUnavailable);
-    } else {
-      openTour(context, tour, fromQr: fromQr);
+    } else if (inner != null) {
+      openTour(inner, tour, fromQr: fromQr);
     }
   }
 
@@ -244,15 +258,31 @@ class _AppShellState extends State<AppShell> {
   /// il menu cambia voci, quindi si torna alla prima.
   String? _lastKind;
 
-  void _select(int i) => setState(() => _index = i);
+  void _select(int i) {
+    // Sulla stessa voce si torna alla sua pagina principale.
+    if (i == _index) {
+      _navKey.currentState?.popUntil((r) => r.isFirst);
+      return;
+    }
+    setState(() => _reset(i));
+  }
+
+  void _reset(int i) {
+    _index = i;
+    _navKey = GlobalKey<NavigatorState>();
+    _depth = 0;
+  }
+
+  /// Apre una pagina sotto intestazione e footer.
+  void _open(Widget page) =>
+      _navKey.currentState?.push(MaterialPageRoute(builder: (_) => page));
 
   /// Chi è collegato arriva all'Account dal pallino, non dal menu.
   void openAccount() {
     if (appState.currentUser == null) {
       _select(_navItems(context).length - 1);
     } else {
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => const _AccountPage()));
+      _open(const _AccountPage());
     }
   }
 
@@ -409,10 +439,10 @@ class _AppShellState extends State<AppShell> {
             : (user.role.isProfessional ? 'pro' : 'tourist');
         if (kind != _lastKind) {
           _lastKind = kind;
-          _index = 0;
+          _reset(0);
         }
         final items = _navItems(context);
-        if (_index >= items.length) _index = 0;
+        if (_index >= items.length) _reset(0);
         return LayoutBuilder(builder: (context, constraints) {
           final isDesktop = constraints.maxWidth >= kDesktopWidth;
           Widget topBar({required bool overPhoto}) => isDesktop
@@ -423,39 +453,55 @@ class _AppShellState extends State<AppShell> {
                   overPhoto: overPhoto,
                 )
               : const _MobileTopBar();
-          final Widget body;
-          if (_index == 0) {
-            body = HomeScreen(
-              header: topBar(overPhoto: true),
-              links: [
-                for (var i = 0; i < items.length; i++)
-                  (items[i].$1, () => _select(i)),
-              ],
-              onOpenSearch: () => _select(1),
-              onOpenAccount: openAccount,
-            );
-          } else if (isDesktop) {
-            body = Column(
+          final home = _index == 0;
+          final root = home
+              ? HomeScreen(
+                  header: topBar(overPhoto: true),
+                  onOpenSearch: () => _select(1),
+                  onOpenAccount: openAccount,
+                )
+              : items[_index].$4!;
+          // In home l'intestazione sta sopra la foto; nelle altre pagine in alto.
+          final showHeader = !home || _depth > 0;
+          final inner = NavigatorPopHandler(
+            onPopWithResult: (_) => _navKey.currentState?.maybePop(),
+            child: Navigator(
+              key: _navKey,
+              observers: [_observer],
+              onGenerateRoute: (_) => MaterialPageRoute(
+                builder: (context) => ShellScope.of(context)!.root,
+              ),
+            ),
+          );
+          final Widget content;
+          if (isDesktop) {
+            content = Column(
               children: [
-                topBar(overPhoto: false),
-                Expanded(child: items[_index].$4!),
+                if (showHeader) topBar(overPhoto: false),
+                Expanded(child: inner),
               ],
             );
           } else {
-            body = SafeArea(
-              child: Column(
-                children: [
+            content = Column(
+              children: [
+                if (showHeader) ...[
+                  const _MobileTopBar(solid: true),
                   const Padding(
                     padding: EdgeInsets.fromLTRB(12, 8, 12, 0),
-                    child: Align(
-                        alignment: Alignment.centerRight,
-                        child: _TopActions(withCity: true)),
+                    child:
+                        Align(alignment: Alignment.centerRight, child: CityPicker()),
                   ),
-                  Expanded(child: items[_index].$4!),
                 ],
-              ),
+                Expanded(child: inner),
+              ],
             );
           }
+          final body = ShellScope(
+            goHome: () => _select(0),
+            open: _open,
+            root: root,
+            child: content,
+          );
           return Scaffold(
             body: body,
             bottomNavigationBar: isDesktop ? null : _bottomBar(context, items),
@@ -667,23 +713,35 @@ class _NavLink extends StatelessWidget {
 /// Su telefono la home mostra solo logo e lingua sopra la foto: il menu è
 /// nella barra in basso.
 class _MobileTopBar extends StatelessWidget {
-  const _MobileTopBar();
+  /// [solid]: sfondo blu notte, per le pagine senza la foto della home.
+  const _MobileTopBar({this.solid = false});
+  final bool solid;
 
   @override
-  Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.fromLTRB(20, 14, 16, 0),
+  Widget build(BuildContext context) => Container(
+        color: solid ? kNight : null,
+        padding: EdgeInsets.fromLTRB(
+            20, solid ? MediaQuery.paddingOf(context).top + 10 : 14, 16,
+            solid ? 10 : 0),
         child: Row(
           children: [
             // Sui telefoni più stretti il logo si rimpicciolisce.
             Expanded(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
+              child: Align(
                 alignment: Alignment.centerLeft,
-                child: BrandLogo(),
+                child: InkWell(
+                  key: const ValueKey('header-logo'),
+                  onTap: ShellScope.of(context)?.goHome,
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: BrandLogo(),
+                  ),
+                ),
               ),
             ),
-            SizedBox(width: 8),
-            _TopActions(),
+            const SizedBox(width: 8),
+            const _TopActions(),
           ],
         ),
       );
@@ -695,21 +753,14 @@ bool _showsCart() {
   return user == null || !user.role.isProfessional;
 }
 
-/// Lingua e carrello in alto a destra su telefono; nelle pagine interne
-/// anche la città (in home sta sopra il titolo della copertina).
+/// Lingua, carrello e pallino in alto a destra su telefono.
 class _TopActions extends StatelessWidget {
-  const _TopActions({this.withCity = false});
-  final bool withCity;
+  const _TopActions();
 
   @override
   Widget build(BuildContext context) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (withCity) ...[
-            // Su uno schermo stretto il nome della città si accorcia.
-            const Flexible(child: CityPicker()),
-            const SizedBox(width: 8),
-          ],
           const LanguagePicker(),
           if (_showsCart()) ...[
             const SizedBox(width: 8),
@@ -729,7 +780,6 @@ class _AccountPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(l10n(context).navAccount)),
         body: ListenableBuilder(
           listenable: appState,
           builder: (context, _) {
@@ -748,11 +798,43 @@ class _UserButton extends StatelessWidget {
   const _UserButton();
 
   @override
-  Widget build(BuildContext context) => InkWell(
-        key: const ValueKey('user-avatar'),
-        customBorder: const CircleBorder(),
-        onTap: () =>
-            context.findAncestorStateOfType<_AppShellState>()?.openAccount(),
-        child: UserAvatar(user: appState.currentUser!),
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: appState,
+        builder: (context, _) {
+          final user = appState.currentUser;
+          if (user == null) return const SizedBox.shrink();
+          return InkWell(
+            key: const ValueKey('user-avatar'),
+            customBorder: const CircleBorder(),
+            onTap: () => context
+                .findAncestorStateOfType<_AppShellState>()
+                ?.openAccount(),
+            child: UserAvatar(user: user),
+          );
+        },
       );
+}
+
+/// Conta le pagine aperte sopra quella del menu, per mostrare l'intestazione.
+class _DepthObserver extends NavigatorObserver {
+  _DepthObserver(this.onChange);
+  final ValueChanged<int> onChange;
+  int _routes = 0;
+
+  void _set(int routes) {
+    _routes = routes;
+    onChange((_routes - 1).clamp(0, 1 << 20));
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _set(_routes + 1);
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _set(_routes - 1);
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _set(_routes - 1);
 }

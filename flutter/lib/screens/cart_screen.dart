@@ -176,10 +176,8 @@ class CartButton extends StatelessWidget {
         return IconButton(
           tooltip: l10n(context).navCart,
           style: IconButton.styleFrom(backgroundColor: kSurface),
-          onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) =>
-                Scaffold(appBar: AppBar(), body: const CartScreen()),
-          )),
+          onPressed: () =>
+              ShellScope.of(context)?.open(const Scaffold(body: CartScreen())),
           icon: Badge(
             isLabelVisible: count > 0,
             label: Text('$count'),

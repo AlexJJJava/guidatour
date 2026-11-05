@@ -58,9 +58,9 @@ class PosterScreen extends StatelessWidget {
     final guide = appState.guideById(tour.guideId);
     final link = '${tour.url}&src=qr';
     return Scaffold(
-      appBar: AppBar(title: Text(t.qrAndPoster)),
       body: PageBody(
         maxWidth: 560,
+        title: t.qrAndPoster,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

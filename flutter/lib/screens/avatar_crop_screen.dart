@@ -111,13 +111,13 @@ class _AvatarCropScreenState extends State<AvatarCropScreen> {
     final t = l10n(context);
     final image = _image;
     return Scaffold(
-      appBar: AppBar(title: Text(t.avatarCropTitle)),
       body: _failed
           ? Center(child: Text(t.avatarInvalid))
           : image == null
               ? const Center(child: CircularProgressIndicator(color: kPrimary))
               : PageBody(
                   maxWidth: 420,
+                  title: t.avatarCropTitle,
                   child: LayoutBuilder(builder: (context, c) {
                     final side = math.min(c.maxWidth, 360.0);
                     if (side != _side) {

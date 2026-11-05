@@ -16,7 +16,6 @@ void _openSearch(BuildContext context, {String query = '', String? category}) {
   Navigator.of(context).push(
     MaterialPageRoute(
       builder: (_) => Scaffold(
-        appBar: AppBar(),
         body: SearchScreen(initialQuery: query, initialCategory: category),
       ),
     ),
@@ -30,7 +29,6 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.header,
-    required this.links,
     required this.onOpenSearch,
     required this.onOpenAccount,
   });
@@ -39,7 +37,6 @@ class HomeScreen extends StatefulWidget {
   final Widget header;
 
   /// Voci del menu ripetute nel footer.
-  final List<(String, VoidCallback)> links;
   final VoidCallback onOpenSearch;
   final VoidCallback onOpenAccount;
 
@@ -51,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final _scroll = ScrollController();
 
   Widget get header => widget.header;
-  List<(String, VoidCallback)> get links => widget.links;
   VoidCallback get onOpenSearch => widget.onOpenSearch;
   VoidCallback get onOpenAccount => widget.onOpenAccount;
 
@@ -90,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const _Section(
                     color: kCream, child: WhatsAppOptInCard(source: 'Home')),
                 _CtaBand(wide: wide, onBook: onOpenSearch),
-                _Footer(wide: wide, links: links),
+                const SiteFooter(),
               ],
             ),
           ),
@@ -901,92 +897,3 @@ class _CtaBand extends StatelessWidget {
   }
 }
 
-class _Footer extends StatelessWidget {
-  const _Footer({required this.wide, required this.links});
-  final bool wide;
-  final List<(String, VoidCallback)> links;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = l10n(context);
-    const heading = TextStyle(
-        fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white);
-    final brand = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: BrandLogo(tagline: t.footerTagline),
-        ),
-        const SizedBox(height: 16),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 380),
-          child: Text(t.platformDisclaimer,
-              style: const TextStyle(
-                  fontSize: 12, height: 1.5, color: Colors.white54)),
-        ),
-      ],
-    );
-    final nav = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(t.footerLinks, style: heading),
-        const SizedBox(height: 10),
-        for (final (label, onTap) in links)
-          InkWell(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Text(label,
-                  style: const TextStyle(fontSize: 13, color: Colors.white70)),
-            ),
-          ),
-      ],
-    );
-    final language = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(t.footerLanguage, style: heading),
-        const SizedBox(height: 12),
-        const LanguagePicker(),
-      ],
-    );
-    return Container(
-      width: double.infinity,
-      color: kNight,
-      padding: EdgeInsets.fromLTRB(wide ? 48 : 20, 22, wide ? 48 : 20, 20),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: kContentWidth),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (wide)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(flex: 3, child: brand),
-                    Expanded(flex: 2, child: nav),
-                    Expanded(flex: 2, child: language),
-                  ],
-                )
-              else ...[
-                brand,
-                const SizedBox(height: 14),
-                nav,
-                const SizedBox(height: 16),
-                language,
-              ],
-              const SizedBox(height: 14),
-              const Divider(color: Colors.white12, height: 1),
-              const SizedBox(height: 12),
-              Text('© ${DateTime.now().year} guidatour. ${t.footerRights}',
-                  style: const TextStyle(fontSize: 12, color: Colors.white54)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
