@@ -59,7 +59,7 @@ function colours(ws, ref, rules) {
 const YES = [['Sì', 'D9F0DF'], ['No', 'F8D9D6'], ['Con accesso', 'FDEFC8']];
 const PRO = 'Scopri, Tour, Scheda tour, Panoramica, I miei tour, Assegnazioni, Prenotazioni, Account (dal pallino in alto a destra)';
 
-sheet('Ruoli', "Situazione dell'app al 2 novembre 2026, ricavata dal codice. Scheda tour = pagina che si apre toccando un tour.",
+sheet('Ruoli', "Situazione dell'app al 5 novembre 2026, ricavata dal codice. Scheda tour = pagina che si apre toccando un tour.",
   ['Ruolo', 'Pagine visibili', 'Cosa può fare', 'Cosa non può fare', 'Accesso rapido di prova'], [
   ['Visitatore (senza account)', "Scopri, Tour, Scheda tour, Accesso/Registrazione. Preferiti, Prenotazioni e Account portano all'accesso",
     'Cercare e filtrare i tour; scegliere città e lingua; inviare una richiesta di prenotazione; iscriversi a WhatsApp; registrarsi',
@@ -73,56 +73,62 @@ sheet('Ruoli', "Situazione dell'app al 2 novembre 2026, ricavata dal codice. Sch
   ['Accompagnatore turistico', PRO,
     'Pubblicare, modificare ed eliminare attività di accompagnamento; generare QR e locandina; gestire richieste; accettare o rifiutare proposte di accompagnamento o pacchetti',
     "Pubblicare visite guidate, pacchetti o testi su beni culturali; presentarsi come guida abilitata (l'avviso compare nel modulo e nella scheda pubblica)", 'Accompagnatore'],
-  ['Tour operator non verificato', PRO, 'Le stesse funzioni della guida', 'Pubblicare pacchetti con servizi accessori', 'T.O. non verificato'],
-  ['Tour operator verificato', PRO, 'Le stesse funzioni della guida; pubblicare pacchetti completi con cena, transfer, biglietti, hotel o esperienze food',
+  ['Tour operator', PRO, 'Le stesse funzioni della guida; pubblicare pacchetti completi con cena, transfer, biglietti, hotel o esperienze food',
     'Toccare tour e richieste altrui', 'Tour operator'],
   ['Admin', 'Scopri, Tour, Scheda tour, Preferiti, Prenotazioni, Carrello, Approvazioni, Account dal pallino (account di prova con ruolo turista)',
     'Approvare o rifiutare guide, accompagnatori e tour operator; consultare i consensi WhatsApp; usare le funzioni del proprio ruolo',
-    'Pubblicare tour, se il ruolo è turista. Sospendere utenti, rimuovere tour e assegnare il badge verificato (non ancora sviluppati)', 'Admin'],
-  ['Professionista in attesa o rifiutato', "Nessuna pagina professionale: dopo il login viene disconnesso e vede l'avviso sullo stato",
-    "Attendere la decisione dell'admin", 'Pubblicare o usare qualunque funzione professionale', 'No'],
+    'Pubblicare tour, se il ruolo è turista. Sospendere utenti e rimuovere tour (non ancora sviluppati)', 'Admin'],
 ], [26, 44, 58, 50, 18]);
 
-const roles = ['Visitatore', 'Turista', 'Guida', 'Accompagnatore', 'T.O. non verificato', 'T.O. verificato', 'Admin (ruolo turista)'];
+// Regola unica: guide, accompagnatori e tour operator ottengono il ruolo solo con
+// l'approvazione dell'admin; prima (o se rifiutati) sono turisti.
+const wsR = wb.getWorksheet('Ruoli');
+wsR.getCell(12, 1).value = "Chi si registra come guida, accompagnatore o tour operator è un turista finché l'admin non lo approva (anche se rifiutato); in Account vede lo stato della richiesta. L'approvazione vale anche come verifica: ogni tour operator approvato può pubblicare pacchetti.";
+wsR.mergeCells(12, 1, 12, 5);
+wsR.getCell(12, 1).font = { name: 'Arial', size: 10, italic: true, color: { argb: 'FF5B6470' } };
+wsR.getCell(12, 1).alignment = { wrapText: true, vertical: 'top' };
+wsR.getRow(12).height = 32;
+
+const roles = ['Visitatore', 'Turista (e professionisti non approvati)', 'Guida', 'Accompagnatore', 'Tour operator', 'Admin (ruolo turista)'];
 const P = 'Sì', N = 'No', L = 'Con accesso';
 const pages = [
-  ['Scopri (home)', P, P, P, P, P, P, P],
-  ['Tour (ricerca)', P, P, P, P, P, P, P],
-  ['Scheda tour', P, P, P, P, P, P, P],
-  ['Accesso / Registrazione', P, N, N, N, N, N, N],
-  ['Preferiti', L, P, N, N, N, N, P],
-  ['Prenotazioni: storico inviate', L, P, N, N, N, N, P],
-  ['Prenotazioni: richieste ricevute', N, N, P, P, P, P, N],
-  ['Carrello', L, P, N, N, N, N, P],
-  ['Panoramica', N, N, P, P, P, P, N],
-  ['I miei tour', N, N, P, P, P, P, N],
-  ['Modulo tour', N, N, P, P, P, P, N],
-  ['QR e locandina (PDF da scaricare o stampare)', N, N, P, P, P, P, N],
-  ['Assegnazioni', N, N, P, P, P, P, N],
-  ['Approvazioni', N, N, N, N, N, N, P],
-  ['Account e profilo (foto inclusa), dal pallino se collegati', L, P, P, P, P, P, P],
-  ['FAQ (dal footer)', P, P, P, P, P, P, P],
+  ['Scopri (home)', P, P, P, P, P, P],
+  ['Tour (ricerca)', P, P, P, P, P, P],
+  ['Scheda tour', P, P, P, P, P, P],
+  ['Accesso / Registrazione', P, N, N, N, N, N],
+  ['Preferiti', L, P, N, N, N, P],
+  ['Prenotazioni: storico inviate', L, P, N, N, N, P],
+  ['Prenotazioni: richieste ricevute', N, N, P, P, P, N],
+  ['Carrello', L, P, N, N, N, P],
+  ['Panoramica', N, N, P, P, P, N],
+  ['I miei tour', N, N, P, P, P, N],
+  ['Modulo tour', N, N, P, P, P, N],
+  ['QR e locandina (PDF da scaricare o stampare)', N, N, P, P, P, N],
+  ['Assegnazioni', N, N, P, P, P, N],
+  ['Approvazioni', N, N, N, N, N, P],
+  ['Account e profilo (foto inclusa), dal pallino se collegati', L, P, P, P, P, P],
+  ['FAQ (dal footer)', P, P, P, P, P, P],
 ];
 colours(sheet('Pagine per ruolo', 'Sì = visibile. Con accesso = la voce porta alla pagina di login. No = non disponibile.',
-  ['Pagina', ...roles], pages, [32, 15, 15, 15, 15, 15, 15, 15]), `B5:H${4 + pages.length}`, YES);
+  ['Pagina', ...roles], pages, [32, 15, 20, 15, 15, 15, 15]), `B5:G${4 + pages.length}`, YES);
 
 const ops = [
-  ['Cercare tour e inviare richieste', P, P, P, P, P, P, P],
-  ['Iscriversi a WhatsApp', P, P, P, P, P, P, P],
-  ['Salvare preferiti', N, P, N, N, N, N, P],
-  ['Inviare richieste dal carrello', N, P, N, N, N, N, P],
-  ['Pubblicare e modificare propri tour', N, N, P, 'Solo accompagnamento', P, P, N],
-  ['Pubblicare visite guidate', N, N, P, N, P, P, N],
-  ['Pubblicare pacchetti con accessori', N, N, N, N, N, P, N],
-  ['Generare QR e locandina PDF', N, N, P, P, P, P, N],
-  ['Confermare o rifiutare richieste', N, N, P, P, P, P, N],
-  ['Proporre tour ad altri professionisti', N, N, P, 'Sì (da decidere)', P, P, N],
-  ['Ricevere proposte', N, N, P, 'Solo accompagnamento e pacchetti', P, P, N],
-  ['Approvare registrazioni', N, N, N, N, N, N, P],
-  ['Consultare consensi WhatsApp', N, N, N, N, N, N, P],
+  ['Cercare tour e inviare richieste', P, P, P, P, P, P],
+  ['Iscriversi a WhatsApp', P, P, P, P, P, P],
+  ['Salvare preferiti', N, P, N, N, N, P],
+  ['Inviare richieste dal carrello', N, P, N, N, N, P],
+  ['Pubblicare e modificare propri tour', N, N, P, 'Solo accompagnamento', P, N],
+  ['Pubblicare visite guidate', N, N, P, N, P, N],
+  ['Pubblicare pacchetti con accessori', N, N, N, N, P, N],
+  ['Generare QR e locandina PDF', N, N, P, P, P, N],
+  ['Confermare o rifiutare richieste', N, N, P, P, P, N],
+  ['Proporre tour ad altri professionisti', N, N, P, 'Sì (da decidere)', P, N],
+  ['Ricevere proposte', N, N, P, 'Solo accompagnamento e pacchetti', P, N],
+  ['Approvare registrazioni', N, N, N, N, N, P],
+  ['Consultare consensi WhatsApp', N, N, N, N, N, P],
 ];
 colours(sheet('Operazioni per ruolo', "Regole imposte dal backend, non solo dall'app.",
-  ['Operazione', ...roles], ops, [38, 16, 16, 18, 18, 16, 16, 16]), `B5:H${4 + ops.length}`, YES);
+  ['Operazione', ...roles], ops, [38, 16, 20, 18, 18, 16, 16]), `B5:G${4 + ops.length}`, YES);
 
 const tests = [
   ['Backend online', 'Account di prova', 1, 'Superato', 'Ruoli corretti'],
@@ -130,12 +136,12 @@ const tests = [
   ['Backend online', 'Turista', 3, 'Superato', 'Preferiti, carrello, storico, nessun accesso professionale'],
   ['Backend online', 'Guida', 8, 'Superato', 'Tour, richieste, cessione, dati altrui protetti'],
   ['Backend online', 'Accompagnatore', 7, 'Superato', 'Categorie, parole riservate, pacchetti, proposte'],
-  ['Backend online', 'Tour operator', 3, 'Superato', 'Pacchetti pubblicati da operatore verificato e bloccati se non verificato'],
+  ['Backend online', 'Tour operator', 3, 'Superato', 'Pacchetti pubblicati da tour operator approvato'],
+  ['Backend online', 'Professionista non approvato', 3, 'Superato', 'Guida rifiutata: niente funzioni professionali, preferiti, carrello e richieste come turista, assente dagli elenchi'],
   ['Backend online', 'Admin', 3, 'Superato', 'Registrazioni, consensi, limiti del ruolo'],
   ['Backend online', 'Tentativi di scavalcare i ruoli', 6, 'Superato', 'Revoca consensi provata solo su id inesistente: nel database non ci sono consensi'],
   ['Backend online', 'Foto profilo', 5, 'Superato', 'Caricamento, rimozione, cartelle altrui, formato e indirizzi esterni'],
-  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 53, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
-  ['Non coperto', 'Rifiuto di una registrazione', 0, 'Da provare', 'Approvazione provata a mano, rifiuto no'],
+  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 56, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
   ['Non coperto', 'Prova end-to-end nel browser', 0, 'Da provare', 'Clic reali sul sito pubblicato'],
 ];
 const wsT = sheet('Test', 'Esiti del 2 novembre 2026. Comando backend: npm run test:roles (cartella nodeBE).',
@@ -153,7 +159,7 @@ const todo = [
   [4, 'MVP', 'Locandina PDF', 'A4 con foto, QR, prezzo e organizzatore; pulsanti Scarica PDF e Stampa', 'Fatto'],
   [5, 'MVP', 'SEO', 'Pagine indicizzabili, sitemap, robots.txt, dati strutturati, titolo del sito', F],
   [6, 'MVP', 'Privacy e termini', 'Pagine vere e cancellazione dei dati su richiesta', F],
-  [7, 'MVP', 'Admin completo', 'Sospensione utenti, rimozione tour, badge verificato', F],
+  [7, 'MVP', 'Admin completo', 'Sospensione utenti e rimozione tour (il badge verificato coincide ora con l’approvazione)', F],
   [8, 'MVP', 'Recupero password', "Non presente nell'app", F],
   [9, 'MVP', 'Conferma email e rimozione accessi rapidi', 'Da fare prima del lancio', F],
   [10, 'MVP', 'Hosting sempre attivo', 'Render free si addormenta, i QR devono essere sempre raggiungibili', 'Da decidere'],
@@ -200,6 +206,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['05/11/2026', 'Non approvati = turisti', 'Professionisti in attesa o rifiutati usano l’app come turisti con avviso in Account; pacchetti per ogni tour operator approvato; tolto l’accesso rapido T.O. non verificato', 'Test app e backend'],
   ['05/11/2026', 'Footer più basso, home senza guide', 'Footer su una fascia (marchio, avvertenza accanto, link utili a destra), circa 60 px in meno; tolta dalla home la lista delle guide', 'Test app, prova sul sito'],
   ['05/11/2026', 'Fix intestazione doppia', 'Dopo il login o il logout la home mostrava due intestazioni', 'Test app (riproduce il bug)'],
   ['05/11/2026', 'Copertina più bassa', 'Sottotitolo su una riga su schermo largo, spazi ridotti, foto tagliata dal cielo e non dal fondo (40 px in meno a 1920 e 1280)', 'Test app, prova sul sito'],
