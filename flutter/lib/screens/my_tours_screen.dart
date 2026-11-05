@@ -26,21 +26,25 @@ class MyToursScreen extends StatelessWidget {
         return PageBody(
           maxWidth: 900,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               PageHeader(
                   title: t.dashTabMyTours,
                   icon: Icons.map_outlined,
                   subtitle: t.pageMyToursSub),
               const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const TourFormScreen())),
-                icon: const Icon(Icons.add),
-                label: Text(t.newTour),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FilledButton.icon(
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const TourFormScreen())),
+                  icon: const Icon(Icons.add),
+                  label: Text(t.newTour),
+                ),
               ),
               const SizedBox(height: 16),
-              if (mine.isEmpty) Text(t.dashNoToursYet),
+              if (mine.isEmpty)
+                EmptyState(icon: Icons.map_outlined, message: t.dashNoToursYet),
               for (final tour in mine) _TourCard(user: user, tour: tour),
             ],
           ),
@@ -59,19 +63,45 @@ class _TourCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = l10n(context);
     return Card(
+      margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(tour.title,
-                style:
-                    const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-            Text(
-                t.dashTourLine(fmtDate(tour.start), fmtPrice(tour.price),
-                    tour.seats, tour.visits, tour.scans),
-                style: const TextStyle(color: kMuted, fontSize: 12)),
-            const SizedBox(height: 8),
+            Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(categoryImage(tour.category),
+                      width: 64, height: 64, fit: BoxFit.cover),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(tour.title,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w800, fontSize: 16)),
+                      const SizedBox(height: 2),
+                      Text(categoryLabel(context, tour.category),
+                          style:
+                              const TextStyle(color: kPrimary, fontSize: 13)),
+                      Text(
+                          t.dashTourLine(
+                              fmtDate(tour.start),
+                              fmtPrice(tour.price),
+                              tour.seats,
+                              tour.visits,
+                              tour.scans),
+                          style: const TextStyle(color: kMuted, fontSize: 12)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               children: [

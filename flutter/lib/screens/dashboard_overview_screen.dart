@@ -14,9 +14,16 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, c) {
+      const gap = 12.0;
+      final cols = c.maxWidth >= 700 ? 5 : 2;
+      return _tile((c.maxWidth - gap * (cols - 1)) / cols);
+    });
+  }
+
+  Widget _tile(double width) {
     return Container(
-      // Sempre due per riga anche sui telefoni più stretti.
-      width: ((MediaQuery.sizeOf(context).width - 52) / 2).clamp(130.0, 150.0),
+      width: width,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: kSurface,
@@ -63,7 +70,7 @@ class DashboardOverviewScreen extends StatelessWidget {
         return PageBody(
           maxWidth: 900,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               PageHeader(
                   title: t.dashTabOverview,
@@ -80,58 +87,72 @@ class DashboardOverviewScreen extends StatelessWidget {
                 _StatTile(t.statConversion, '${rate.toStringAsFixed(1)}%',
                     Icons.trending_up),
               ]),
-              const SizedBox(height: 28),
-              SectionHeading(title: t.dashAlertsTitle),
-              const SizedBox(height: 10),
-              if (alerts.isEmpty)
-                InfoBanner(t.dashNoAlerts)
-              else
-                for (final a in alerts)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: InfoBanner(a, warning: true),
-                  ),
-              const SizedBox(height: 28),
-              Row(
-                children: [
-                  Expanded(
-                      child: SectionHeading(title: t.dashNotificationsTitle)),
-                  if (appState.notifications.any((n) => !n.isRead))
-                    TextButton(
-                      onPressed: () => runOrSnack(
-                          context, appState.markAllNotificationsRead),
-                      child: Text(t.markAllRead),
-                    ),
-                ],
+              const SizedBox(height: 20),
+              GoldPanel(
+                title: t.dashAlertsTitle,
+                icon: Icons.warning_amber_rounded,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (alerts.isEmpty)
+                      InfoBanner(t.dashNoAlerts)
+                    else
+                      for (final a in alerts)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: InfoBanner(a, warning: true),
+                        ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 10),
-              if (appState.notifications.isEmpty)
-                Text(t.dashNoNotifications,
-                    style: const TextStyle(color: kMuted))
-              else
-                for (final n in appState.notifications.take(8))
-                  ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                        n.isRead ? Icons.notifications_none : Icons.circle,
-                        size: n.isRead ? 20 : 10,
-                        color: n.isRead ? null : kPrimary),
-                    title: Text(n.message,
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: n.isRead
-                                ? FontWeight.normal
-                                : FontWeight.w700)),
-                    trailing: n.isRead
-                        ? null
-                        : IconButton(
-                            tooltip: t.markRead,
-                            icon: const Icon(Icons.check, size: 18),
-                            onPressed: () => runOrSnack(context,
-                                () => appState.markNotificationRead(n)),
-                          ),
-                  ),
+              const SizedBox(height: 16),
+              GoldPanel(
+                title: t.dashNotificationsTitle,
+                icon: Icons.notifications_none,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (appState.notifications.any((n) => !n.isRead))
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => runOrSnack(
+                              context, appState.markAllNotificationsRead),
+                          child: Text(t.markAllRead),
+                        ),
+                      ),
+                    if (appState.notifications.isEmpty)
+                      Text(t.dashNoNotifications,
+                          style: const TextStyle(color: kMuted))
+                    else
+                      for (final n in appState.notifications.take(8))
+                        ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(
+                              n.isRead
+                                  ? Icons.notifications_none
+                                  : Icons.circle,
+                              size: n.isRead ? 20 : 10,
+                              color: n.isRead ? null : kPrimary),
+                          title: Text(n.message,
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: n.isRead
+                                      ? FontWeight.normal
+                                      : FontWeight.w700)),
+                          trailing: n.isRead
+                              ? null
+                              : IconButton(
+                                  tooltip: t.markRead,
+                                  icon: const Icon(Icons.check, size: 18),
+                                  onPressed: () => runOrSnack(context,
+                                      () => appState.markNotificationRead(n)),
+                                ),
+                        ),
+                  ],
+                ),
+              ),
               if (appState.consents.isNotEmpty) ...[
                 const SizedBox(height: 28),
                 SectionHeading(title: t.whatsappConsentsTitle),
