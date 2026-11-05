@@ -118,6 +118,8 @@ class _RegistrationCard extends StatelessWidget {
     final details = [
       rolesLabel(context,
           guide.requestedRoles.isEmpty ? guide.roles : guide.requestedRoles),
+      if (guide.pendingRoles.isNotEmpty)
+        t.approvalsAddsRoles(rolesLabel(context, guide.pendingRoles)),
       guide.email,
       cityLabel(context, guide.city),
       if (guide.createdAt != null)

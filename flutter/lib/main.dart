@@ -266,6 +266,44 @@ class _AppShellState extends State<AppShell> {
   /// il menu cambia voci, quindi si torna alla prima.
   String? _lastKind;
 
+  /// Tipo della pagina di menu mostrata all'ultimo disegno (Null = Scopri):
+  /// dopo login o logout si resta lì se il nuovo menu la contiene ancora.
+  Type _rootType = Null;
+
+  /// Account aperto dal pallino: dopo il logout si mostra la voce Account.
+  bool _accountOpen = false;
+
+  /// Login, logout o cambio di ruolo: si resta sulla stessa pagina se è
+  /// ancora consentita, altrimenti si torna a Scopri.
+  void _keepPage(List<_NavItem> items, {required bool wasGuest}) {
+    final nowGuest = appState.currentUser == null;
+    if (nowGuest && _accountOpen) {
+      _accountOpen = false;
+      _reset(items.indexWhere((i) => i.$4 is AccountScreen));
+      return;
+    }
+    if (!nowGuest && _rootType == AccountScreen) {
+      // La voce Account non c'è più: Scopri, con l'Account aperto sopra.
+      _reset(0);
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _open(const _AccountPage()));
+      _accountOpen = true;
+      return;
+    }
+    final same = items.indexWhere((i) => i.$4.runtimeType == _rootType);
+    if (same < 0) {
+      _reset(0);
+      return;
+    }
+    // Stessa pagina: il navigatore resta, cambia solo la voce di menu.
+    _index = same;
+    // Le pagine aperte sopra potevano essere riservate: al logout si chiudono.
+    if (!wasGuest) {
+      WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _navKey.currentState?.popUntil((r) => r.isFirst));
+    }
+  }
+
   void _select(int i) {
     // Sulla stessa voce si torna alla sua pagina principale.
     if (i == _index) {
@@ -291,7 +329,10 @@ class _AppShellState extends State<AppShell> {
     if (appState.currentUser == null) {
       _select(_navItems(context).length - 1);
     } else {
-      _open(const _AccountPage());
+      _accountOpen = true;
+      _navKey.currentState
+          ?.push(MaterialPageRoute(builder: (_) => const _AccountPage()))
+          .then((_) => _accountOpen = false);
     }
   }
 
@@ -446,12 +487,18 @@ class _AppShellState extends State<AppShell> {
         final kind = user == null
             ? 'guest'
             : (user.role.isProfessional ? 'pro' : 'tourist');
-        if (kind != _lastKind) {
-          _lastKind = kind;
-          _reset(0);
-        }
         final items = _navItems(context);
+        if (kind != _lastKind) {
+          final previous = _lastKind;
+          _lastKind = kind;
+          if (previous == null) {
+            _reset(0);
+          } else {
+            _keepPage(items, wasGuest: previous == 'guest');
+          }
+        }
         if (_index >= items.length) _reset(0);
+        _rootType = items[_index].$4.runtimeType;
         return LayoutBuilder(builder: (context, constraints) {
           final isDesktop = constraints.maxWidth >= kDesktopWidth;
           Widget topBar({required bool overPhoto}) => isDesktop
@@ -837,15 +884,20 @@ class _DepthObserver extends NavigatorObserver {
     onChange((_routes - 1).clamp(0, 1 << 20));
   }
 
+  // Solo le pagine: menu (lingua, città) e finestre a comparsa non contano,
+  // altrimenti aprirli in home farebbe comparire una seconda intestazione.
   @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _set(_routes + 1);
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is PageRoute) _set(_routes + 1);
+  }
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _set(_routes - 1);
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is PageRoute) _set(_routes - 1);
+  }
 
   @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _set(_routes - 1);
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is PageRoute) _set(_routes - 1);
+  }
 }

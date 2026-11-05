@@ -57,6 +57,7 @@ class Guide {
     this.avatarUrl,
     List<Role>? roles,
     this.requestedRoles = const [],
+    this.pendingRoles = const [],
   }) : roles = roles ?? (role.isProfessional ? [role] : const []);
   final String id;
   final String name;
@@ -83,6 +84,19 @@ class Guide {
   /// Ruoli professionali chiesti alla registrazione e non ancora approvati
   /// (o rifiutati): finché non c'è l'approvazione l'utente è un turista.
   final List<Role> requestedRoles;
+
+  /// Ruoli aggiunti dal profilo da un professionista già approvato: si
+  /// attivano quando l'admin li approva (gli altri restano validi).
+  final List<Role> pendingRoles;
+
+  /// Ruoli scelti dall'utente: attivi, in attesa o chiesti in registrazione.
+  List<Role> get chosenRoles => [
+        for (final r in professionalRoles)
+          if (roles.contains(r) ||
+              pendingRoles.contains(r) ||
+              requestedRoles.contains(r))
+            r
+      ];
 
   bool has(Role r) => roles.contains(r);
 
@@ -139,6 +153,10 @@ class Guide {
         role: role,
         roles: roles,
         requestedRoles: requestedRoles,
+        pendingRoles: [
+          for (final r in (j['pendingRoles'] as List? ?? const []))
+            roleFromString(r as String?)
+        ].where((r) => r.isProfessional).toList(),
         verified: j['verified'] as bool? ?? false,
         languages:
             (j['languages'] as List?)?.cast<String>() ?? const ['Italiano'],

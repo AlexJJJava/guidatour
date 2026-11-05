@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { currentUserId, requireAuth, type AppEnv } from '../auth.js'
 import { listNotifications, markRead } from '../services/notifications.js'
-import { getMyProfile, requireProfessional, updateMyProfile } from '../services/profiles.js'
+import { getMyProfile, requireProfessional, updateMyProfile, requestRoles } from '../services/profiles.js'
 import { listSent } from '../services/requests.js'
 import {
   addFavorite,
@@ -38,6 +38,15 @@ me.get('/', async (c) => c.json(await getMyProfile(c.get('db'), currentUserId(c)
 me.patch('/', async (c) => {
   const patch = await parseBody(c, profilePatch)
   return c.json(await updateMyProfile(c.get('db'), currentUserId(c), patch))
+})
+
+// Ruoli professionali: togliere vale subito, aggiungere passa dall'admin.
+me.put('/roles', async (c) => {
+  const { roles } = await parseBody(
+    c,
+    z.object({ roles: z.array(z.enum(['guida', 'accompagnatore', 'tourOperator'])).max(3) }),
+  )
+  return c.json(await requestRoles(c.get('db'), currentUserId(c), roles))
 })
 
 // ── Turista ──

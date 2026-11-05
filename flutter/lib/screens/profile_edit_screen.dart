@@ -23,6 +23,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   late final _bio = TextEditingController(text: _user.bio);
   late final Set<String> _languages = {..._user.languages};
   late String _city = _user.city;
+  late final Set<Role> _roles = {..._user.chosenRoles};
   bool _saving = false;
   bool _photoBusy = false;
 
@@ -42,6 +43,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     }
     setState(() => _saving = true);
     try {
+      final roles = [
+        for (final r in professionalRoles)
+          if (_roles.contains(r)) r
+      ];
+      if (roles.length != _user.chosenRoles.length ||
+          !roles.every(_user.chosenRoles.contains)) {
+        await appState.requestRoles(roles);
+      }
       await appState.updateProfile(
         name: _name.text.trim(),
         bio: _bio.text.trim(),
@@ -119,6 +128,46 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
+  Widget _rolesPanel(BuildContext context) {
+    final t = l10n(context);
+    final suspended = _user.approvalStatus == 'sospeso';
+    final approved = _user.roles.isNotEmpty;
+    return GoldPanel(
+      title: t.profileRolesSection,
+      icon: Icons.badge_outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+              suspended
+                  ? t.profileRolesSuspended
+                  : approved
+                      ? t.profileRolesHint
+                      : t.profileRolesTouristHint,
+              style: const TextStyle(color: kMuted, height: 1.4)),
+          const SizedBox(height: 8),
+          for (final r in professionalRoles)
+            CheckboxListTile(
+              key: ValueKey('edit-role-${r.name}'),
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: _roles.contains(r),
+              onChanged: suspended
+                  ? null
+                  : (v) => setState(
+                      () => v == true ? _roles.add(r) : _roles.remove(r)),
+              title: Text(roleLabel(context, r)),
+              secondary: _user.pendingRoles.contains(r) ||
+                      (_user.requestedRoles.contains(r) &&
+                          _user.approvalStatus == 'in_attesa')
+                  ? StatusPill(t.profileRolesPendingTag)
+                  : null,
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
@@ -180,6 +229,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 16),
+              _rolesPanel(context),
               const SizedBox(height: 16),
               GoldPanel(
                 title: t.fieldLanguagesSpoken,

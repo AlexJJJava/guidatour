@@ -537,6 +537,98 @@ describe('admin', () => {
   })
 })
 
+describe('ruoli dal profilo', () => {
+  // Servono la migrazione 0008 e l'account multi1 (guida + accompagnatore).
+  let token = ''
+  let id = ''
+  let ready = false
+  const roles = (j: { roles?: string[] }) => [...(j.roles ?? [])].sort()
+  before(async () => {
+    token = await login('alessio.damico+multi1@gmail.com').catch(() => '')
+    if (!token) return
+    const r = await api('/me/roles', { method: 'PUT', token, body: { roles: ['accompagnatore', 'guida'] } })
+    ready = r.status === 200
+    if (ready) id = r.json.id
+  })
+  const skip = (t: { skip: (m: string) => void }) => {
+    if (!ready) t.skip('serve la migrazione 0008')
+    return !ready
+  }
+
+  test('togliere un ruolo vale subito', async (t) => {
+    if (skip(t)) return
+    try {
+      const r = await api('/me/roles', { method: 'PUT', token, body: { roles: ['guida'] } })
+      assert.equal(r.status, 200, JSON.stringify(r.json))
+      assert.deepEqual(roles(r.json), ['guida'])
+      assert.equal(r.json.approvalStatus, 'approvato')
+    } finally {
+      // Riaggiungerlo passa dall'admin: si approva per tornare com'era.
+      await api('/me/roles', { method: 'PUT', token, body: { roles: ['accompagnatore', 'guida'] } })
+      await api(`/admin/registrations/${id}`, { token: tokens.admin, body: { status: 'approvato' } })
+    }
+  })
+
+  test("aggiungere un ruolo resta in attesa finché l'admin approva", async (t) => {
+    if (skip(t)) return
+    await api('/me/roles', { method: 'PUT', token, body: { roles: ['guida'] } })
+    const r = await api('/me/roles', {
+      method: 'PUT',
+      token,
+      body: { roles: ['guida', 'accompagnatore'] },
+    })
+    assert.equal(r.status, 200)
+    assert.deepEqual(roles(r.json), ['guida'], 'ruolo nuovo attivo senza approvazione')
+    assert.deepEqual(r.json.pendingRoles, ['accompagnatore'])
+    assert.equal(r.json.approvalStatus, 'approvato', 'la guida resta attiva')
+    const pending = await api('/admin/registrations?status=in_attesa', { token: tokens.admin })
+    assert.ok(pending.json.registrations.some((p: { id: string }) => p.id === id), 'non visibile all\'admin')
+    const ok = await api(`/admin/registrations/${id}`, { token: tokens.admin, body: { status: 'approvato' } })
+    assert.equal(ok.status, 204)
+    const me = (await api('/me', { token })).json
+    assert.deepEqual(roles(me), ['accompagnatore', 'guida'])
+    assert.deepEqual(me.pendingRoles, [])
+  })
+
+  test("se l'admin rifiuta i ruoli nuovi, quelli approvati restano", async (t) => {
+    if (skip(t)) return
+    await api('/me/roles', { method: 'PUT', token, body: { roles: ['accompagnatore', 'guida', 'tourOperator'] } })
+    const no = await api(`/admin/registrations/${id}`, { token: tokens.admin, body: { status: 'rifiutato' } })
+    assert.equal(no.status, 204)
+    const me = (await api('/me', { token })).json
+    assert.deepEqual(roles(me), ['accompagnatore', 'guida'])
+    assert.deepEqual(me.pendingRoles, [])
+    assert.equal(me.approvalStatus, 'approvato')
+  })
+
+  test('un turista che chiede un ruolo aspetta come in registrazione', async (t) => {
+    if (skip(t)) return
+    const tt = tokens.turista
+    try {
+      const r = await api('/me/roles', { method: 'PUT', token: tt, body: { roles: ['guida'] } })
+      assert.equal(r.status, 200)
+      assert.equal(r.json.approvalStatus, 'in_attesa')
+      assert.equal((await api('/tours', { token: tt, body: tourBody() })).status, 403)
+    } finally {
+      const back = await api('/me/roles', { method: 'PUT', token: tt, body: { roles: [] } })
+      assert.equal(back.json.role, 'turista')
+      assert.equal(back.json.approvalStatus, 'approvato')
+    }
+  })
+
+  test('nessuno si assegna ruoli scrivendo su Supabase', async (t) => {
+    if (skip(t)) return
+    await rest(`/rest/v1/profiles?id=eq.${ids.turista}`, {
+      method: 'PATCH',
+      token: tokens.turista,
+      body: { roles: ['tourOperator'], pending_roles: [], approval_status: 'approvato' },
+    })
+    const me = (await api('/me', { token: tokens.turista })).json
+    assert.equal(me.role, 'turista')
+    assert.deepEqual(me.roles, [])
+  })
+})
+
 describe('gestione (admin)', () => {
   test('panoramica, professionisti e tour per l\'admin', async () => {
     const token = tokens.admin

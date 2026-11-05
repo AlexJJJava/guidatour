@@ -27,7 +27,9 @@ type Stats = { requests: number; requestsConfirmed: number; visits: number; scan
 
 export async function getOverview(db: Db): Promise<AdminOverview> {
   const [profiles, tours, consents, stats] = await Promise.all([
-    db.from('profiles').select('role, approval_status').returns<{ role: string; approval_status?: string }[]>(),
+    db.from('profiles').select('*').returns<
+      { role: string; approval_status?: string; pending_roles?: string[] }[]
+    >(),
     db.from('tours').select('start_at, accessories, visits, scans').returns<
       { start_at: string; accessories: string[]; visits: number; scans: number }[]
     >(),
@@ -42,7 +44,11 @@ export async function getOverview(db: Db): Promise<AdminOverview> {
   const s = stats.error ? null : (stats.data as Stats)
   return {
     professionals: status('approvato'),
-    pending: status('in_attesa'),
+    // Registrazioni in attesa più professionisti che chiedono nuovi ruoli.
+    pending:
+      status('in_attesa') +
+      pros.filter((p) => (p.approval_status ?? 'approvato') === 'approvato' && p.pending_roles?.length)
+        .length,
     suspended: status('sospeso'),
     rejected: status('rifiutato'),
     tourists: people.length - pros.length,

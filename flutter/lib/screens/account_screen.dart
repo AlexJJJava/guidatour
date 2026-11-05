@@ -44,6 +44,11 @@ class AccountScreen extends StatelessWidget {
                   warning: user.approvalStatus != 'in_attesa',
                 ),
               ],
+              if (user.pendingRoles.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                InfoBanner(t.accountRolesPending(
+                    rolesLabel(context, user.pendingRoles))),
+              ],
               const SizedBox(height: 18),
               // Tre riquadri che riempiono la riga.
               _CountRow(
@@ -184,6 +189,21 @@ class _ProfileHeader extends StatelessWidget {
                                 color: kGold,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700)),
+                      ),
+                    for (final r in user.pendingRoles)
+                      Container(
+                        key: ValueKey('pending-role-${r.name}'),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: kSurface,
+                          border: Border.all(color: kNight),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                            '${roleLabel(context, r)} · ${t.profileRolesPendingTag}',
+                            style: const TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w700)),
                       ),
                     if (user.role.isProfessional)
                       Row(

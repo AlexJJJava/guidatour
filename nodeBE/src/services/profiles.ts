@@ -19,6 +19,8 @@ export interface Profile {
   isAdmin: boolean
   approvalStatus: ApprovalStatus
   roles: Role[]
+  // Ruoli aggiunti dal profilo, in attesa dell'admin (migrazione 0008).
+  pendingRoles: Role[]
   avatarUrl: string | null
   languages: string[]
   bio: string
@@ -51,6 +53,7 @@ type ProfileRow = {
   approval_status?: ApprovalStatus
   // Assente finché la migrazione 0006 non è applicata.
   roles?: Role[] | null
+  pending_roles?: Role[] | null
   // Assente finché la migrazione 0005 non è applicata.
   avatar_url?: string | null
   languages: string[]
@@ -84,6 +87,7 @@ const toProfile = (r: ProfileRow): Profile => ({
   isAdmin: r.is_admin,
   approvalStatus: r.approval_status ?? 'approvato',
   roles: rolesOf(r),
+  pendingRoles: r.pending_roles ?? [],
   avatarUrl: r.avatar_url ?? null,
   languages: r.languages,
   bio: r.bio,
@@ -123,16 +127,23 @@ export async function requireAdmin(db: Db, userId: string): Promise<Profile> {
 // Registrazioni professionali per la pagina delle approvazioni (solo admin:
 // la policy profiles_select_admin rende visibili i profili altrui).
 export async function listRegistrations(db: Db, status: ApprovalStatus): Promise<Profile[]> {
-  const rows = unwrap(
-    await db
-      .from('profiles')
-      .select('*')
-      .neq('role', 'turista')
-      .eq('approval_status', status)
-      .order('created_at', { ascending: false })
-      .returns<ProfileRow[]>(),
-  )
-  return rows.map(toProfile)
+  const query = () =>
+    db.from('profiles').select('*').neq('role', 'turista').order('created_at', { ascending: false })
+  // "In attesa" comprende i professionisti che hanno chiesto nuovi ruoli.
+  if (status === 'in_attesa') {
+    const both = await query()
+      .or('approval_status.eq.in_attesa,pending_roles.neq.{}')
+      .returns<ProfileRow[]>()
+    // Prima della migrazione 0008 la colonna pending_roles non esiste.
+    if (!both.error) return both.data.map(toProfile)
+  }
+  return unwrap(await query().eq('approval_status', status).returns<ProfileRow[]>()).map(toProfile)
+}
+
+/** Chiede di cambiare i propri ruoli professionali (migrazione 0008). */
+export async function requestRoles(db: Db, userId: string, roles: Role[]): Promise<Profile> {
+  unwrap(await db.rpc('request_roles', { p_roles: roles }))
+  return getMyProfile(db, userId)
 }
 
 export async function setApprovalStatus(

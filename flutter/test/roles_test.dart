@@ -18,6 +18,7 @@ import 'package:guidatour/screens/bookings_screen.dart';
 import 'package:guidatour/screens/cart_screen.dart';
 import 'package:guidatour/screens/faq_screen.dart';
 import 'package:guidatour/screens/favorites_screen.dart';
+import 'package:guidatour/screens/home_screen.dart';
 import 'package:guidatour/screens/my_tours_screen.dart';
 import 'package:guidatour/screens/profile_edit_screen.dart';
 import 'package:guidatour/screens/tour_detail_screen.dart';
@@ -336,7 +337,120 @@ void main() {
         expect(bars(size), findsOneWidget);
         await tester.pumpWidget(const SizedBox());
       });
+
+      testWidgets('con il menu della lingua aperto (${size.width})',
+          (tester) async {
+        sized(tester, size);
+        seed(user(Role.turista));
+        await tester.pumpWidget(const GuidaTourApp());
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.tap(find.byType(LanguagePicker).first);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(bars(size), findsOneWidget, reason: 'menu aperto');
+        await tester.tap(find.text('English').last);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(bars(size), findsOneWidget, reason: 'lingua cambiata');
+        localeController.value = const Locale('it');
+        await tester.pumpWidget(const SizedBox());
+      });
     }
+  });
+
+  group('login e logout restano sulla pagina', () {
+    Future<void> open(WidgetTester tester, Guide? u) async {
+      sized(tester, const Size(1920, 1080));
+      seed(u);
+      await tester.pumpWidget(const GuidaTourApp());
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    Future<void> become(WidgetTester tester, Guide? u) async {
+      appState.currentUser = u;
+      appState.notifyListeners();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+    }
+
+    Future<void> go(WidgetTester tester, String label) async {
+      await tester.tap(navLabel(label));
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+
+    testWidgets('visitatore su Preferiti, accede da turista: resta',
+        (tester) async {
+      await open(tester, null);
+      await go(tester, t.navFavorites);
+      expect(find.byType(AuthScreen), findsOneWidget);
+      await become(tester, user(Role.turista));
+      expect(find.byType(FavoritesScreen), findsOneWidget);
+      expect(find.byType(AuthScreen), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('visitatore su Preferiti, accede da guida: Scopri',
+        (tester) async {
+      await open(tester, null);
+      await go(tester, t.navFavorites);
+      await become(tester, user(Role.guida));
+      expect(find.byType(FavoritesScreen), findsNothing);
+      expect(find.byType(HomeScreen), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('turista su Prenotazioni, esce: resta', (tester) async {
+      await open(tester, user(Role.turista));
+      await go(tester, t.navBookings);
+      await become(tester, null);
+      expect(find.byType(BookingsScreen), findsOneWidget);
+      expect(find.byType(AuthScreen), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('guida su I miei tour, esce: Scopri', (tester) async {
+      await open(tester, user(Role.guida));
+      await go(tester, t.dashTabMyTours);
+      expect(find.byType(MyToursScreen), findsOneWidget);
+      await become(tester, null);
+      expect(find.byType(MyToursScreen), findsNothing);
+      expect(find.byType(HomeScreen), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('accesso dalla voce Account: si apre il proprio Account',
+        (tester) async {
+      await open(tester, null);
+      await go(tester, t.navAccount);
+      await become(tester, user(Role.turista));
+      expect(find.byType(AccountScreen), findsOneWidget);
+      expect(find.text(t.accountProfileSection), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets("uscita dall'Account: si vede la pagina di accesso",
+        (tester) async {
+      await open(tester, user(Role.turista));
+      await tester.tap(find.byKey(const ValueKey('user-avatar')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+      await become(tester, null);
+      expect(find.byType(AuthScreen), findsOneWidget);
+      expect(navLabel(t.navAccount), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('scheda di un tour aperta: resta anche dopo il login',
+        (tester) async {
+      await open(tester, null);
+      openTour(tester.element(find.byType(HomeScreen)), tourBy('u1'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.byType(TourDetailScreen), findsOneWidget);
+      await become(tester, user(Role.turista));
+      expect(find.byType(TourDetailScreen), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
   });
 
   group('barra su telefono', () {
@@ -602,6 +716,70 @@ void main() {
               u.requestedRoles.isEmpty ? u.roles : u.requestedRoles)))));
       expect(find.text('${t.roleGuida} · ${t.roleTourOperator}'),
           findsOneWidget);
+    });
+  });
+
+  group('ruoli dal profilo', () {
+    Guide me(Map<String, dynamic> extra) => Guide.fromProfileJson({
+          'id': 'r1',
+          'name': 'Rita Bianchi',
+          'email': 'r@example.com',
+          'role': 'guida',
+          'roles': ['guida'],
+          'approvalStatus': 'approvato',
+          ...extra,
+        });
+
+    testWidgets('si scelgono più ruoli, con quelli attuali già spuntati',
+        (tester) async {
+      sized(tester, const Size(1280, 2400));
+      seed(me({'pendingRoles': ['tourOperator']}));
+      await tester.pumpWidget(page(const ProfileEditScreen()));
+      await tester.pump();
+      expect(find.text(t.profileRolesSection), findsOneWidget);
+      expect(find.text(t.profileRolesHint), findsOneWidget);
+      CheckboxListTile box(String r) => tester.widget<CheckboxListTile>(
+          find.byKey(ValueKey('edit-role-$r')));
+      expect(box('guida').value, isTrue);
+      expect(box('accompagnatore').value, isFalse);
+      expect(box('tourOperator').value, isTrue);
+      // Il ruolo in attesa è segnalato.
+      expect(find.text(t.profileRolesPendingTag), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('edit-role-accompagnatore')));
+      await tester.pump();
+      expect(box('accompagnatore').value, isTrue);
+    });
+
+    testWidgets('sospeso: i ruoli non si cambiano', (tester) async {
+      sized(tester, const Size(1280, 2400));
+      seed(me({'approvalStatus': 'sospeso'}));
+      await tester.pumpWidget(page(const ProfileEditScreen()));
+      await tester.pump();
+      expect(find.text(t.profileRolesSuspended), findsOneWidget);
+      final box = tester.widget<CheckboxListTile>(
+          find.byKey(const ValueKey('edit-role-guida')));
+      expect(box.onChanged, isNull);
+    });
+
+    testWidgets('Account mostra i ruoli in attesa', (tester) async {
+      sized(tester, const Size(1280, 1600));
+      seed(me({'pendingRoles': ['accompagnatore']}));
+      await tester.pumpWidget(page(const AccountScreen()));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('pending-role-accompagnatore')),
+          findsOneWidget);
+      expect(find.text(t.accountRolesPending(t.roleAccompagnatore)),
+          findsOneWidget);
+    });
+
+    test('i ruoli in attesa arrivano dal profilo', () {
+      final u = me({
+        'pendingRoles': ['tourOperator', 'accompagnatore']
+      });
+      expect(u.roles, [Role.guida]);
+      expect(u.pendingRoles, [Role.tourOperator, Role.accompagnatore]);
+      expect(u.chosenRoles,
+          [Role.guida, Role.accompagnatore, Role.tourOperator]);
     });
   });
 

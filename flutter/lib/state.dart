@@ -488,6 +488,15 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Togliere un ruolo vale subito; aggiungerlo passa dall'approvazione.
+  Future<void> requestRoles(List<Role> roles) async {
+    await api.put('/me/roles', {
+      'roles': [for (final r in roles) r.name],
+    });
+    // Il profilo può diventare turista o professionista: si ricarica tutto.
+    await _loadMyProfile();
+  }
+
   Future<void> markNotificationRead(AppNotification n) async {
     if (n.isRead) return;
     await api.post('/me/notifications/${n.id}/read');

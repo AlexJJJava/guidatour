@@ -489,6 +489,12 @@ class _ProCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 2),
+                    if (guide.pendingRoles.isNotEmpty)
+                      Text(
+                          t.approvalsAddsRoles(
+                              rolesLabel(context, guide.pendingRoles)),
+                          style: const TextStyle(
+                              color: kOnGold, fontWeight: FontWeight.w600)),
                     Text(rolesLabel(context, roles),
                         style: const TextStyle(color: kPrimary)),
                     Text(
