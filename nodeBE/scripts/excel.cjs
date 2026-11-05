@@ -93,11 +93,11 @@ wsR.addConditionalFormatting({
 
 // Regola unica: guide, accompagnatori e tour operator ottengono il ruolo solo con
 // l'approvazione dell'admin; prima (o se rifiutati) sono turisti.
-wsR.getCell(12, 1).value = "Chi si registra come guida, accompagnatore o tour operator è un turista finché l'admin non lo approva (anche se rifiutato); in Account vede lo stato della richiesta. L'approvazione vale anche come verifica: ogni tour operator approvato può pubblicare pacchetti.";
+wsR.getCell(12, 1).value = "Un utente può avere più ruoli professionali (guida, accompagnatore, tour operator), scelti in registrazione e approvati insieme dall'admin con un'unica approvazione. Finché non è approvato (o se rifiutato) è un turista e in Account vede lo stato della richiesta. Le regole si sommano: chi è anche guida o tour operator non ha i limiti dell'accompagnatore; i pacchetti richiedono il ruolo tour operator.";
 wsR.mergeCells(12, 1, 12, 6);
 wsR.getCell(12, 1).font = { name: 'Arial', size: 10, italic: true, color: { argb: 'FF5B6470' } };
 wsR.getCell(12, 1).alignment = { wrapText: true, vertical: 'top' };
-wsR.getRow(12).height = 32;
+wsR.getRow(12).height = 46;
 
 const roles = ['Visitatore', 'Turista (e professionisti non approvati)', 'Guida', 'Accompagnatore', 'Tour operator', 'Admin (ruolo turista)'];
 const P = 'Sì', N = 'No', L = 'Con accesso';
@@ -147,11 +147,12 @@ const tests = [
   ['Backend online', 'Guida', 8, 'Superato', 'Tour, richieste, cessione, dati altrui protetti'],
   ['Backend online', 'Accompagnatore', 7, 'Superato', 'Categorie, parole riservate, pacchetti, proposte'],
   ['Backend online', 'Tour operator', 3, 'Superato', 'Pacchetti pubblicati da tour operator approvato'],
+  ['Backend online', 'Più ruoli', 5, 'In attesa della migrazione 0006', 'Guida + accompagnatore: visite e accompagnamenti senza blocchi, niente pacchetti, cessioni, elenchi per ruolo. Si attivano dopo la query'],
   ['Backend online', 'Professionista non approvato', 3, 'Superato', 'Guida rifiutata: niente funzioni professionali, preferiti, carrello e richieste come turista, assente dagli elenchi'],
   ['Backend online', 'Admin', 3, 'Superato', 'Registrazioni, consensi, limiti del ruolo'],
   ['Backend online', 'Tentativi di scavalcare i ruoli', 6, 'Superato', 'Revoca consensi provata solo su id inesistente: nel database non ci sono consensi'],
   ['Backend online', 'Foto profilo', 5, 'Superato', 'Caricamento, rimozione, cartelle altrui, formato e indirizzi esterni'],
-  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 56, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
+  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 64, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
   ['Non coperto', 'Prova end-to-end nel browser', 0, 'Da provare', 'Clic reali sul sito pubblicato'],
 ];
 const wsT = sheet('Test', 'Esiti del 2 novembre 2026. Comando backend: npm run test:roles (cartella nodeBE).',
@@ -216,6 +217,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['05/11/2026', 'Più ruoli per utente', 'In registrazione si scelgono uno o più profili professionali, con un’unica approvazione dell’admin; regole sommate per combinazione (migrazione 0006). Fix: Approvazioni mostrava Turista per le richieste in attesa', 'Test app e backend (5 in attesa della 0006)'],
   ['05/11/2026', 'Excel: colonna approvazione', 'Nel foglio Ruoli la colonna "Approvazione admin": la richiedono guida, accompagnatore e tour operator', '—'],
   ['05/11/2026', 'Non approvati = turisti', 'Professionisti in attesa o rifiutati usano l’app come turisti con avviso in Account; pacchetti per ogni tour operator approvato; tolto l’accesso rapido T.O. non verificato', 'Test app e backend'],
   ['05/11/2026', 'Footer più basso, home senza guide', 'Footer su una fascia (marchio, avvertenza accanto, link utili a destra), circa 60 px in meno; tolta dalla home la lista delle guide', 'Test app, prova sul sito'],
