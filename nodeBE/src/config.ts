@@ -22,3 +22,9 @@ export const WHATSAPP_SENDER = 'GuidaTour'
 // Sito pubblico: da qui partono i link dei tour e quindi i QR delle locandine.
 export const PUBLIC_SITE_URL =
   process.env.PUBLIC_SITE_URL || 'https://alexjjjava.github.io/guidatour/'
+
+/** App Flutter: da qui si prenota (le pagine SEO ci portano con ?tour=ID). */
+export const APP_URL = PUBLIC_SITE_URL
+
+/** Pagine pubbliche in HTML servite da questo backend (sitemap, canonical). */
+export const SEO_SITE_URL = (process.env.SEO_SITE_URL || 'https://guidatour.onrender.com').replace(/\/$/, '')

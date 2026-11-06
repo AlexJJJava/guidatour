@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test:roles": "tsx --test test/roles.test.ts",
+    "test:site": "tsx --test test/site.test.ts",
     "docs:excel": "node scripts/excel.cjs"
   },
   "engines": {

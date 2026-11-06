@@ -10,6 +10,7 @@ import { consents } from './routes/consents.js'
 import { guides } from './routes/guides.js'
 import { me } from './routes/me.js'
 import { requests } from './routes/requests.js'
+import { site } from './routes/site.js'
 import { tours } from './routes/tours.js'
 
 const app = new Hono<AppEnv>()
@@ -32,6 +33,8 @@ app.route('/requests', requests)
 app.route('/consents', consents)
 app.route('/assignments', assignments)
 app.route('/admin', admin)
+// Pagine pubbliche (SEO): dopo le API, solo per percorsi che le API non usano.
+app.route('/', site)
 
 app.notFound((c) => c.json({ error: 'Risorsa non trovata' }, 404))
 
