@@ -225,6 +225,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['06/11/2026', 'Città accanto alla lingua', 'Nelle finestre strette (sotto 1024 px) la scelta della città andava a capo sotto la barra: ora resta nella barra in alto a sinistra della lingua e si accorcia con i puntini se manca spazio', 'Test app (nessuna pagina sfora da 320 px in su); schermate del sito a 1000, 600 e 360 px'],
   ['06/11/2026', 'Fix foto profilo sul sito', 'Sul sito ogni foto risultava "non valida": la lettura usava una funzione di Flutter che sul web non esiste. Ora si legge in modo compatibile; messaggio con i formati accettati (JPG, PNG, WebP)', 'Test app; caricamento e salvataggio provati sul sito pubblicato'],
   ['06/11/2026', 'Date multiple per tour', 'Un tour ha più date (anche ogni settimana): il turista sceglie la data in scheda, carrello e richiesta, la guida la vede nelle richieste, gli avvisi contano i posti per data; pagine SEO con prossime date; locandina "Ogni martedì alle 21:00". Fix: la modifica parziale di un tour non svuota più la descrizione', 'Test app e backend online, schermate'],
   ['06/11/2026', 'SEO: pagine pubbliche', 'Il backend serve pagine HTML vere (home, /roma, /roma/visita-guidata, /tour/ID) con titolo e descrizione propri, dati strutturati, sitemap e robots; il pulsante Prenota apre l’app. L’app Flutter ha titolo vero ed è noindex', 'Test SEO e ruoli sul backend online, schermate'],
