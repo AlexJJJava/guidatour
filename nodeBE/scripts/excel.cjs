@@ -126,7 +126,9 @@ const ops = [
   ['Iscriversi a WhatsApp', P, P, P, P, P, P],
   ['Salvare preferiti', N, P, N, N, N, P],
   ['Inviare richieste dal carrello', N, P, N, N, N, P],
+  ['Scegliere la data del tour (scheda, carrello, richiesta)', P, P, P, P, P, P],
   ['Pubblicare e modificare propri tour', N, N, P, 'Solo accompagnamento', P, N],
+  ['Più date per tour (anche ogni settimana, max 60)', N, N, P, P, P, N],
   ['Pubblicare visite guidate', N, N, P, N, P, N],
   ['Pubblicare pacchetti con accessori', N, N, N, N, P, N],
   ['Generare QR e locandina PDF', N, N, P, P, P, N],
@@ -155,9 +157,10 @@ const tests = [
   ['Backend online', 'Professionista non approvato', 3, 'Superato', 'Guida rifiutata: niente funzioni professionali, preferiti, carrello e richieste come turista, assente dagli elenchi'],
   ['Backend online', 'Admin', 3, 'Superato', 'Registrazioni, consensi, limiti del ruolo'],
   ['Backend online', 'Tentativi di scavalcare i ruoli', 6, 'Superato', 'Revoca consensi provata solo su id inesistente: nel database non ci sono consensi'],
+  ['Backend online', 'Date multiple', 6, 'Superato', 'Tour con più date in ordine; ricerca per data; richiesta e carrello con la data (data estranea rifiutata); modifica delle date senza toccare gli altri campi; tour con la sola data; limiti'],
   ['Backend online', 'Foto profilo', 5, 'Superato', 'Caricamento, rimozione, cartelle altrui, formato e indirizzi esterni'],
   ['Backend online', 'Pagine SEO', 12, 'Superato', 'npm run test:site: titolo, descrizione, canonical, hreflang, JSON-LD Event e ItemList, 404 e 410 noindex, sitemap senza [TEST], robots, immagini, API invariate'],
-  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, ruoli dal profilo, login senza cambio pagina, menu lingua, carrello e richieste, approvazioni, Gestione admin, Account e profilo, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 87, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
+  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, ruoli dal profilo, login senza cambio pagina, menu lingua, carrello e richieste, approvazioni, Gestione admin, Account e profilo, pallino, ritaglio foto, locandina PDF, blocchi, link QR, date multiple, layout', 95, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
   ['Non coperto', 'Prova end-to-end nel browser', 0, 'Da provare', 'Clic reali sul sito pubblicato'],
 ];
 const wsT = sheet('Test', 'Esiti del 6 novembre 2026. Comandi backend: npm run test:roles e npm run test:site (cartella nodeBE).',
@@ -170,7 +173,7 @@ for (const n of [2, 3]) wsT.getCell(lt + 1, n).font = { name: 'Arial', size: 10,
 const F = 'Da fare';
 const todo = [
   [1, 'MVP', 'QR funzionanti', 'Link al sito attuale con apertura diretta del tour e conteggio scansioni. Con un dominio definitivo i QR già stampati vanno rifatti', 'Fatto'],
-  [2, 'MVP', 'Date multiple per tour', 'Ogni tour ha una sola data e poi scade', F],
+  [2, 'MVP', 'Date multiple per tour', 'Fino a 60 date per tour, aggiunte una per una o ogni settimana; stesso link e QR finché ci sono date; data scelta da carrello e richiesta; posti per uscita (migrazione 0009)', 'Fatto'],
   [3, 'MVP', 'Notifiche email', "Oggi gli avvisi sono solo dentro l'app", F],
   [4, 'MVP', 'Locandina PDF', 'A4 con foto, QR, prezzo e organizzatore; pulsanti Scarica PDF e Stampa', 'Fatto'],
   [5, 'MVP', 'SEO', 'Pagine HTML dal backend: home, città, città + categoria, tour (IT/EN/ES), sitemap, robots.txt, dati strutturati Event, 404/410. Da portare sul dominio definitivo e inviare a Google Search Console', 'Fatto'],
@@ -222,6 +225,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['06/11/2026', 'Date multiple per tour', 'Un tour ha più date (anche ogni settimana): il turista sceglie la data in scheda, carrello e richiesta, la guida la vede nelle richieste, gli avvisi contano i posti per data; pagine SEO con prossime date; locandina "Ogni martedì alle 21:00". Fix: la modifica parziale di un tour non svuota più la descrizione', 'Test app e backend online, schermate'],
   ['06/11/2026', 'SEO: pagine pubbliche', 'Il backend serve pagine HTML vere (home, /roma, /roma/visita-guidata, /tour/ID) con titolo e descrizione propri, dati strutturati, sitemap e robots; il pulsante Prenota apre l’app. L’app Flutter ha titolo vero ed è noindex', 'Test SEO e ruoli sul backend online, schermate'],
   ['05/11/2026', 'Tolto "verificato"', 'Non si parla più di tour operator verificato o non verificato: tolte l’etichetta “verificato” da Account e scheda tour e la parola dalle frasi su tour operator e pacchetti (home, modulo tour, FAQ, messaggio del backend)', 'Test app e backend'],
   ['05/11/2026', 'Approvazioni: Tutte di default', 'La scheda Approvazioni parte da Tutte, in ordine di data, con data e stato colorato su ogni registrazione; filtri In attesa, Approvate, Rifiutate. Fix: si approvano i nuovi ruoli di chi è già approvato', 'Test app e backend, schermata sul sito'],
