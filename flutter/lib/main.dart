@@ -537,14 +537,7 @@ class _AppShellState extends State<AppShell> {
           } else {
             content = Column(
               children: [
-                if (showHeader) ...[
-                  const _MobileTopBar(solid: true),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(12, 8, 12, 0),
-                    child: Align(
-                        alignment: Alignment.centerRight, child: CityPicker()),
-                  ),
-                ],
+                if (showHeader) const _MobileTopBar(solid: true),
                 Expanded(child: inner),
               ],
             );
@@ -794,6 +787,16 @@ class _MobileTopBar extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+            const SizedBox(width: 8),
+            // La città resta accanto alla lingua: nelle finestre strette si
+            // accorcia con i puntini invece di andare a capo.
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxWidth: (MediaQuery.sizeOf(context).width *
+                          (MediaQuery.sizeOf(context).width < 400 ? 0.25 : 0.32))
+                      .clamp(72.0, 200.0)),
+              child: const CityPicker(),
             ),
             const SizedBox(width: 8),
             const _TopActions(),

@@ -274,12 +274,6 @@ class _Hero extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            if (!wide) ...[
-                              const Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: CityPicker()),
-                              const SizedBox(height: 8),
-                            ],
                             Text(t.homeHeroLine1,
                                 style: TextStyle(
                                     fontFamily: kSerif,
