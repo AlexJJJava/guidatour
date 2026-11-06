@@ -20,6 +20,15 @@ create table public.profiles (
   languages text[] not null default '{Italiano}',
   bio text not null default '',
   city text not null default 'Roma',
+  -- Colonne aggiunte dalle migrazioni 0004-0008 (riportate qui per completezza;
+  -- le funzioni e le policy relative sono nelle migrazioni).
+  approval_status text not null default 'approvato'
+    check (approval_status in ('in_attesa', 'approvato', 'rifiutato', 'sospeso')),
+  avatar_url text,
+  roles text[] not null default '{}'
+    check (roles <@ array['guida', 'accompagnatore', 'tourOperator']),
+  pending_roles text[] not null default '{}'
+    check (pending_roles <@ array['guida', 'accompagnatore', 'tourOperator']),
   created_at timestamptz not null default now()
 );
 

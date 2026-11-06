@@ -225,6 +225,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['06/11/2026', 'Schema del database', 'Immagine dello schema del DB (tabelle, colonne, relazioni e azioni alla cancellazione) in docs/GuidaTour_Schema_DB.png e .svg; si rigenera con npm run docs:db. schema.sql allineato alle colonne aggiunte dalle migrazioni', 'Confronto con schema.sql e migrazioni 0002-0009'],
   ['06/11/2026', 'Città accanto alla lingua', 'Nelle finestre strette (sotto 1024 px) la scelta della città andava a capo sotto la barra: ora resta nella barra in alto a sinistra della lingua e si accorcia con i puntini se manca spazio', 'Test app (nessuna pagina sfora da 320 px in su); schermate del sito a 1000, 600 e 360 px'],
   ['06/11/2026', 'Fix foto profilo sul sito', 'Sul sito ogni foto risultava "non valida": la lettura usava una funzione di Flutter che sul web non esiste. Ora si legge in modo compatibile; messaggio con i formati accettati (JPG, PNG, WebP)', 'Test app; caricamento e salvataggio provati sul sito pubblicato'],
   ['06/11/2026', 'Date multiple per tour', 'Un tour ha più date (anche ogni settimana): il turista sceglie la data in scheda, carrello e richiesta, la guida la vede nelle richieste, gli avvisi contano i posti per data; pagine SEO con prossime date; locandina "Ogni martedì alle 21:00". Fix: la modifica parziale di un tour non svuota più la descrizione', 'Test app e backend online, schermate'],

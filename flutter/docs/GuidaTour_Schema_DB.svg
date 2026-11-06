@@ -1,0 +1,365 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1174" viewBox="0 0 1600 1174">
+<defs>
+  <marker id="many" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7"><circle cx="5" cy="5" r="4" fill="#fff" stroke="#3B6EA5" stroke-width="2"/></marker>
+  <marker id="one-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#3B6EA5"/></marker>
+  <marker id="one-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#9A6B1F"/></marker>
+</defs>
+<style>
+  text { font-family: Inter, 'Segoe UI', Arial, sans-serif; }
+  .h1 { font-size: 26px; font-weight: 700; fill: #14213D; font-family: 'Playfair Display', Georgia, serif; }
+  .sub { font-size: 13px; fill: #6B7280; }
+  .title { font-size: 15px; font-weight: 700; fill: #fff; }
+  .note { font-size: 11px; fill: #E5D3A8; font-style: italic; }
+  .col { font-size: 12.5px; fill: #1F2937; }
+  .pk { font-weight: 700; }
+  .type { font-size: 11px; fill: #6B7280; text-anchor: end; font-family: Consolas, monospace; }
+  .badge { font-size: 8.5px; font-weight: 700; fill: #fff; text-anchor: middle; }
+  .action { font-size: 10px; font-style: italic; }
+  .legend { font-size: 12px; fill: #1F2937; }
+</style>
+<rect width="100%" height="100%" fill="#FBF8F2"/>
+<text x="40" y="52" class="h1">GuidaTour · schema del database</text>
+<text x="40" y="76" class="sub">Supabase Postgres (schema public) · tabelle, colonne e relazioni · aggiornato al 06/11/2026</text>
+<path d="M570 286 V250" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
+<text x="578" y="272" class="action" fill="#3B6EA5">cascade</text>
+<path d="M1300 150 V118 H734 V345 H720" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
+<text x="997" y="112" class="action" fill="#3B6EA5">guida del tour · cascade</text>
+<path d="M840 209 H745 V345 H720" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
+<text x="790" y="204" class="action" fill="#3B6EA5">cascade</text>
+<path d="M1140 231 H1242 V209 H1260" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
+<text x="1146" y="226" class="action" fill="#3B6EA5">cascade</text>
+<path d="M840 367 H756 V345 H720" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
+<text x="790" y="362" class="action" fill="#3B6EA5">cascade</text>
+<path d="M1140 389 H1231 V209 H1260" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
+<text x="1146" y="384" class="action" fill="#3B6EA5">cascade</text>
+<path d="M840 613 H767 V345 H720" fill="none" stroke="#9A6B1F" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-n)" opacity=".85"/>
+<text x="790" y="608" class="action" fill="#9A6B1F">set null</text>
+<path d="M1140 591 H1220 V209 H1260" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
+<text x="1146" y="586" class="action" fill="#3B6EA5">cascade</text>
+<path d="M840 947 H778 V345 H720" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
+<text x="790" y="942" class="action" fill="#3B6EA5">cascade</text>
+<path d="M840 969 H789 V345 H720" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
+<text x="790" y="964" class="action" fill="#3B6EA5">cascade</text>
+<path d="M1140 925 H1209 V209 H1260" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
+<text x="1146" y="920" class="action" fill="#3B6EA5">cascade</text>
+<path d="M340 381 H402 V345 H420" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
+<text x="346" y="376" class="action" fill="#3B6EA5">cascade</text>
+<path d="M340 583 H391 V345 H420" fill="none" stroke="#9A6B1F" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-n)" opacity=".85"/>
+<text x="346" y="578" class="action" fill="#9A6B1F">set null</text>
+<path d="M420 631 H398 V809 H340" fill="none" stroke="#7C5E2A" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#one-n)"/>
+<text x="344" y="803" class="action" fill="#7C5E2A">URL</text>
+<g>
+<rect x="423" y="154" width="300" height="100" rx="10" fill="#000" opacity=".08"/>
+<rect x="420" y="150" width="300" height="100" rx="10" fill="#fff" stroke="#4B5563" stroke-width="1.5"/>
+<path d="M420 160 a10 10 0 0 1 10 -10 h280 a10 10 0 0 1 10 10 v38 h-300 z" fill="#4B5563"/>
+<text x="434" y="171" class="title">auth.users</text>
+<text x="434" y="188" class="note">Account di Supabase Auth</text>
+<rect x="432" y="203" width="20" height="12" rx="3" fill="#C9963A"/>
+<text x="442" y="212" class="badge">PK</text>
+<text x="478" y="213" class="col pk">id</text>
+<text x="708" y="213" class="type">uuid</text>
+<rect x="421" y="220" width="298" height="22" fill="#F7F4EE"/>
+<text x="478" y="235" class="col">email, password…</text>
+<text x="708" y="235" class="type">gestiti da Supabase</text>
+</g>
+<g>
+<rect x="423" y="290" width="300" height="386" rx="10" fill="#000" opacity=".08"/>
+<rect x="420" y="286" width="300" height="386" rx="10" fill="#fff" stroke="#14213D" stroke-width="1.5"/>
+<path d="M420 296 a10 10 0 0 1 10 -10 h280 a10 10 0 0 1 10 10 v38 h-300 z" fill="#14213D"/>
+<text x="434" y="307" class="title">profiles</text>
+<text x="434" y="324" class="note">Un profilo per ogni account</text>
+<rect x="432" y="339" width="20" height="12" rx="3" fill="#C9963A"/>
+<text x="442" y="348" class="badge">PK</text>
+<rect x="455" y="339" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="465" y="348" class="badge">FK</text>
+<text x="480" y="349" class="col pk">id</text>
+<text x="708" y="349" class="type">uuid</text>
+<rect x="421" y="356" width="298" height="22" fill="#F7F4EE"/>
+<text x="478" y="371" class="col">name</text>
+<text x="708" y="371" class="type">text</text>
+<text x="478" y="393" class="col">email</text>
+<text x="708" y="393" class="type">text</text>
+<rect x="421" y="400" width="298" height="22" fill="#F7F4EE"/>
+<text x="478" y="415" class="col">role</text>
+<text x="708" y="415" class="type">text</text>
+<text x="478" y="437" class="col">roles</text>
+<text x="708" y="437" class="type">text[]</text>
+<rect x="421" y="444" width="298" height="22" fill="#F7F4EE"/>
+<text x="478" y="459" class="col">pending_roles</text>
+<text x="708" y="459" class="type">text[]</text>
+<text x="478" y="481" class="col">approval_status</text>
+<text x="708" y="481" class="type">text</text>
+<rect x="421" y="488" width="298" height="22" fill="#F7F4EE"/>
+<text x="478" y="503" class="col">provider</text>
+<text x="708" y="503" class="type">text</text>
+<text x="478" y="525" class="col">verified</text>
+<text x="708" y="525" class="type">boolean</text>
+<rect x="421" y="532" width="298" height="22" fill="#F7F4EE"/>
+<text x="478" y="547" class="col">is_admin</text>
+<text x="708" y="547" class="type">boolean</text>
+<text x="478" y="569" class="col">languages</text>
+<text x="708" y="569" class="type">text[]</text>
+<rect x="421" y="576" width="298" height="22" fill="#F7F4EE"/>
+<text x="478" y="591" class="col">bio</text>
+<text x="708" y="591" class="type">text</text>
+<text x="478" y="613" class="col">city</text>
+<text x="708" y="613" class="type">text</text>
+<rect x="421" y="620" width="298" height="22" fill="#F7F4EE"/>
+<text x="478" y="635" class="col">avatar_url</text>
+<text x="708" y="635" class="type">text</text>
+<text x="478" y="657" class="col">created_at</text>
+<text x="708" y="657" class="type">timestamptz</text>
+</g>
+<g>
+<rect x="1263" y="154" width="300" height="452" rx="10" fill="#000" opacity=".08"/>
+<rect x="1260" y="150" width="300" height="452" rx="10" fill="#fff" stroke="#14213D" stroke-width="1.5"/>
+<path d="M1260 160 a10 10 0 0 1 10 -10 h280 a10 10 0 0 1 10 10 v38 h-300 z" fill="#14213D"/>
+<text x="1274" y="171" class="title">tours</text>
+<text x="1274" y="188" class="note">Tour pubblicati dai professionisti</text>
+<rect x="1272" y="203" width="20" height="12" rx="3" fill="#C9963A"/>
+<text x="1282" y="212" class="badge">PK</text>
+<text x="1318" y="213" class="col pk">id</text>
+<text x="1548" y="213" class="type">text (slug)</text>
+<rect x="1261" y="220" width="298" height="22" fill="#F7F4EE"/>
+<rect x="1272" y="225" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="1282" y="234" class="badge">FK</text>
+<text x="1318" y="235" class="col">guide_id</text>
+<text x="1548" y="235" class="type">uuid</text>
+<text x="1318" y="257" class="col">title</text>
+<text x="1548" y="257" class="type">text</text>
+<rect x="1261" y="264" width="298" height="22" fill="#F7F4EE"/>
+<text x="1318" y="279" class="col">city</text>
+<text x="1548" y="279" class="type">text</text>
+<text x="1318" y="301" class="col">category</text>
+<text x="1548" y="301" class="type">text</text>
+<rect x="1261" y="308" width="298" height="22" fill="#F7F4EE"/>
+<text x="1318" y="323" class="col">language</text>
+<text x="1548" y="323" class="type">text</text>
+<text x="1318" y="345" class="col">duration</text>
+<text x="1548" y="345" class="type">text</text>
+<rect x="1261" y="352" width="298" height="22" fill="#F7F4EE"/>
+<text x="1318" y="367" class="col">start_at</text>
+<text x="1548" y="367" class="type">timestamptz</text>
+<text x="1318" y="389" class="col">dates</text>
+<text x="1548" y="389" class="type">timestamptz[]</text>
+<rect x="1261" y="396" width="298" height="22" fill="#F7F4EE"/>
+<text x="1318" y="411" class="col">last_start_at</text>
+<text x="1548" y="411" class="type">timestamptz</text>
+<text x="1318" y="433" class="col">price</text>
+<text x="1548" y="433" class="type">numeric(10,2)</text>
+<rect x="1261" y="440" width="298" height="22" fill="#F7F4EE"/>
+<text x="1318" y="455" class="col">meeting_point</text>
+<text x="1548" y="455" class="type">text</text>
+<text x="1318" y="477" class="col">description</text>
+<text x="1548" y="477" class="type">text</text>
+<rect x="1261" y="484" width="298" height="22" fill="#F7F4EE"/>
+<text x="1318" y="499" class="col">seats</text>
+<text x="1548" y="499" class="type">int</text>
+<text x="1318" y="521" class="col">accessories</text>
+<text x="1548" y="521" class="type">text[]</text>
+<rect x="1261" y="528" width="298" height="22" fill="#F7F4EE"/>
+<text x="1318" y="543" class="col">visits</text>
+<text x="1548" y="543" class="type">int</text>
+<text x="1318" y="565" class="col">scans</text>
+<text x="1548" y="565" class="type">int</text>
+<rect x="1261" y="572" width="298" height="22" fill="#F7F4EE"/>
+<text x="1318" y="587" class="col">created_at</text>
+<text x="1548" y="587" class="type">timestamptz</text>
+</g>
+<g>
+<rect x="843" y="154" width="300" height="122" rx="10" fill="#000" opacity=".08"/>
+<rect x="840" y="150" width="300" height="122" rx="10" fill="#fff" stroke="#14213D" stroke-width="1.5"/>
+<path d="M840 160 a10 10 0 0 1 10 -10 h280 a10 10 0 0 1 10 10 v38 h-300 z" fill="#14213D"/>
+<text x="854" y="171" class="title">favorites</text>
+<text x="854" y="188" class="note">Tour preferiti del turista</text>
+<rect x="852" y="203" width="20" height="12" rx="3" fill="#C9963A"/>
+<text x="862" y="212" class="badge">PK</text>
+<rect x="875" y="203" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="885" y="212" class="badge">FK</text>
+<text x="900" y="213" class="col pk">user_id</text>
+<text x="1128" y="213" class="type">uuid</text>
+<rect x="841" y="220" width="298" height="22" fill="#F7F4EE"/>
+<rect x="852" y="225" width="20" height="12" rx="3" fill="#C9963A"/>
+<text x="862" y="234" class="badge">PK</text>
+<rect x="875" y="225" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="885" y="234" class="badge">FK</text>
+<text x="900" y="235" class="col pk">tour_id</text>
+<text x="1128" y="235" class="type">text</text>
+<text x="898" y="257" class="col">created_at</text>
+<text x="1128" y="257" class="type">timestamptz</text>
+</g>
+<g>
+<rect x="843" y="312" width="300" height="166" rx="10" fill="#000" opacity=".08"/>
+<rect x="840" y="308" width="300" height="166" rx="10" fill="#fff" stroke="#14213D" stroke-width="1.5"/>
+<path d="M840 318 a10 10 0 0 1 10 -10 h280 a10 10 0 0 1 10 10 v38 h-300 z" fill="#14213D"/>
+<text x="854" y="329" class="title">cart_items</text>
+<text x="854" y="346" class="note">Carrello del turista</text>
+<rect x="852" y="361" width="20" height="12" rx="3" fill="#C9963A"/>
+<text x="862" y="370" class="badge">PK</text>
+<rect x="875" y="361" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="885" y="370" class="badge">FK</text>
+<text x="900" y="371" class="col pk">user_id</text>
+<text x="1128" y="371" class="type">uuid</text>
+<rect x="841" y="378" width="298" height="22" fill="#F7F4EE"/>
+<rect x="852" y="383" width="20" height="12" rx="3" fill="#C9963A"/>
+<text x="862" y="392" class="badge">PK</text>
+<rect x="875" y="383" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="885" y="392" class="badge">FK</text>
+<text x="900" y="393" class="col pk">tour_id</text>
+<text x="1128" y="393" class="type">text</text>
+<text x="898" y="415" class="col">people</text>
+<text x="1128" y="415" class="type">int</text>
+<rect x="841" y="422" width="298" height="22" fill="#F7F4EE"/>
+<text x="898" y="437" class="col">start_at</text>
+<text x="1128" y="437" class="type">timestamptz</text>
+<text x="898" y="459" class="col">created_at</text>
+<text x="1128" y="459" class="type">timestamptz</text>
+</g>
+<g>
+<rect x="843" y="514" width="300" height="298" rx="10" fill="#000" opacity=".08"/>
+<rect x="840" y="510" width="300" height="298" rx="10" fill="#fff" stroke="#14213D" stroke-width="1.5"/>
+<path d="M840 520 a10 10 0 0 1 10 -10 h280 a10 10 0 0 1 10 10 v38 h-300 z" fill="#14213D"/>
+<text x="854" y="531" class="title">booking_requests</text>
+<text x="854" y="548" class="note">Richieste di prenotazione</text>
+<rect x="852" y="563" width="20" height="12" rx="3" fill="#C9963A"/>
+<text x="862" y="572" class="badge">PK</text>
+<text x="898" y="573" class="col pk">id</text>
+<text x="1128" y="573" class="type">uuid</text>
+<rect x="841" y="580" width="298" height="22" fill="#F7F4EE"/>
+<rect x="852" y="585" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="862" y="594" class="badge">FK</text>
+<text x="898" y="595" class="col">tour_id</text>
+<text x="1128" y="595" class="type">text</text>
+<rect x="852" y="607" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="862" y="616" class="badge">FK</text>
+<text x="898" y="617" class="col">user_id</text>
+<text x="1128" y="617" class="type">uuid (facoltativo)</text>
+<rect x="841" y="624" width="298" height="22" fill="#F7F4EE"/>
+<text x="898" y="639" class="col">name</text>
+<text x="1128" y="639" class="type">text</text>
+<text x="898" y="661" class="col">email</text>
+<text x="1128" y="661" class="type">text</text>
+<rect x="841" y="668" width="298" height="22" fill="#F7F4EE"/>
+<text x="898" y="683" class="col">phone</text>
+<text x="1128" y="683" class="type">text</text>
+<text x="898" y="705" class="col">people</text>
+<text x="1128" y="705" class="type">int</text>
+<rect x="841" y="712" width="298" height="22" fill="#F7F4EE"/>
+<text x="898" y="727" class="col">message</text>
+<text x="1128" y="727" class="type">text</text>
+<text x="898" y="749" class="col">start_at</text>
+<text x="1128" y="749" class="type">timestamptz</text>
+<rect x="841" y="756" width="298" height="22" fill="#F7F4EE"/>
+<text x="898" y="771" class="col">status</text>
+<text x="1128" y="771" class="type">text</text>
+<text x="898" y="793" class="col">created_at</text>
+<text x="1128" y="793" class="type">timestamptz</text>
+</g>
+<g>
+<rect x="843" y="848" width="300" height="210" rx="10" fill="#000" opacity=".08"/>
+<rect x="840" y="844" width="300" height="210" rx="10" fill="#fff" stroke="#14213D" stroke-width="1.5"/>
+<path d="M840 854 a10 10 0 0 1 10 -10 h280 a10 10 0 0 1 10 10 v38 h-300 z" fill="#14213D"/>
+<text x="854" y="865" class="title">assignments</text>
+<text x="854" y="882" class="note">Cessione di un tour a un collega</text>
+<rect x="852" y="897" width="20" height="12" rx="3" fill="#C9963A"/>
+<text x="862" y="906" class="badge">PK</text>
+<text x="898" y="907" class="col pk">id</text>
+<text x="1128" y="907" class="type">uuid</text>
+<rect x="841" y="914" width="298" height="22" fill="#F7F4EE"/>
+<rect x="852" y="919" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="862" y="928" class="badge">FK</text>
+<text x="898" y="929" class="col">tour_id</text>
+<text x="1128" y="929" class="type">text</text>
+<rect x="852" y="941" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="862" y="950" class="badge">FK</text>
+<text x="898" y="951" class="col">from_guide_id</text>
+<text x="1128" y="951" class="type">uuid</text>
+<rect x="841" y="958" width="298" height="22" fill="#F7F4EE"/>
+<rect x="852" y="963" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="862" y="972" class="badge">FK</text>
+<text x="898" y="973" class="col">to_guide_id</text>
+<text x="1128" y="973" class="type">uuid</text>
+<text x="898" y="995" class="col">status</text>
+<text x="1128" y="995" class="type">text</text>
+<rect x="841" y="1002" width="298" height="22" fill="#F7F4EE"/>
+<text x="898" y="1017" class="col">created_at</text>
+<text x="1128" y="1017" class="type">timestamptz</text>
+<text x="898" y="1039" class="col">updated_at</text>
+<text x="1128" y="1039" class="type">timestamptz</text>
+</g>
+<g>
+<rect x="43" y="304" width="300" height="166" rx="10" fill="#000" opacity=".08"/>
+<rect x="40" y="300" width="300" height="166" rx="10" fill="#fff" stroke="#14213D" stroke-width="1.5"/>
+<path d="M40 310 a10 10 0 0 1 10 -10 h280 a10 10 0 0 1 10 10 v38 h-300 z" fill="#14213D"/>
+<text x="54" y="321" class="title">notifications</text>
+<text x="54" y="338" class="note">Avvisi nell'app</text>
+<rect x="52" y="353" width="20" height="12" rx="3" fill="#C9963A"/>
+<text x="62" y="362" class="badge">PK</text>
+<text x="98" y="363" class="col pk">id</text>
+<text x="328" y="363" class="type">uuid</text>
+<rect x="41" y="370" width="298" height="22" fill="#F7F4EE"/>
+<rect x="52" y="375" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="62" y="384" class="badge">FK</text>
+<text x="98" y="385" class="col">user_id</text>
+<text x="328" y="385" class="type">uuid</text>
+<text x="98" y="407" class="col">message</text>
+<text x="328" y="407" class="type">text</text>
+<rect x="41" y="414" width="298" height="22" fill="#F7F4EE"/>
+<text x="98" y="429" class="col">read_at</text>
+<text x="328" y="429" class="type">timestamptz</text>
+<text x="98" y="451" class="col">created_at</text>
+<text x="328" y="451" class="type">timestamptz</text>
+</g>
+<g>
+<rect x="43" y="506" width="300" height="232" rx="10" fill="#000" opacity=".08"/>
+<rect x="40" y="502" width="300" height="232" rx="10" fill="#fff" stroke="#14213D" stroke-width="1.5"/>
+<path d="M40 512 a10 10 0 0 1 10 -10 h280 a10 10 0 0 1 10 10 v38 h-300 z" fill="#14213D"/>
+<text x="54" y="523" class="title">whatsapp_consents</text>
+<text x="54" y="540" class="note">Consensi agli aggiornamenti WhatsApp</text>
+<rect x="52" y="555" width="20" height="12" rx="3" fill="#C9963A"/>
+<text x="62" y="564" class="badge">PK</text>
+<text x="98" y="565" class="col pk">id</text>
+<text x="328" y="565" class="type">uuid</text>
+<rect x="41" y="572" width="298" height="22" fill="#F7F4EE"/>
+<rect x="52" y="577" width="20" height="12" rx="3" fill="#3B6EA5"/>
+<text x="62" y="586" class="badge">FK</text>
+<text x="98" y="587" class="col">user_id</text>
+<text x="328" y="587" class="type">uuid (facoltativo)</text>
+<text x="98" y="609" class="col">phone</text>
+<text x="328" y="609" class="type">text</text>
+<rect x="41" y="616" width="298" height="22" fill="#F7F4EE"/>
+<text x="98" y="631" class="col">source</text>
+<text x="328" y="631" class="type">text</text>
+<text x="98" y="653" class="col">consent_text</text>
+<text x="328" y="653" class="type">text</text>
+<rect x="41" y="660" width="298" height="22" fill="#F7F4EE"/>
+<text x="98" y="675" class="col">sender</text>
+<text x="328" y="675" class="type">text</text>
+<text x="98" y="697" class="col">created_at</text>
+<text x="328" y="697" class="type">timestamptz</text>
+<rect x="41" y="704" width="298" height="22" fill="#F7F4EE"/>
+<text x="98" y="719" class="col">revoked_at</text>
+<text x="328" y="719" class="type">timestamptz</text>
+</g>
+<g>
+<rect x="43" y="774" width="300" height="78" rx="10" fill="#000" opacity=".08"/>
+<rect x="40" y="770" width="300" height="78" rx="10" fill="#fff" stroke="#7C5E2A" stroke-width="1.5" stroke-dasharray="6 4"/>
+<path d="M40 780 a10 10 0 0 1 10 -10 h280 a10 10 0 0 1 10 10 v38 h-300 z" fill="#7C5E2A"/>
+<text x="54" y="791" class="title">storage: avatars</text>
+<text x="54" y="808" class="note">Bucket delle foto profilo</text>
+<text x="98" y="833" class="col">avatars/&lt;uid&gt;/…</text>
+<text x="328" y="833" class="type">PNG, max 2 MB</text>
+</g>
+<g transform="translate(40 1104)">
+  <rect x="0" y="-22" width="1520" height="56" rx="10" fill="#fff" stroke="#E5E0D6"/>
+  <rect x="16" y="-6" width="20" height="12" rx="3" fill="#C9963A"/><text x="26" y="3" class="badge">PK</text>
+  <text x="44" y="4" class="legend">chiave primaria</text>
+  <rect x="160" y="-6" width="20" height="12" rx="3" fill="#3B6EA5"/><text x="170" y="3" class="badge">FK</text>
+  <text x="188" y="4" class="legend">chiave esterna</text>
+  <circle cx="310" cy="0" r="4" fill="#fff" stroke="#3B6EA5" stroke-width="2"/><line x1="314" y1="0" x2="350" y2="0" stroke="#3B6EA5" stroke-width="1.6"/><path d="M350 -4 L358 0 L350 4 z" fill="#3B6EA5"/>
+  <text x="368" y="4" class="legend">molti → uno; cancellando il record puntato si cancellano anche questi (cascade)</text>
+  <line x1="880" y1="0" x2="916" y2="0" stroke="#9A6B1F" stroke-width="1.6"/><path d="M916 -4 L924 0 L916 4 z" fill="#9A6B1F"/>
+  <text x="934" y="4" class="legend">set null: il record resta, il collegamento si svuota</text>
+  <text x="16" y="24" class="sub" style="font-size:11px">Tutte le tabelle sono protette da RLS; avatar_url non è una FK ma l'indirizzo di un file nel bucket avatars.</text>
+</g>
+</svg>
