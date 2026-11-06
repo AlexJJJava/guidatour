@@ -19,7 +19,9 @@ import {
 import { HttpError } from '../errors.js'
 import { parseBody, parseQuery } from '../validate.js'
 
-const tourSchema = z.object({
+// Campi del tour senza valori di default: per le modifiche parziali (PATCH)
+// un campo assente deve restare com'è, non tornare vuoto.
+const tourFields = z.object({
   title: z.string().trim().min(3).max(120),
   city: z.enum(CITIES),
   category: z.enum(TOUR_CATEGORIES),
@@ -30,10 +32,16 @@ const tourSchema = z.object({
   dates: z.array(z.iso.datetime({ offset: true })).min(1).max(60).optional(),
   price: z.number().min(0).max(100_000),
   meetingPoint: z.string().trim().min(3).max(200),
-  description: z.string().trim().max(5000).default(''),
+  description: z.string().trim().max(5000),
   seats: z.int().min(1).max(1000),
-  accessories: z.array(z.enum(ACCESSORY_SERVICES)).max(10).default([]),
+  accessories: z.array(z.enum(ACCESSORY_SERVICES)).max(10),
 })
+
+const tourSchema = tourFields.extend({
+  description: tourFields.shape.description.default(''),
+  accessories: tourFields.shape.accessories.default([]),
+})
+const tourPatchSchema = tourFields.partial()
 
 const listQuery = z.object({
   q: z.string().max(100).optional(),
@@ -92,7 +100,7 @@ tours.post('/', requireAuth, async (c) => {
 tours.patch('/:id', requireAuth, async (c) => {
   const db = c.get('db')
   const author = await requireProfessional(db, currentUserId(c))
-  const patch = await parseBody(c, tourSchema.partial())
+  const patch = await parseBody(c, tourPatchSchema)
   return c.json(await updateTour(db, author, c.req.param('id'), patch))
 })
 

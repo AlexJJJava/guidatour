@@ -938,6 +938,9 @@ describe('date multiple', () => {
     })
     assert.equal(r.status, 200, JSON.stringify(r.json))
     assert.deepEqual(r.json.dates, [D[0], D[2]])
+    // I campi non inviati restano com'erano (prima la descrizione si svuotava).
+    assert.equal(r.json.description, 'Creato dai test automatici')
+    assert.equal(r.json.title, '[TEST] Tour di prova')
     const old = await newTour('guida', { start: '2099-08-01T10:00:00Z' })
     const o = await api(`/tours/${old.id}`)
     assert.deepEqual(o.json.dates, ['2099-08-01T10:00:00.000Z'])
