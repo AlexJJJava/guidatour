@@ -376,5 +376,18 @@
   "approvalsRejectedDone": "{name} has been rejected",
   "cityAllItaly": "All of Italy",
   "toursTitleItaly": "Unforgettable experiences in Italy",
-  "searchTitleItaly": "Tours in Italy"
+  "searchTitleItaly": "Tours in Italy",
+  "fieldDates": "Tour dates",
+  "formNoDates": "No dates yet: add at least one.",
+  "formAddDate": "Add date",
+  "formRepeatWeekly": "Repeat weekly",
+  "formRepeatUntil": "Repeat the last date until",
+  "formMaxDates": "At most {max} dates per tour.",
+  "detailChooseDate": "Choose the date",
+  "cartChangeDate": "Change date",
+  "requestForDate": "For {date}",
+  "moreDates": "{count, plural, =1{+1 more date} other{+{count} more dates}}",
+  "scheduleWeekly": "Every {weekday} at {time} · from {from} to {to}",
+  "scheduleNextDates": "Upcoming dates: {dates}",
+  "weekdayNames": "Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday"
 }

@@ -403,7 +403,7 @@ class AppState extends ChangeNotifier {
     required String category,
     required String language,
     required String duration,
-    required DateTime start,
+    required List<DateTime> dates,
     required double price,
     required String meetingPoint,
     required String description,
@@ -416,7 +416,8 @@ class AppState extends ChangeNotifier {
       'category': category,
       'language': language,
       'duration': duration,
-      'start': start.toUtc().toIso8601String(),
+      'start': dates.first.toUtc().toIso8601String(),
+      'dates': [for (final d in dates) d.toUtc().toIso8601String()],
       'price': price,
       'meetingPoint': meetingPoint,
       'description': description,
@@ -436,7 +437,7 @@ class AppState extends ChangeNotifier {
     required String category,
     required String language,
     required String duration,
-    required DateTime start,
+    required List<DateTime> dates,
     required double price,
     required String meetingPoint,
     required String description,
@@ -449,7 +450,8 @@ class AppState extends ChangeNotifier {
       'category': category,
       'language': language,
       'duration': duration,
-      'start': start.toUtc().toIso8601String(),
+      'start': dates.first.toUtc().toIso8601String(),
+      'dates': [for (final d in dates) d.toUtc().toIso8601String()],
       'price': price,
       'meetingPoint': meetingPoint,
       'description': description,
@@ -583,10 +585,23 @@ class AppState extends ChangeNotifier {
 
   bool inCart(String tourId) => cart.any((c) => c.tourId == tourId);
 
-  Future<void> addToCart(String tourId, {int people = 2}) async {
+  Future<void> addToCart(String tourId,
+      {int people = 2, DateTime? start}) async {
     if (inCart(tourId)) return;
-    await api.post('/me/cart', {'tourId': tourId, 'people': people});
-    cart.add(CartItem(tourId, people: people));
+    await api.post('/me/cart', {
+      'tourId': tourId,
+      'people': people,
+      if (start != null) 'start': start.toUtc().toIso8601String(),
+    });
+    cart.add(CartItem(tourId, people: people, start: start));
+    notifyListeners();
+  }
+
+  /// Cambia la data scelta per un tour già nel carrello.
+  Future<void> setCartDate(CartItem item, DateTime start) async {
+    await api.patch(
+        '/me/cart/${item.tourId}', {'start': start.toUtc().toIso8601String()});
+    item.start = start;
     notifyListeners();
   }
 
@@ -635,6 +650,7 @@ class AppState extends ChangeNotifier {
       'phone': r.phone,
       'people': r.people,
       'message': r.message,
+      if (r.start != null) 'start': r.start!.toUtc().toIso8601String(),
     });
   }
 
@@ -653,23 +669,42 @@ class AppState extends ChangeNotifier {
       .where((r) => r.tourId == t.id)
       .fold(0, (sum, r) => sum + r.people);
 
+  /// I posti valgono per ogni uscita: persone richieste data per data (le
+  /// richieste senza data contano sulla prossima uscita).
+  Map<DateTime, int> requestedPeopleByDate(Tour t) {
+    final out = <DateTime, int>{};
+    for (final r in requests.where((r) => r.tourId == t.id)) {
+      final d = r.start ?? t.nextStart;
+      out[d] = (out[d] ?? 0) + r.people;
+    }
+    return out;
+  }
+
   List<String> overbookingAlerts(String guideId) {
     final mine = myTours.where((t) => t.guideId == guideId).toList();
     final alerts = <String>[];
+    final now = DateTime.now();
     for (final t in mine) {
-      final n = requestedPeople(t);
-      if (n > t.seats) {
-        alerts.add(
-            '"${t.title}": $n persone richieste per ${t.seats} posti disponibili.');
-      }
-    }
-    for (var i = 0; i < mine.length; i++) {
-      for (var j = i + 1; j < mine.length; j++) {
-        final a = mine[i], b = mine[j];
-        if (a.start.difference(b.start).abs() < const Duration(hours: 3)) {
-          alerts.add(
-              '"${a.title}" e "${b.title}" si sovrappongono (${fmtDate(a.start)}).');
+      requestedPeopleByDate(t).forEach((d, n) {
+        if (n > t.seats && !d.isBefore(now)) {
+          final when = t.dates.length > 1 ? ' (${fmtDate(d)})' : '';
+          alerts.add('"${t.title}"$when: $n persone richieste per '
+              '${t.seats} posti disponibili.');
         }
+      });
+    }
+    // Ogni uscita futura di ogni tour, in ordine di data.
+    final slots = [
+      for (final t in mine)
+        for (final d in t.upcoming) (tour: t, at: d),
+    ]..sort((a, b) => a.at.compareTo(b.at));
+    for (var i = 0; i < slots.length; i++) {
+      for (var j = i + 1; j < slots.length; j++) {
+        final a = slots[i], b = slots[j];
+        if (b.at.difference(a.at) >= const Duration(hours: 3)) break;
+        if (a.tour.id == b.tour.id) continue;
+        alerts.add('"${a.tour.title}" e "${b.tour.title}" si sovrappongono '
+            '(${fmtDate(a.at)}).');
       }
     }
     return alerts;

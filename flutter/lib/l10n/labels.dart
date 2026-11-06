@@ -95,3 +95,30 @@ String assignmentStatusLabel(BuildContext context, AssignmentStatus status) {
     AssignmentStatus.completato => t.statusCompletato,
   };
 }
+
+/// Data per gli elenchi: la prossima uscita e quante altre ce ne sono.
+String tourDatesLabel(BuildContext context, Tour tour) {
+  final more = tour.upcoming.length - 1;
+  final next = fmtDate(tour.nextStart);
+  return more > 0 ? '$next · ${l10n(context).moreDates(more)}' : next;
+}
+
+/// Calendario per la locandina: una data, "ogni martedì alle 21:00" se le
+/// uscite sono settimanali, altrimenti l'elenco delle prossime date.
+String tourScheduleLabel(BuildContext context, Tour tour) {
+  final t = l10n(context);
+  final up = tour.upcoming;
+  if (up.length <= 1) return fmtDate(tour.nextStart);
+  String two(int n) => n.toString().padLeft(2, '0');
+  String day(DateTime d) => '${two(d.day)}/${two(d.month)}';
+  if (isWeekly(up)) {
+    final first = up.first;
+    return t.scheduleWeekly(t.weekdayNames.split(',')[first.weekday - 1],
+        '${two(first.hour)}:${two(first.minute)}', day(first), day(up.last));
+  }
+  final shown = up
+      .take(4)
+      .map((d) => '${day(d)} ${two(d.hour)}:${two(d.minute)}')
+      .join(', ');
+  return t.scheduleNextDates(up.length > 4 ? '$shown…' : shown);
+}

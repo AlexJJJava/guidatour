@@ -544,7 +544,7 @@ class _TourRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = l10n(context);
-    final past = tour.start.isBefore(DateTime.now());
+    final past = tour.isPast;
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
@@ -574,7 +574,7 @@ class _TourRow extends StatelessWidget {
                       ],
                     ),
                     Text(
-                        '${fmtDate(tour.start)} · ${categoryLabel(context, tour.category)}'
+                        '${tourDatesLabel(context, tour)} · ${categoryLabel(context, tour.category)}'
                         '${organizer == null ? '' : ' · $organizer'}',
                         style: const TextStyle(color: kMuted, fontSize: 12)),
                     Text(t.adminViewsValue('${tour.visits}', '${tour.scans}'),

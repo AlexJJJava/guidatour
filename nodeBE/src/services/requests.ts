@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { HttpError, unwrap } from '../errors.js'
 import type { Db } from '../supabase.js'
-import { getTour } from './tours.js'
+import { getTour, type Tour } from './tours.js'
 
 export const REQUEST_STATUSES = ['inviata', 'confermata', 'rifiutata'] as const
 export type RequestStatus = (typeof REQUEST_STATUSES)[number]
@@ -12,6 +12,8 @@ export interface RequestInput {
   phone: string
   people: number
   message: string
+  /** Data scelta tra quelle del tour; senza, la prossima uscita. */
+  start?: string
 }
 
 export interface BookingRequest extends RequestInput {
@@ -32,6 +34,7 @@ type RequestRow = {
   phone: string
   people: number
   message: string
+  start_at: string | null
   status: RequestStatus
   created_at: string
   tours?: { id: string; title: string; start_at: string }
@@ -48,6 +51,7 @@ export const toRequest = (r: RequestRow): BookingRequest => ({
   phone: r.phone,
   people: r.people,
   message: r.message,
+  ...(r.start_at && { start: new Date(r.start_at).toISOString() }),
   status: r.status,
   createdAt: r.created_at,
   ...(r.tours && { tour: { id: r.tours.id, title: r.tours.title, start: r.tours.start_at } }),
@@ -72,6 +76,7 @@ export async function createRequests(
     phone: r.phone,
     people: r.people,
     message: r.message,
+    start_at: r.start ?? null,
   }))
   unwrap(await db.from('booking_requests').insert(rows))
   return rows.map((r) => r.id)
@@ -84,11 +89,22 @@ export async function createRequest(
   input: RequestInput,
 ): Promise<string> {
   const tour = await getTour(db, tourId)
-  if (new Date(tour.start) < new Date()) {
-    throw new HttpError(422, 'Il tour si è già svolto')
-  }
-  const [id] = await createRequests(db, userId, [{ ...input, tourId }])
+  const start = pickDate(tour, input.start)
+  const [id] = await createRequests(db, userId, [{ ...input, start, tourId }])
   return id
+}
+
+/**
+ * La data della richiesta: quella scelta, se è una delle prossime uscite del
+ * tour, altrimenti la prossima. Errore se il tour non ha più date.
+ */
+export function pickDate(tour: Tour, wanted?: string | null): string {
+  if (tour.upcoming.length === 0) throw new HttpError(422, 'Il tour si è già svolto')
+  if (!wanted) return tour.upcoming[0]
+  const ms = Date.parse(wanted)
+  const match = tour.upcoming.find((d) => Date.parse(d) === ms)
+  if (!match) throw new HttpError(422, 'La data scelta non è tra le prossime date del tour')
+  return match
 }
 
 // Richieste ricevute dalla guida per i propri tour.

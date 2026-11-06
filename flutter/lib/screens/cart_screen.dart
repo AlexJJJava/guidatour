@@ -144,6 +144,11 @@ class _CartBodyState extends State<_CartBody> {
     final t = l10n(context);
     final tour = appState.tourById(item.tourId);
     if (tour == null) return const SizedBox.shrink();
+    final upcoming = tour.upcoming;
+    // La data scelta, se è ancora in programma; altrimenti la prossima.
+    final date = upcoming.firstWhere(
+        (d) => item.start != null && d.isAtSameMomentAs(item.start!),
+        orElse: () => tour.nextStart);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -160,12 +165,25 @@ class _CartBodyState extends State<_CartBody> {
                             fontWeight: FontWeight.w800, fontSize: 15)),
                     Text(
                         t.cartLinePricePerPerson(
-                            fmtDate(tour.start), fmtPrice(tour.price)),
+                            fmtDate(date), fmtPrice(tour.price)),
                         style: const TextStyle(color: kMuted, fontSize: 12)),
                   ],
                 ),
               ),
             ),
+            if (upcoming.length > 1)
+              PopupMenuButton<DateTime>(
+                key: ValueKey('cart-date-${tour.id}'),
+                tooltip: t.cartChangeDate,
+                icon: const Icon(Icons.edit_calendar_outlined),
+                initialValue: date,
+                onSelected: (d) =>
+                    runOrSnack(context, () => appState.setCartDate(item, d)),
+                itemBuilder: (_) => [
+                  for (final d in upcoming)
+                    PopupMenuItem(value: d, child: Text(fmtDate(d))),
+                ],
+              ),
             IconButton(
               onPressed: item.people > 1
                   ? () => runOrSnack(context,

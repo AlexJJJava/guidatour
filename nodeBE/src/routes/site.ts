@@ -57,7 +57,8 @@ const when = (lang: Lang, iso: string) =>
     minute: '2-digit',
   }).format(new Date(iso))
 
-const appTour = (id: string) => `${APP_URL}?tour=${encodeURIComponent(id)}`
+const appTour = (id: string, date?: string) =>
+  `${APP_URL}?tour=${encodeURIComponent(id)}${date ? `&date=${encodeURIComponent(date)}` : ''}`
 
 const html = (c: Context<AppEnv>, page: string, status = 200) => {
   c.header('Cache-Control', 'public, max-age=300')
@@ -68,7 +69,7 @@ function card(lang: Lang, t: Tour) {
   const tx = TEXTS[lang]
   return `<li class="card"><a href="${esc(withLang(`/tour/${t.id}`, lang))}">
 <img src="${imageFor(t.category)}" alt="${esc(tx.categories[t.category] ?? t.category)}" loading="lazy" width="400" height="150">
-<div class="b"><span class="d">${esc(when(lang, t.start))}</span><h3>${esc(t.title)}</h3>
+<div class="b"><span class="d">${esc(when(lang, t.start))}${t.upcoming.length > 1 ? ` · ${esc(tx.moreDates(t.upcoming.length - 1))}` : ''}</span><h3>${esc(t.title)}</h3>
 <span class="m">${esc(t.city)} · ${esc(tx.categories[t.category] ?? t.category)} · ${esc(t.duration)} · ${esc(t.language)}</span>
 <span class="p">${esc(tx.pricePerPerson(money(lang, t.price)))}</span></div></a></li>`
 }
@@ -150,7 +151,7 @@ site.get('/tour/:id', async (c) => {
   const id = c.req.param('id')
   const tour = await getTourWithGuide(anonDb, id).catch(() => null)
   if (!tour || !isPublic(tour)) return notFoundPage(c, lang)
-  if (new Date(tour.start) < new Date()) return gonePage(c, lang, tour.city)
+  if (tour.upcoming.length === 0) return gonePage(c, lang, tour.city)
 
   // Conteggi: la scansione dal QR sempre, le visite solo da persone.
   const scan = c.req.query('src') === 'qr'
@@ -163,13 +164,15 @@ site.get('/tour/:id', async (c) => {
   const roles = guide ? (guide.roles ?? [guide.role]).map((r) => tx.roles[r] ?? r).join(' · ') : ''
   const category = tx.categories[tour.category] ?? tour.category
   const image = SEO_SITE_URL + imageFor(tour.category)
+  // Fino a 12 date in pagina e nei dati strutturati (un Event per uscita).
+  const shown = tour.upcoming.slice(0, 12)
   const description = `${when(lang, tour.start)} · ${tour.city} · ${category} · ${tour.duration} · ${tx.pricePerPerson(money(lang, tour.price))}. ${tour.description}`.slice(0, 300)
   const body = `<article class="tour">
 <p class="muted">${esc(category)} · <a href="${esc(withLang(`/${slug(tour.city)}`, lang))}">${esc(tour.city)}</a></p>
 <h1>${esc(tour.title)}</h1>
 <img src="${imageFor(tour.category)}" alt="${esc(category)}" width="1100" height="320">
 <ul class="facts">
-<li><b>${esc(tx.when)}</b>${esc(when(lang, tour.start))}</li>
+<li><b>${esc(tx.when)}</b>${esc(when(lang, tour.start))}${tour.upcoming.length > 1 ? `<br><span class="muted">${esc(tx.moreDates(tour.upcoming.length - 1))}</span>` : ''}</li>
 <li><b>${esc(tx.duration)}</b>${esc(tour.duration)}</li>
 <li><b>${esc(tx.language)}</b>${esc(tour.language)}</li>
 <li><b>${esc(tx.meetingPoint)}</b>${esc(tour.meetingPoint)}</li>
@@ -178,6 +181,7 @@ ${guide ? `<li><b>${esc(tx.organizer)}</b>${esc(guide.name)} · ${esc(roles)}</l
 </ul>
 ${tour.isPackage ? `<p class="note">${esc(tx.package(tour.accessories.join(', ')))}</p>` : ''}
 ${guide && onlyAccompagnatore(guide) ? `<p class="note">${esc(tx.accompagnatoreNotice)}</p>` : ''}
+${tour.upcoming.length > 1 ? `<h2>${esc(tx.nextDates)}</h2><ul class="chips">${shown.map((d) => `<li><a href="${esc(appTour(tour.id, d))}">${esc(when(lang, d))}</a></li>`).join('')}</ul>` : ''}
 <p>${esc(tour.description).replace(/\n/g, '<br>')}</p>
 <a class="cta" href="${esc(appTour(tour.id))}">${esc(tx.book)}</a>
 <p class="muted">${esc(tx.bookHint)}</p>
@@ -191,12 +195,12 @@ ${guide && onlyAccompagnatore(guide) ? `<p class="note">${esc(tx.accompagnatoreN
       path: `/tour/${tour.id}`,
       body,
       image,
-      ld: {
+      ld: shown.map((startDate) => ({
         '@context': 'https://schema.org',
         '@type': 'Event',
         name: tour.title,
         description: tour.description || description,
-        startDate: tour.start,
+        startDate,
         eventStatus: 'https://schema.org/EventScheduled',
         eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
         inLanguage: tour.language,
@@ -219,7 +223,7 @@ ${guide && onlyAccompagnatore(guide) ? `<p class="note">${esc(tx.accompagnatoreN
             name: guide.name,
           },
         }),
-      },
+      })),
     }),
   )
 })

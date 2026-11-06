@@ -601,7 +601,7 @@ class TourCard extends StatelessWidget {
                       children: [
                         const Icon(Icons.event, size: 14, color: kPrimary),
                         const SizedBox(width: 5),
-                        Text(fmtDate(tour.start),
+                        Text(tourDatesLabel(context, tour),
                             style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,

@@ -83,7 +83,13 @@
   "authRolesHint": "Sei un professionista? Scegli uno o più profili: un amministratore approverà la registrazione. Senza scelta ti registri come turista.",
   "authRolesTourist": "Ti registri come turista.",
   "authRolesPro": "Chiedi i profili: {roles}. Fino all’approvazione userai GuidaTour come turista.",
-  "@authRolesPro": {"placeholders": {"roles": {"type": "String"}}},
+  "@authRolesPro": {
+    "placeholders": {
+      "roles": {
+        "type": "String"
+      }
+    }
+  },
   "authRoleDescTurista": "Preferiti, carrello e storico delle tue richieste.",
   "authRoleDescGuida": "Pubblica visite guidate svolte da te.",
   "authRoleDescAccompagnatore": "Assistenza e supporto operativo ai gruppi; non visite guidate specialistiche.",
@@ -530,9 +536,21 @@
   "profileRolesSuspended": "Il tuo account è sospeso: i ruoli non si possono cambiare.",
   "profileRolesPendingTag": "in attesa",
   "accountRolesPending": "Hai chiesto anche: {roles}. In attesa di approvazione.",
-  "@accountRolesPending": {"placeholders":{"roles":{"type":"String"}}},
+  "@accountRolesPending": {
+    "placeholders": {
+      "roles": {
+        "type": "String"
+      }
+    }
+  },
   "approvalsAddsRoles": "Chiede di aggiungere: {roles}",
-  "@approvalsAddsRoles": {"placeholders":{"roles":{"type":"String"}}},
+  "@approvalsAddsRoles": {
+    "placeholders": {
+      "roles": {
+        "type": "String"
+      }
+    }
+  },
   "navManage": "Gestione",
   "adminTitle": "Gestione della piattaforma",
   "adminSubtitle": "Professionisti, tour, approvazioni e consensi WhatsApp in un unico posto.",
@@ -551,7 +569,16 @@
   "adminStatViews": "Visite · scansioni QR",
   "adminStatConsents": "Consensi WhatsApp",
   "adminViewsValue": "{visits} visite · {scans} QR",
-  "@adminViewsValue": {"placeholders":{"visits":{"type":"String"},"scans":{"type":"String"}}},
+  "@adminViewsValue": {
+    "placeholders": {
+      "visits": {
+        "type": "String"
+      },
+      "scans": {
+        "type": "String"
+      }
+    }
+  },
   "adminUpcomingTitle": "Prossimi tour",
   "adminSearch": "Cerca per nome, email o titolo",
   "adminActive": "Attivo",
@@ -559,18 +586,48 @@
   "adminSuspend": "Sospendi",
   "adminReactivate": "Riattiva",
   "adminSuspendTitle": "Sospendere {name}?",
-  "@adminSuspendTitle": {"placeholders":{"name":{"type":"String"}}},
+  "@adminSuspendTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "adminSuspendBody": "Tornerà a usare GuidaTour come turista e i suoi tour non saranno più visibili. Potrai riattivarlo in qualsiasi momento.",
   "adminSuspendedDone": "{name} è stato sospeso",
-  "@adminSuspendedDone": {"placeholders":{"name":{"type":"String"}}},
+  "@adminSuspendedDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "adminReactivatedDone": "{name} è stato riattivato",
-  "@adminReactivatedDone": {"placeholders":{"name":{"type":"String"}}},
+  "@adminReactivatedDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "adminToursCount": "tour: {count}",
-  "@adminToursCount": {"placeholders":{"count":{"type":"int"}}},
+  "@adminToursCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "adminNoProfessionals": "Nessun professionista trovato.",
   "adminNoTours": "Nessun tour trovato.",
   "adminDeleteTourTitle": "Eliminare «{title}»?",
-  "@adminDeleteTourTitle": {"placeholders":{"title":{"type":"String"}}},
+  "@adminDeleteTourTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "adminDeleteTourBody": "Il tour e le richieste ricevute verranno cancellati definitivamente.",
   "adminTourDeleted": "Tour eliminato",
   "adminPast": "Concluso",
@@ -578,9 +635,21 @@
   "adminNoConsents": "Nessun consenso raccolto.",
   "adminBadge": "Admin",
   "accountRoleSuspended": "Il tuo profilo come {role} è sospeso. Puoi continuare a usare GuidaTour come turista.",
-  "@accountRoleSuspended": {"placeholders":{"role":{"type":"String"}}},
+  "@accountRoleSuspended": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
   "accountMemberSince": "Su GuidaTour dal {date}",
-  "@accountMemberSince": {"placeholders":{"date":{"type":"String"}}},
+  "@accountMemberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "accountProfileSection": "Il tuo profilo",
   "accountBioEmpty": "Non hai ancora scritto una presentazione: aggiungila da Modifica profilo.",
   "accountActions": "Account",
@@ -593,9 +662,21 @@
   "profilePhotoSection": "Foto profilo",
   "profileDataSection": "I tuoi dati",
   "accountRolePending": "La tua richiesta come {role} è in attesa di approvazione. Intanto puoi usare GuidaTour come turista.",
-  "@accountRolePending": {"placeholders": {"role": {"type": "String"}}},
+  "@accountRolePending": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
   "accountRoleRejected": "La tua richiesta come {role} non è stata approvata. Puoi continuare a usare GuidaTour come turista.",
-  "@accountRoleRejected": {"placeholders": {"role": {"type": "String"}}},
+  "@accountRoleRejected": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
   "approvalsIntro": "Finché non li approvi, guide, accompagnatori e tour operator usano GuidaTour come turisti.",
   "approvalsPending": "In attesa",
   "approvalsApproved": "Approvate",
@@ -629,5 +710,62 @@
   },
   "cityAllItaly": "Tutta Italia",
   "toursTitleItaly": "Esperienze indimenticabili in Italia",
-  "searchTitleItaly": "Tour in Italia"
+  "searchTitleItaly": "Tour in Italia",
+  "fieldDates": "Date del tour",
+  "formNoDates": "Nessuna data: aggiungine almeno una.",
+  "formAddDate": "Aggiungi data",
+  "formRepeatWeekly": "Ripeti ogni settimana",
+  "formRepeatUntil": "Ripeti l'ultima data fino al",
+  "formMaxDates": "Al massimo {max} date per tour.",
+  "@formMaxDates": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "detailChooseDate": "Scegli la data",
+  "cartChangeDate": "Cambia data",
+  "requestForDate": "Per il {date}",
+  "@requestForDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "moreDates": "{count, plural, =1{+1 altra data} other{+{count} altre date}}",
+  "@moreDates": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleWeekly": "Ogni {weekday} alle {time} · dal {from} al {to}",
+  "@scheduleWeekly": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleNextDates": "Prossime date: {dates}",
+  "@scheduleNextDates": {
+    "placeholders": {
+      "dates": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayNames": "lunedì,martedì,mercoledì,giovedì,venerdì,sabato,domenica"
 }

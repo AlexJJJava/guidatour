@@ -96,7 +96,7 @@ class SentRequestsList extends StatelessWidget {
                                       : t.historyLineWithTourDate(
                                           fmtDate(r.createdAt),
                                           r.people,
-                                          fmtDate(tour.start)),
+                                          fmtDate(r.start ?? tour.nextStart)),
                                   style: const TextStyle(
                                       color: kMuted, fontSize: 13)),
                             ],
@@ -171,6 +171,12 @@ class _ReceivedBookings extends StatelessWidget {
                                         fontSize: 15)),
                                 Text(tour?.title ?? t.tourUnavailable,
                                     style: const TextStyle(color: kPrimary)),
+                                if (r.start != null)
+                                  Text(t.requestForDate(fmtDate(r.start!)),
+                                      key: ValueKey('request-date-${r.id}'),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13)),
                                 Text(
                                     '${r.email}'
                                     '${r.phone.isEmpty ? '' : ' · ${r.phone}'}',

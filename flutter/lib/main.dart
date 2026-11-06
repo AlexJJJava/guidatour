@@ -198,6 +198,10 @@ class _StartupState extends State<_Startup> {
   return (id, uri.queryParameters['src'] == 'qr');
 }
 
+/// Data scelta nella pagina pubblica del tour (`&date=` in ISO), se valida.
+DateTime? tourLinkDate(Uri uri) =>
+    DateTime.tryParse(uri.queryParameters['date'] ?? '')?.toLocal();
+
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
@@ -258,7 +262,7 @@ class _AppShellState extends State<AppShell> {
     if (tour == null) {
       snack(context, l10n(context).tourUnavailable);
     } else if (inner != null) {
-      openTour(inner, tour, fromQr: fromQr);
+      openTour(inner, tour, fromQr: fromQr, date: tourLinkDate(Uri.base));
     }
   }
 

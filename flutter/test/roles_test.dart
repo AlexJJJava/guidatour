@@ -184,8 +184,7 @@ void main() {
         }
         for (final p in pages) {
           expect(
-              navLabel(p).evaluate().length + menuLabel(p).evaluate().length,
-              1,
+              navLabel(p).evaluate().length + menuLabel(p).evaluate().length, 1,
               reason: '$name senza $p');
         }
         for (final p in allPages.difference(pages.toSet())) {
@@ -205,7 +204,8 @@ void main() {
       ('computer', Size(1920, 1080)),
       ('telefono', Size(412, 915)),
     ]) {
-      testWidgets('$name: pagina aperta con intestazione, footer e senza freccia',
+      testWidgets(
+          '$name: pagina aperta con intestazione, footer e senza freccia',
           (tester) async {
         sized(tester, size);
         seed(user(Role.guida));
@@ -227,7 +227,8 @@ void main() {
             scrollable: find.byType(Scrollable).last);
         final footer = find.byType(SiteFooter);
         expect(footer, findsOneWidget);
-        expect(find.descendant(of: footer, matching: find.byType(LanguagePicker)),
+        expect(
+            find.descendant(of: footer, matching: find.byType(LanguagePicker)),
             findsNothing);
         expect(find.descendant(of: footer, matching: find.byType(InkWell)),
             findsNWidgets(2));
@@ -276,7 +277,8 @@ void main() {
           seed(u);
           await tester.pumpWidget(const GuidaTourApp());
           await tester.pump(const Duration(milliseconds: 100));
-          final labels = u?.role.isProfessional == true ? proPages : turistaPages;
+          final labels =
+              u?.role.isProfessional == true ? proPages : turistaPages;
           for (final label in labels.skip(1)) {
             final link = navLabel(label);
             if (link.evaluate().isEmpty) continue;
@@ -306,7 +308,8 @@ void main() {
 
   group('una sola intestazione', () {
     Finder bars(Size size) => find.byWidgetPredicate((w) =>
-        '${w.runtimeType}' == (size.width >= 1024 ? '_TopBar' : '_MobileTopBar'));
+        '${w.runtimeType}' ==
+        (size.width >= 1024 ? '_TopBar' : '_MobileTopBar'));
 
     for (final size in const [Size(1920, 1080), Size(412, 915)]) {
       testWidgets('dopo il login dalla pagina di accesso (${size.width})',
@@ -612,8 +615,8 @@ void main() {
   group('scheda del tour', () {
     testWidgets('il turista può aggiungere al carrello', (tester) async {
       sized(tester, const Size(1280, 2400));
-      final guida = Guide(
-          id: 'g1', name: 'Guida', email: 'g@e.it', role: Role.guida);
+      final guida =
+          Guide(id: 'g1', name: 'Guida', email: 'g@e.it', role: Role.guida);
       seed(user(Role.turista), owner: guida);
       await tester.pumpWidget(page(TourDetailScreen(tour: tourBy('g1'))));
       await tester.pump(const Duration(milliseconds: 100));
@@ -647,8 +650,10 @@ void main() {
         (tester) async {
       await open(tester, user(Role.accompagnatore));
       expect(find.text(t.accompagnatoreNotice), findsOneWidget);
-      await tester.tap(find.byWidgetPredicate(
-          (w) => '${w.runtimeType}'.startsWith('DropdownButton<String>')).at(1));
+      await tester.tap(find
+          .byWidgetPredicate(
+              (w) => '${w.runtimeType}'.startsWith('DropdownButton<String>'))
+          .at(1));
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('Visita guidata'), findsNothing);
     });
@@ -713,8 +718,10 @@ void main() {
       await tester.pumpWidget(page(const TourFormScreen()));
       await tester.pump();
       expect(find.text(t.accompagnatoreNotice), findsNothing);
-      await tester.tap(find.byWidgetPredicate(
-          (w) => '${w.runtimeType}'.startsWith('DropdownButton<String>')).at(1));
+      await tester.tap(find
+          .byWidgetPredicate(
+              (w) => '${w.runtimeType}'.startsWith('DropdownButton<String>'))
+          .at(1));
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('Visita guidata'), findsWidgets);
       expect(find.text('Accompagnamento'), findsWidgets);
@@ -773,8 +780,8 @@ void main() {
       await tester.pumpWidget(page(Builder(
           builder: (context) => Text(rolesLabel(context,
               u.requestedRoles.isEmpty ? u.roles : u.requestedRoles)))));
-      expect(find.text('${t.roleGuida} · ${t.roleTourOperator}'),
-          findsOneWidget);
+      expect(
+          find.text('${t.roleGuida} · ${t.roleTourOperator}'), findsOneWidget);
     });
   });
 
@@ -792,13 +799,15 @@ void main() {
     testWidgets('si scelgono più ruoli, con quelli attuali già spuntati',
         (tester) async {
       sized(tester, const Size(1280, 2400));
-      seed(me({'pendingRoles': ['tourOperator']}));
+      seed(me({
+        'pendingRoles': ['tourOperator']
+      }));
       await tester.pumpWidget(page(const ProfileEditScreen()));
       await tester.pump();
       expect(find.text(t.profileRolesSection), findsOneWidget);
       expect(find.text(t.profileRolesHint), findsOneWidget);
-      CheckboxListTile box(String r) => tester.widget<CheckboxListTile>(
-          find.byKey(ValueKey('edit-role-$r')));
+      CheckboxListTile box(String r) =>
+          tester.widget<CheckboxListTile>(find.byKey(ValueKey('edit-role-$r')));
       expect(box('guida').value, isTrue);
       expect(box('accompagnatore').value, isFalse);
       expect(box('tourOperator').value, isTrue);
@@ -822,7 +831,9 @@ void main() {
 
     testWidgets('Account mostra i ruoli in attesa', (tester) async {
       sized(tester, const Size(1280, 1600));
-      seed(me({'pendingRoles': ['accompagnatore']}));
+      seed(me({
+        'pendingRoles': ['accompagnatore']
+      }));
       await tester.pumpWidget(page(const AccountScreen()));
       await tester.pump();
       expect(find.byKey(const ValueKey('pending-role-accompagnatore')),
@@ -837,8 +848,8 @@ void main() {
       });
       expect(u.roles, [Role.guida]);
       expect(u.pendingRoles, [Role.tourOperator, Role.accompagnatore]);
-      expect(u.chosenRoles,
-          [Role.guida, Role.accompagnatore, Role.tourOperator]);
+      expect(
+          u.chosenRoles, [Role.guida, Role.accompagnatore, Role.tourOperator]);
     });
   });
 
@@ -1116,6 +1127,202 @@ void main() {
       expect(find.text(t.profilePhotoSection), findsOneWidget);
       expect(find.text(t.profileDataSection), findsOneWidget);
       expect(find.text(t.fieldLanguagesSpoken), findsOneWidget);
+    });
+  });
+
+  group('date multiple', () {
+    final d1 = DateTime(2099, 6, 2, 21);
+    final d2 = DateTime(2099, 6, 9, 21);
+    final d3 = DateTime(2099, 6, 16, 21);
+    Tour multi(String guideId) => Tour(
+          id: 'tour1',
+          title: 'Trastevere by night',
+          city: 'Roma',
+          category: 'Serale',
+          language: 'Italiano',
+          duration: '2 ore',
+          start: d1,
+          dates: [d1, d2, d3],
+          price: 20,
+          meetingPoint: 'Piazza Trilussa',
+          description: 'Descrizione',
+          seats: 10,
+          guideId: guideId,
+        );
+
+    test('date settimanali, prossima uscita e tour passato', () {
+      expect(weeklyDates(d1, DateTime(2099, 6, 16)), [d2, d3]);
+      expect(weeklyDates(d1, DateTime(2099, 6, 8)), isEmpty);
+      expect(isWeekly([d1, d2, d3]), isTrue);
+      expect(isWeekly([d1, d3]), isFalse);
+      final tour = multi('g1');
+      expect(tour.upcoming, [d1, d2, d3]);
+      expect(tour.nextStart, d1);
+      expect(tour.isPast, isFalse);
+      final old = Tour(
+        id: 'x',
+        title: 'Passato',
+        city: 'Roma',
+        category: 'Serale',
+        language: 'Italiano',
+        duration: '1 ora',
+        start: DateTime(2020, 1, 1),
+        dates: [DateTime(2020, 1, 1), DateTime(2020, 1, 8)],
+        price: 10,
+        meetingPoint: 'Qui',
+        description: '',
+        seats: 5,
+        guideId: 'g1',
+      );
+      expect(old.isPast, isTrue);
+      expect(old.upcoming, isEmpty);
+      expect(old.nextStart, DateTime(2020, 1, 8));
+      // Un tour con una data sola funziona come prima.
+      expect(tourBy('g1').dates, [DateTime(2099, 6, 15, 10)]);
+    });
+
+    testWidgets('la scheda fa scegliere la data', (tester) async {
+      sized(tester, const Size(1280, 2600));
+      final guida =
+          Guide(id: 'g1', name: 'Guida', email: 'g@e.it', role: Role.guida);
+      seed(user(Role.turista), owner: guida);
+      final tour = multi('g1');
+      appState.tours
+        ..clear()
+        ..add(tour);
+      await tester.pumpWidget(page(TourDetailScreen(tour: tour)));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.text(t.detailChooseDate), findsOneWidget);
+      final chips = find.descendant(
+          of: find.byKey(const ValueKey('tour-date-choice')),
+          matching: find.byType(ChoiceChip));
+      expect(chips, findsNWidgets(3));
+      expect(tester.widget<ChoiceChip>(chips.at(0)).selected, isTrue);
+      await tester.tap(chips.at(1));
+      await tester.pump();
+      expect(tester.widget<ChoiceChip>(chips.at(1)).selected, isTrue);
+      expect(tester.widget<ChoiceChip>(chips.at(0)).selected, isFalse);
+    });
+
+    testWidgets('dal link si apre sulla data scelta', (tester) async {
+      sized(tester, const Size(1280, 2600));
+      seed(null,
+          owner: Guide(
+              id: 'g1', name: 'Guida', email: 'g@e.it', role: Role.guida));
+      final tour = multi('g1');
+      await tester
+          .pumpWidget(page(TourDetailScreen(tour: tour, initialDate: d3)));
+      await tester.pump(const Duration(milliseconds: 100));
+      final chips = find.byType(ChoiceChip);
+      expect(tester.widget<ChoiceChip>(chips.at(2)).selected, isTrue);
+      final iso = d3.toUtc().toIso8601String();
+      expect(
+          tourLinkDate(Uri.parse('$publicSiteUrl?tour=tour1&date=$iso')), d3);
+    });
+
+    testWidgets('il modulo mostra le date e le toglie', (tester) async {
+      sized(tester, const Size(1280, 2600));
+      seed(user(Role.guida));
+      await tester.pumpWidget(page(TourFormScreen(existing: multi('u1'))));
+      await tester.pump();
+      expect(find.text(t.fieldDates), findsOneWidget);
+      final chips = find.descendant(
+          of: find.byKey(const ValueKey('tour-dates')),
+          matching: find.byType(InputChip));
+      expect(chips, findsNWidgets(3));
+      expect(find.text(t.formAddDate), findsOneWidget);
+      expect(find.text(t.formRepeatWeekly), findsOneWidget);
+      tester.widget<InputChip>(chips.first).onDeleted!();
+      await tester.pump();
+      expect(chips, findsNWidgets(2));
+    });
+
+    testWidgets('carrello con la data scelta', (tester) async {
+      sized(tester, const Size(1280, 2000));
+      seed(user(Role.turista));
+      final tour = multi('g1');
+      appState.tours
+        ..clear()
+        ..add(tour);
+      appState.cart = [CartItem('tour1', start: d2)];
+      await tester.pumpWidget(page(const CartScreen()));
+      await tester.pump();
+      expect(find.textContaining(fmtDate(d2)), findsOneWidget);
+      expect(find.byKey(const ValueKey('cart-date-tour1')), findsOneWidget);
+      appState.cart = [];
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('la guida vede la data di ogni richiesta', (tester) async {
+      sized(tester, const Size(1280, 1600));
+      seed(user(Role.guida));
+      appState.requests = [
+        BookingRequest(
+          id: 'r1',
+          tourId: 'tour1',
+          name: 'Anna',
+          email: 'a@example.com',
+          phone: '',
+          people: 2,
+          message: '',
+          createdAt: DateTime(2026, 11, 1),
+          start: d2,
+        ),
+      ];
+      await tester.pumpWidget(page(const BookingsScreen()));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('request-date-r1')), findsOneWidget);
+      expect(find.text(t.requestForDate(fmtDate(d2))), findsOneWidget);
+      appState.requests = [];
+    });
+
+    testWidgets('locandina: ogni settimana alla stessa ora', (tester) async {
+      late String label;
+      await tester.pumpWidget(page(Builder(builder: (context) {
+        label = tourScheduleLabel(context, multi('g1'));
+        return const SizedBox();
+      })));
+      expect(label, t.scheduleWeekly('martedì', '21:00', '02/06', '16/06'));
+    });
+
+    test('avvisi: posti contati per data, niente sovrapposizioni con sé stesso',
+        () {
+      final tour = Tour(
+        id: 'tour1',
+        title: 'Settimanale',
+        city: 'Roma',
+        category: 'Serale',
+        language: 'Italiano',
+        duration: '2 ore',
+        start: d1,
+        dates: [d1, d2],
+        price: 20,
+        meetingPoint: 'Qui',
+        description: '',
+        seats: 3,
+        guideId: 'u1',
+      );
+      BookingRequest r(String id, DateTime d, int people) => BookingRequest(
+            id: id,
+            tourId: 'tour1',
+            name: 'X',
+            email: 'x@e.it',
+            phone: '',
+            people: people,
+            message: '',
+            createdAt: DateTime(2026, 11, 1),
+            start: d,
+          );
+      appState
+        ..myTours = [tour]
+        ..requests = [r('a', d1, 2), r('b', d2, 2)];
+      // 2 + 2 su date diverse: nessun overbooking.
+      expect(appState.overbookingAlerts('u1'), isEmpty);
+      appState.requests = [r('a', d1, 2), r('b', d1, 2)];
+      expect(appState.overbookingAlerts('u1'), hasLength(1));
+      appState
+        ..myTours = []
+        ..requests = [];
     });
   });
 }

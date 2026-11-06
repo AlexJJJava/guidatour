@@ -7,7 +7,8 @@ import '../widgets.dart';
 import 'tour_map.dart';
 import 'whatsapp_optin.dart';
 
-void openTour(BuildContext context, Tour t, {bool fromQr = false}) {
+void openTour(BuildContext context, Tour t,
+    {bool fromQr = false, DateTime? date}) {
   if (fromQr) {
     // Il conteggio non deve fermare chi ha appena inquadrato il QR.
     appState.recordScan(t).catchError((_) {});
@@ -15,13 +16,34 @@ void openTour(BuildContext context, Tour t, {bool fromQr = false}) {
     appState.recordVisit(t);
   }
   Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => TourDetailScreen(tour: t)),
+    MaterialPageRoute(
+        builder: (_) => TourDetailScreen(tour: t, initialDate: date)),
   );
 }
 
-class TourDetailScreen extends StatelessWidget {
-  const TourDetailScreen({super.key, required this.tour});
+class TourDetailScreen extends StatefulWidget {
+  const TourDetailScreen({super.key, required this.tour, this.initialDate});
   final Tour tour;
+
+  /// Data proposta (es. dal link di una pagina pubblica), se è tra le prossime.
+  final DateTime? initialDate;
+
+  @override
+  State<TourDetailScreen> createState() => _TourDetailScreenState();
+}
+
+class _TourDetailScreenState extends State<TourDetailScreen> {
+  Tour get tour => widget.tour;
+
+  /// Data scelta per carrello e richiesta: di default la prossima uscita.
+  late DateTime? _date = () {
+    final up = tour.upcoming;
+    final wanted = widget.initialDate;
+    if (wanted != null && up.any((d) => d.isAtSameMomentAs(wanted))) {
+      return wanted;
+    }
+    return up.isEmpty ? null : up.first;
+  }();
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +132,7 @@ class TourDetailScreen extends StatelessWidget {
               spacing: 20,
               runSpacing: 8,
               children: [
-                _Fact(Icons.event, fmtDate(tour.start)),
+                _Fact(Icons.event, fmtDate(_date ?? tour.nextStart)),
                 _Fact(Icons.schedule, tour.duration),
                 _Fact(Icons.language, languageLabel(context, tour.language)),
                 _Fact(Icons.euro, fmtPrice(tour.price)),
@@ -118,6 +140,25 @@ class TourDetailScreen extends StatelessWidget {
                     Icons.event_seat_outlined, t.detailSeatsCount(tour.seats)),
               ],
             ),
+            if (tour.upcoming.length > 1) ...[
+              const SizedBox(height: 18),
+              Text(t.detailChooseDate,
+                  style: const TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              Wrap(
+                key: const ValueKey('tour-date-choice'),
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final d in tour.upcoming)
+                    ChoiceChip(
+                      label: Text(fmtDate(d)),
+                      selected: _date == d,
+                      onSelected: (_) => setState(() => _date = d),
+                    ),
+                ],
+              ),
+            ],
             const SizedBox(height: 14),
             _Fact(
                 Icons.place_outlined, t.detailMeetingPoint(tour.meetingPoint)),
@@ -162,7 +203,7 @@ class TourDetailScreen extends StatelessWidget {
                   : () async {
                       if (_needsTourist(context)) return;
                       try {
-                        await appState.addToCart(tour.id);
+                        await appState.addToCart(tour.id, start: _date);
                         if (context.mounted) {
                           snack(context, t.cartAdded);
                         }
@@ -175,7 +216,7 @@ class TourDetailScreen extends StatelessWidget {
               label: Text(inCart ? t.inCart : t.addToCart),
             ),
             const SizedBox(height: 20),
-            BookingForm(tour: tour),
+            BookingForm(tour: tour, date: _date),
             const SizedBox(height: 28),
             WhatsAppOptInCard(source: 'Scheda tour: ${tour.title}'),
             const PlatformDisclaimer(),
@@ -206,8 +247,11 @@ class _Fact extends StatelessWidget {
 
 /// Richiesta di prenotazione non vincolante (BR-006): la conferma è della guida.
 class BookingForm extends StatefulWidget {
-  const BookingForm({super.key, required this.tour});
+  const BookingForm({super.key, required this.tour, this.date});
   final Tour tour;
+
+  /// Data scelta nella scheda; null = la prossima uscita.
+  final DateTime? date;
 
   @override
   State<BookingForm> createState() => _BookingFormState();
@@ -252,6 +296,7 @@ class _BookingFormState extends State<BookingForm> {
         message: _message.text.trim(),
         createdAt: DateTime.now(),
         userId: appState.isTourist ? appState.currentUser!.id : null,
+        start: widget.date,
       ));
       if (mounted) setState(() => _sent = true);
     } catch (e) {

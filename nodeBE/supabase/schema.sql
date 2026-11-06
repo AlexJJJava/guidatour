@@ -86,6 +86,9 @@ create table public.tours (
   language text not null,
   duration text not null,
   start_at timestamptz not null,
+  -- Tutte le date del tour; start_at e last_start_at le tiene il trigger.
+  dates timestamptz[] not null default '{}',
+  last_start_at timestamptz,
   price numeric(10, 2) not null check (price >= 0),
   meeting_point text not null,
   description text not null default '',
@@ -99,6 +102,28 @@ create table public.tours (
 create index tours_start_at_idx on public.tours (start_at);
 create index tours_guide_id_idx on public.tours (guide_id);
 create index tours_city_idx on public.tours (city);
+create index tours_last_start_at_idx on public.tours (last_start_at);
+
+create function public.tours_normalize_dates() returns trigger
+language plpgsql as $
+begin
+  if cardinality(new.dates) = 0
+     or (tg_op = 'UPDATE' and new.dates = old.dates
+         and new.start_at is distinct from old.start_at) then
+    new.dates := array[new.start_at];
+  end if;
+  new.dates := array(select distinct d from unnest(new.dates) d order by d);
+  if cardinality(new.dates) not between 1 and 60 then
+    raise exception 'Un tour deve avere da 1 a 60 date';
+  end if;
+  new.start_at := new.dates[1];
+  new.last_start_at := new.dates[cardinality(new.dates)];
+  return new;
+end $;
+
+create trigger tours_normalize_dates
+  before insert or update of dates, start_at on public.tours
+  for each row execute function public.tours_normalize_dates();
 
 alter table public.tours enable row level security;
 
@@ -115,7 +140,7 @@ create policy tours_delete_own on public.tours
 
 -- visits/scans si incrementano solo con record_tour_view.
 revoke update on public.tours from anon, authenticated;
-grant update (title, category, language, duration, start_at, price,
+grant update (title, category, language, duration, start_at, dates, price,
               meeting_point, description, seats, accessories)
   on public.tours to authenticated;
 
@@ -139,6 +164,7 @@ create table public.booking_requests (
   phone text not null default '',
   people int not null check (people between 1 and 100),
   message text not null default '',
+  start_at timestamptz,
   status text not null default 'inviata'
     check (status in ('inviata', 'confermata', 'rifiutata')),
   created_at timestamptz not null default now()
@@ -182,6 +208,7 @@ create table public.cart_items (
   user_id uuid not null references public.profiles (id) on delete cascade,
   tour_id text not null references public.tours (id) on delete cascade,
   people int not null default 2 check (people between 1 and 100),
+  start_at timestamptz,
   created_at timestamptz not null default now(),
   primary key (user_id, tour_id)
 );
@@ -295,7 +322,11 @@ language plpgsql security definer set search_path = public as $$
 begin
   insert into notifications (user_id, message)
   select t.guide_id,
-         format('Nuova richiesta da %s per "%s" (%s persone).', new.name, t.title, new.people)
+         format('Nuova richiesta da %s per "%s"%s (%s persone).',
+                new.name, t.title,
+                coalesce(' del ' || to_char(new.start_at at time zone 'Europe/Rome',
+                                            'DD/MM/YYYY HH24:MI'), ''),
+                new.people)
     from tours t where t.id = new.tour_id;
   return new;
 end $$;

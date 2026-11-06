@@ -54,7 +54,10 @@ export interface TourInput {
   category: string
   language: string
   duration: string
+  /** Prima data (client vecchi); con dates diventa la prossima data. */
   start: string
+  /** Tutte le date del tour, in ordine. */
+  dates: string[]
   price: number
   meetingPoint: string
   description: string
@@ -63,6 +66,8 @@ export interface TourInput {
 }
 
 export interface Tour extends TourInput {
+  /** Date ancora da svolgere, in ordine. */
+  upcoming: string[]
   id: string
   guideId: string
   visits: number
@@ -80,6 +85,8 @@ export type TourRow = {
   language: string
   duration: string
   start_at: string
+  dates?: string[] | null
+  last_start_at?: string | null
   price: number | string
   meeting_point: string
   description: string
@@ -89,39 +96,63 @@ export type TourRow = {
   scans: number
 }
 
-export const toTour = (r: TourRow): Tour => ({
-  id: r.id,
-  guideId: r.guide_id,
-  title: r.title,
-  city: r.city,
-  category: r.category,
-  language: r.language,
-  duration: r.duration,
-  start: r.start_at,
-  price: Number(r.price),
-  meetingPoint: r.meeting_point,
-  description: r.description,
-  seats: r.seats,
-  accessories: r.accessories,
-  visits: r.visits,
-  scans: r.scans,
-  isPackage: r.accessories.length > 0,
-  url: `${PUBLIC_SITE_URL}?tour=${r.id}`,
-})
+/** Date in ISO, ordinate e senza doppioni (confronto sull'istante). */
+export function normalizeDates(dates: string[]): string[] {
+  const ms = [...new Set(dates.map((d) => Date.parse(d)))].sort((a, b) => a - b)
+  return ms.map((m) => new Date(m).toISOString())
+}
 
-const toRow = (t: Partial<TourInput>) => ({
-  title: t.title,
-  city: t.city,
-  category: t.category,
-  language: t.language,
-  duration: t.duration,
-  start_at: t.start,
-  price: t.price,
-  meeting_point: t.meetingPoint,
-  description: t.description,
-  seats: t.seats,
-  accessories: t.accessories,
-})
+export const toTour = (r: TourRow, now = Date.now()): Tour => {
+  const dates = normalizeDates(r.dates?.length ? r.dates : [r.start_at])
+  const upcoming = dates.filter((d) => Date.parse(d) >= now)
+  return {
+    id: r.id,
+    guideId: r.guide_id,
+    title: r.title,
+    city: r.city,
+    category: r.category,
+    language: r.language,
+    duration: r.duration,
+    start: upcoming[0] ?? dates[dates.length - 1],
+    dates,
+    upcoming,
+    price: Number(r.price),
+    meetingPoint: r.meeting_point,
+    description: r.description,
+    seats: r.seats,
+    accessories: r.accessories,
+    visits: r.visits,
+    scans: r.scans,
+    isPackage: r.accessories.length > 0,
+    url: `${PUBLIC_SITE_URL}?tour=${r.id}`,
+  }
+}
+
+/** Data dell'ultima uscita: dopo, il tour è passato. */
+export const lastDate = (t: Pick<Tour, 'dates'>) => t.dates[t.dates.length - 1]
+
+/** Con dates le date sono quelle; con il solo start (client vecchi) è una data unica. */
+const toRow = (t: Partial<TourInput>) => {
+  const dates = t.dates?.length
+    ? normalizeDates(t.dates)
+    : t.start
+      ? [new Date(t.start).toISOString()]
+      : undefined
+  return {
+    title: t.title,
+    city: t.city,
+    category: t.category,
+    language: t.language,
+    duration: t.duration,
+    start_at: dates?.[0],
+    dates,
+    price: t.price,
+    meeting_point: t.meetingPoint,
+    description: t.description,
+    seats: t.seats,
+    accessories: t.accessories,
+  }
+}
 
 /**
  * Chi può pubblicare cosa (BR-014D, BR-014G, BRD §13.4): stesse regole del
@@ -180,13 +211,15 @@ export interface TourFilters {
 }
 
 export async function listTours(db: Db, f: TourFilters): Promise<Tour[]> {
+  // Un tour è nel periodo se almeno una delle sue date ci cade: il database
+  // filtra sull'intervallo prima–ultima data, qui sotto si guarda data per data.
   let query = db.from('tours').select('*').order('start_at').limit(f.limit ?? 100)
   if (f.city) query = query.eq('city', f.city)
   if (f.category) query = query.eq('category', f.category)
   if (f.language) query = query.eq('language', f.language)
   if (f.guideId) query = query.eq('guide_id', f.guideId)
-  if (f.from) query = query.gte('start_at', f.from)
-  else if (!f.includePast) query = query.gte('start_at', new Date().toISOString())
+  const from = f.from ?? (f.includePast ? undefined : new Date().toISOString())
+  if (from) query = query.gte('last_start_at', from)
   if (f.to) query = query.lte('start_at', f.to)
   if (f.q) {
     // Virgole e parentesi hanno un significato nella sintassi di .or():
@@ -199,7 +232,14 @@ export async function listTours(db: Db, f: TourFilters): Promise<Tour[]> {
       )
     }
   }
-  return unwrap(await query.returns<TourRow[]>()).map(toTour)
+  const fromMs = from ? Date.parse(from) : -Infinity
+  const toMs = f.to ? Date.parse(f.to) : Infinity
+  const tours = unwrap(await query.returns<TourRow[]>())
+    .map((r) => toTour(r))
+    .filter((t) => t.dates.some((d) => Date.parse(d) >= fromMs && Date.parse(d) <= toMs))
+  // In ordine di prossima uscita; i tour passati (solo con includePast) in fondo.
+  const key = (t: Tour) => (t.upcoming.length ? Date.parse(t.upcoming[0]) : Infinity)
+  return tours.sort((a, b) => key(a) - key(b) || Date.parse(lastDate(b)) - Date.parse(lastDate(a)))
 }
 
 export async function getTour(db: Db, id: string): Promise<Tour> {

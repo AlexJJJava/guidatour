@@ -30,8 +30,14 @@ export async function getOverview(db: Db): Promise<AdminOverview> {
     db.from('profiles').select('*').returns<
       { role: string; approval_status?: string; pending_roles?: string[] }[]
     >(),
-    db.from('tours').select('start_at, accessories, visits, scans').returns<
-      { start_at: string; accessories: string[]; visits: number; scans: number }[]
+    db.from('tours').select('start_at, last_start_at, accessories, visits, scans').returns<
+      {
+        start_at: string
+        last_start_at: string | null
+        accessories: string[]
+        visits: number
+        scans: number
+      }[]
     >(),
     db.from('whatsapp_consents').select('id', { count: 'exact', head: true }),
     db.rpc('admin_stats'),
@@ -53,7 +59,7 @@ export async function getOverview(db: Db): Promise<AdminOverview> {
     rejected: status('rifiutato'),
     tourists: people.length - pros.length,
     tours: allTours.length,
-    upcomingTours: allTours.filter((t) => new Date(t.start_at).getTime() >= now).length,
+    upcomingTours: allTours.filter((t) => Date.parse(t.last_start_at ?? t.start_at) >= now).length,
     packages: allTours.filter((t) => t.accessories.length > 0).length,
     consents: consents.count ?? 0,
     requests: s?.requests ?? null,
@@ -84,7 +90,7 @@ export async function listToursForAdmin(
   db: Db,
 ): Promise<(Tour & { guideName: string; guideStatus: string })[]> {
   const rows = unwrap(
-    await db.from('tours').select('*').order('start_at', { ascending: false }).returns<TourRow[]>(),
+    await db.from('tours').select('*').order('last_start_at', { ascending: false }).returns<TourRow[]>(),
   )
   const ids = [...new Set(rows.map((r) => r.guide_id))]
   const owners = ids.length

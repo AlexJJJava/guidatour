@@ -865,3 +865,100 @@ describe('foto profilo', () => {
     }
   })
 })
+
+describe('date multiple', () => {
+  const D = ['2099-07-07T19:00:00.000Z', '2099-07-14T19:00:00.000Z', '2099-07-21T19:00:00.000Z']
+  let id = ''
+
+  test('la guida crea un tour con più date, in ordine e senza doppioni', async () => {
+    const tour = await newTour('guida', { dates: [D[2], D[0], D[1], D[0]], start: undefined })
+    id = tour.id
+    const r = await api(`/tours/${id}`)
+    assert.equal(r.status, 200)
+    assert.deepEqual(r.json.dates, D)
+    assert.deepEqual(r.json.upcoming, D)
+    assert.equal(r.json.start, D[0])
+  })
+
+  test('negli elenchi il tour compare una volta, filtrabile per una data qualsiasi', async () => {
+    const all = await api('/tours?q=[TEST]&limit=200')
+    assert.equal(all.json.tours.filter((t: { id: string }) => t.id === id).length, 1)
+    const week3 = await api(`/tours?from=2099-07-20T00:00:00Z&to=2099-07-22T00:00:00Z&limit=200`)
+    assert.ok(week3.json.tours.some((t: { id: string }) => t.id === id), 'trovato dalla terza data')
+    const none = await api(`/tours?from=2099-07-08T00:00:00Z&to=2099-07-13T00:00:00Z&limit=200`)
+    assert.ok(!none.json.tours.some((t: { id: string }) => t.id === id), 'nessuna data in quel periodo')
+  })
+
+  test('richiesta per una data del tour; data estranea rifiutata', async () => {
+    const ok = await api(`/tours/${id}/requests`, { body: { ...requestBody, start: D[1] } })
+    assert.equal(ok.status, 201, JSON.stringify(ok.json))
+    const bad = await api(`/tours/${id}/requests`, {
+      body: { ...requestBody, start: '2099-07-08T19:00:00Z' },
+    })
+    assert.equal(bad.status, 422)
+    const received = await api(`/tours/${id}/requests`, { token: tokens.guida })
+    assert.equal(received.status, 200)
+    assert.ok(received.json.requests.some((q: { start?: string }) => q.start === D[1]))
+  })
+
+  test('carrello con la data, cambio data e invio', async () => {
+    const add = await api('/me/cart', { token: tokens.turista, body: { tourId: id, people: 1, start: D[2] } })
+    assert.equal(add.status, 201, JSON.stringify(add.json))
+    const item = add.json.items.find((i: { tourId: string }) => i.tourId === id)
+    assert.equal(item.start, D[2])
+    const bad = await api(`/me/cart/${id}`, {
+      method: 'PATCH',
+      token: tokens.turista,
+      body: { start: '2099-07-08T19:00:00Z' },
+    })
+    assert.equal(bad.status, 422)
+    const moved = await api(`/me/cart/${id}`, { method: 'PATCH', token: tokens.turista, body: { start: D[1] } })
+    assert.equal(moved.status, 200)
+    assert.equal(moved.json.items.find((i: { tourId: string }) => i.tourId === id).start, D[1])
+    // Solo il tour di prova nel carrello: gli altri eventuali restano dove sono.
+    const others = moved.json.items.filter((i: { tourId: string }) => i.tourId !== id)
+    for (const o of others) {
+      await api(`/me/cart/${o.tourId}`, { method: 'DELETE', token: tokens.turista })
+    }
+    const sent = await api('/me/cart/checkout', { token: tokens.turista, body: { message: '[TEST]' } })
+    assert.equal(sent.status, 201, JSON.stringify(sent.json))
+    const mine = await api('/me/requests', { token: tokens.turista })
+    const q = mine.json.requests.find((x: { tourId: string }) => x.tourId === id)
+    assert.equal(q.start, D[1])
+    for (const o of others) {
+      await api('/me/cart', { token: tokens.turista, body: { tourId: o.tourId, people: o.people } })
+    }
+  })
+
+  test('modifica delle date e tour con la sola data (client vecchi)', async () => {
+    const r = await api(`/tours/${id}`, {
+      method: 'PATCH',
+      token: tokens.guida,
+      body: { dates: [D[0], D[2]] },
+    })
+    assert.equal(r.status, 200, JSON.stringify(r.json))
+    assert.deepEqual(r.json.dates, [D[0], D[2]])
+    const old = await newTour('guida', { start: '2099-08-01T10:00:00Z' })
+    const o = await api(`/tours/${old.id}`)
+    assert.deepEqual(o.json.dates, ['2099-08-01T10:00:00.000Z'])
+    assert.equal(o.json.start, '2099-08-01T10:00:00.000Z')
+  })
+
+  test('niente date o solo date passate: rifiutato', async () => {
+    const empty = await api('/tours', { token: tokens.guida, body: tourBody({ start: undefined }) })
+    assert.equal(empty.status, 400)
+    const past = await api('/tours', {
+      token: tokens.guida,
+      body: tourBody({ start: undefined, dates: ['2020-01-01T10:00:00Z'] }),
+    })
+    assert.equal(past.status, 422)
+    const tooMany = await api('/tours', {
+      token: tokens.guida,
+      body: tourBody({
+        start: undefined,
+        dates: Array.from({ length: 61 }, (_, i) => new Date(Date.UTC(2099, 0, 1 + i)).toISOString()),
+      }),
+    })
+    assert.equal(tooMany.status, 400)
+  })
+})

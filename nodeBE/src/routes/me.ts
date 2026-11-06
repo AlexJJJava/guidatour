@@ -12,7 +12,7 @@ import {
   listFavorites,
   removeFavorite,
   removeFromCart,
-  setCartPeople,
+  updateCartItem,
 } from '../services/tourist.js'
 import { CITIES, TOUR_LANGUAGES } from '../services/tours.js'
 import { getDashboard } from '../services/dashboard.js'
@@ -71,18 +71,27 @@ me.delete('/favorites/:tourId', async (c) => {
 me.get('/cart', async (c) => c.json(await getCart(c.get('db'), currentUserId(c))))
 
 me.post('/cart', async (c) => {
-  const body = await parseBody(c, z.object({ tourId: z.string().min(1), people: people.default(2) }))
+  const body = await parseBody(c, z.object({
+      tourId: z.string().min(1),
+      people: people.default(2),
+      start: z.iso.datetime({ offset: true }).optional(),
+    }))
   const db = c.get('db')
   const userId = currentUserId(c)
-  await addToCart(db, userId, body.tourId, body.people)
+  await addToCart(db, userId, body.tourId, body.people, body.start)
   return c.json(await getCart(db, userId), 201)
 })
 
 me.patch('/cart/:tourId', async (c) => {
-  const body = await parseBody(c, z.object({ people }))
+  const body = await parseBody(
+    c,
+    z
+      .object({ people: people.optional(), start: z.iso.datetime({ offset: true }).optional() })
+      .refine((b) => b.people !== undefined || b.start !== undefined, 'Niente da modificare'),
+  )
   const db = c.get('db')
   const userId = currentUserId(c)
-  await setCartPeople(db, userId, c.req.param('tourId'), body.people)
+  await updateCartItem(db, userId, c.req.param('tourId'), body)
   return c.json(await getCart(db, userId))
 })
 

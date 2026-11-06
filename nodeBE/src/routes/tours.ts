@@ -16,6 +16,7 @@ import {
   recordView,
   updateTour,
 } from '../services/tours.js'
+import { HttpError } from '../errors.js'
 import { parseBody, parseQuery } from '../validate.js'
 
 const tourSchema = z.object({
@@ -24,7 +25,9 @@ const tourSchema = z.object({
   category: z.enum(TOUR_CATEGORIES),
   language: z.enum(TOUR_LANGUAGES),
   duration: z.string().trim().min(1).max(40),
-  start: z.iso.datetime({ offset: true }),
+  // Una data (client vecchi) oppure l'elenco delle date: almeno una delle due.
+  start: z.iso.datetime({ offset: true }).optional(),
+  dates: z.array(z.iso.datetime({ offset: true })).min(1).max(60).optional(),
   price: z.number().min(0).max(100_000),
   meetingPoint: z.string().trim().min(3).max(200),
   description: z.string().trim().max(5000).default(''),
@@ -50,6 +53,7 @@ const requestSchema = z.object({
   phone: z.string().trim().max(30).default(''),
   people: z.int().min(1).max(100),
   message: z.string().trim().max(2000).default(''),
+  start: z.iso.datetime({ offset: true }).optional(),
 })
 
 export const tours = new Hono<AppEnv>()
@@ -76,8 +80,13 @@ tours.get('/:id', optionalAuth, async (c) => {
 tours.post('/', requireAuth, async (c) => {
   const db = c.get('db')
   const author = await requireProfessional(db, currentUserId(c))
-  const input = await parseBody(c, tourSchema)
-  return c.json(await createTour(db, author, input), 201)
+  const body = await parseBody(c, tourSchema)
+  const dates = body.dates ?? (body.start ? [body.start] : [])
+  if (dates.length === 0) throw new HttpError(400, 'Serve almeno una data')
+  if (dates.every((d) => Date.parse(d) < Date.now())) {
+    throw new HttpError(422, 'Serve almeno una data futura')
+  }
+  return c.json(await createTour(db, author, { ...body, start: dates[0], dates }), 201)
 })
 
 tours.patch('/:id', requireAuth, async (c) => {

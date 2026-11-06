@@ -24,7 +24,7 @@ class PosterScreen extends StatelessWidget {
       kicker: 'GUIDATOUR · ${cityLabel(context, tour.city).toUpperCase()}',
       title: tour.title,
       when:
-          '${fmtDate(tour.start)} · ${tour.duration} · ${languageLabel(context, tour.language)}',
+          '${tourScheduleLabel(context, tour)} · ${tour.duration} · ${languageLabel(context, tour.language)}',
       meetingPoint: t.detailMeetingPoint(tour.meetingPoint),
       price: fmtPrice(tour.price),
       byline: t.posterByGuide(guide?.name ?? '',
@@ -94,7 +94,7 @@ class PosterScreen extends StatelessWidget {
                             color: _paperInk)),
                     const SizedBox(height: 10),
                     Text(
-                        '${fmtDate(tour.start)} · ${tour.duration} · ${languageLabel(context, tour.language)}',
+                        '${tourScheduleLabel(context, tour)} · ${tour.duration} · ${languageLabel(context, tour.language)}',
                         textAlign: TextAlign.center),
                     Text(t.detailMeetingPoint(tour.meetingPoint),
                         textAlign: TextAlign.center),

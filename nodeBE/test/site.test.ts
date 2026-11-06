@@ -21,7 +21,7 @@ const canonical = (html: string) => /<link rel="canonical" href="([^"]*)"/.exec(
 const ldBlocks = (html: string) =>
   [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]))
 
-type Tour = { id: string; title: string; city: string; price: number; start: string }
+type Tour = { id: string; title: string; city: string; price: number; start: string; upcoming?: string[] }
 let tours: Tour[] = []
 
 before(async () => {
@@ -74,7 +74,10 @@ describe('pagine SEO', () => {
     assert.equal(p.status, 200)
     assert.ok(title(p.text).includes(t.title.replace(/&/g, '&amp;').replace(/'/g, '&#39;')))
     assert.ok(p.text.includes(`${t.price}`))
-    const [ev] = ldBlocks(p.text)
+    // Un Event per ogni prossima data (al massimo 12), il primo è la prossima uscita.
+    const events = ldBlocks(p.text).flat()
+    assert.equal(events.length, Math.min(t.upcoming?.length ?? 1, 12))
+    const ev = events[0]
     assert.equal(ev['@type'], 'Event')
     assert.equal(ev.name, t.title)
     assert.equal(ev.startDate, t.start)

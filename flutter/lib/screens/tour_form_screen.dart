@@ -53,7 +53,9 @@ class _TourFormScreenState extends State<TourFormScreen> {
   late String _city = widget.existing?.city ?? _user.city;
   late String _category = widget.existing?.category ?? tourCategories.first;
   late String _language = widget.existing?.language ?? tourLanguages.first;
-  late DateTime? _start = widget.existing?.start;
+
+  /// Date del tour in ordine; in modifica restano solo quelle future.
+  late final List<DateTime> _dates = [...?widget.existing?.upcoming];
   late final Set<String> _accessories = {...?widget.existing?.accessories};
   bool _declaration = false;
 
@@ -112,7 +114,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
   Future<void> _submit() async {
     final t = l10n(context);
     if (!_key.currentState!.validate()) return;
-    if (_start == null) {
+    if (!_dates.any((d) => d.isAfter(DateTime.now()))) {
       snack(context, t.formChooseDateTime);
       return;
     }
@@ -131,7 +133,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
           category: _category,
           language: _language,
           duration: _duration.text.trim(),
-          start: _start!,
+          dates: _dates,
           price: double.parse(_price.text.replaceAll(',', '.')),
           meetingPoint: _meeting.text.trim(),
           description: _description.text.trim(),
@@ -148,7 +150,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
         category: _category,
         language: _language,
         duration: _duration.text.trim(),
-        start: _start!,
+        dates: _dates,
         price: double.parse(_price.text.replaceAll(',', '.')),
         meetingPoint: _meeting.text.trim(),
         description: _description.text.trim(),
@@ -167,19 +169,51 @@ class _TourFormScreenState extends State<TourFormScreen> {
     }
   }
 
-  Future<void> _pickDate() async {
+  void _setDates(Iterable<DateTime> more) {
+    final all = {..._dates, ...more}.toList()..sort();
+    if (all.length > maxTourDates) {
+      snack(context, l10n(context).formMaxDates(maxTourDates));
+    }
+    setState(() => _dates
+      ..clear()
+      ..addAll(all.take(maxTourDates)));
+  }
+
+  /// Aggiunge una data: giorno e ora (l'ora proposta è quella dell'ultima data).
+  Future<void> _addDate() async {
     final now = DateTime.now();
+    final last = _dates.isEmpty ? null : _dates.last;
     final d = await showDatePicker(
       context: context,
-      initialDate: _start ?? now,
+      initialDate: last != null && last.isAfter(now)
+          ? last.add(const Duration(days: 7))
+          : now,
       firstDate: now,
       lastDate: now.add(const Duration(days: 365)),
     );
     if (d == null || !mounted) return;
     final t = await showTimePicker(
-        context: context, initialTime: const TimeOfDay(hour: 10, minute: 0));
+        context: context,
+        initialTime: last != null
+            ? TimeOfDay.fromDateTime(last)
+            : const TimeOfDay(hour: 10, minute: 0));
     if (t == null) return;
-    setState(() => _start = DateTime(d.year, d.month, d.day, t.hour, t.minute));
+    _setDates([DateTime(d.year, d.month, d.day, t.hour, t.minute)]);
+  }
+
+  /// Ripete l'ultima data ogni settimana, stessa ora, fino al giorno scelto.
+  Future<void> _repeatWeekly() async {
+    final last = _dates.last;
+    final first = last.add(const Duration(days: 7));
+    final until = await showDatePicker(
+      context: context,
+      helpText: l10n(context).formRepeatUntil,
+      initialDate: last.add(const Duration(days: 28)),
+      firstDate: first,
+      lastDate: last.add(const Duration(days: 7 * 26)),
+    );
+    if (until == null || !mounted) return;
+    _setDates(weeklyDates(last, until));
   }
 
   @override
@@ -257,11 +291,43 @@ class _TourFormScreenState extends State<TourFormScreen> {
                 onChanged: (v) => setState(() => _language = v!),
               ),
               const SizedBox(height: 14),
-              OutlinedButton.icon(
-                onPressed: _pickDate,
-                icon: const Icon(Icons.event),
-                label:
-                    Text(_start == null ? t.fieldDateTime : fmtDate(_start!)),
+              Text(t.fieldDates,
+                  style: const TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 6),
+              if (_dates.isEmpty)
+                Text(t.formNoDates, style: const TextStyle(color: kMuted))
+              else
+                Wrap(
+                  key: const ValueKey('tour-dates'),
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final d in _dates)
+                      InputChip(
+                        avatar: const Icon(Icons.event, size: 18),
+                        label: Text(fmtDate(d)),
+                        onDeleted: () => setState(() => _dates.remove(d)),
+                      ),
+                  ],
+                ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    key: const ValueKey('add-date'),
+                    onPressed: _addDate,
+                    icon: const Icon(Icons.add),
+                    label: Text(t.formAddDate),
+                  ),
+                  OutlinedButton.icon(
+                    key: const ValueKey('repeat-weekly'),
+                    onPressed: _dates.isEmpty ? null : _repeatWeekly,
+                    icon: const Icon(Icons.repeat),
+                    label: Text(t.formRepeatWeekly),
+                  ),
+                ],
               ),
               const SizedBox(height: 14),
               LayoutBuilder(builder: (context, c) {

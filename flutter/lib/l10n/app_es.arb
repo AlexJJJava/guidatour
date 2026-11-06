@@ -376,5 +376,18 @@
   "approvalsRejectedDone": "{name} ha sido rechazado",
   "cityAllItaly": "Toda Italia",
   "toursTitleItaly": "Experiencias inolvidables en Italia",
-  "searchTitleItaly": "Tours en Italia"
+  "searchTitleItaly": "Tours en Italia",
+  "fieldDates": "Fechas del tour",
+  "formNoDates": "Sin fechas: añade al menos una.",
+  "formAddDate": "Añadir fecha",
+  "formRepeatWeekly": "Repetir cada semana",
+  "formRepeatUntil": "Repetir la última fecha hasta el",
+  "formMaxDates": "Como máximo {max} fechas por tour.",
+  "detailChooseDate": "Elige la fecha",
+  "cartChangeDate": "Cambiar fecha",
+  "requestForDate": "Para el {date}",
+  "moreDates": "{count, plural, =1{+1 fecha más} other{+{count} fechas más}}",
+  "scheduleWeekly": "Cada {weekday} a las {time} · del {from} al {to}",
+  "scheduleNextDates": "Próximas fechas: {dates}",
+  "weekdayNames": "lunes,martes,miércoles,jueves,viernes,sábado,domingo"
 }

@@ -215,6 +215,33 @@ const tourCities = [
   'Torino',
 ];
 
+/// Date massime per tour (lo stesso limite del database).
+const maxTourDates = 60;
+
+/// Le date dopo [from], una a settimana alla stessa ora, fino al giorno [until].
+List<DateTime> weeklyDates(DateTime from, DateTime until) {
+  final end = DateTime(until.year, until.month, until.day, 23, 59);
+  final out = <DateTime>[];
+  for (var i = 1;; i++) {
+    final d = DateTime(
+        from.year, from.month, from.day + 7 * i, from.hour, from.minute);
+    if (d.isAfter(end)) return out;
+    out.add(d);
+  }
+}
+
+/// Vero se le date sono tutte a una settimana di distanza (stesso giorno e ora).
+bool isWeekly(List<DateTime> dates) {
+  if (dates.length < 2) return false;
+  for (var i = 1; i < dates.length; i++) {
+    final p = dates[i - 1];
+    if (dates[i] != DateTime(p.year, p.month, p.day + 7, p.hour, p.minute)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 class Tour {
   Tour({
     required this.id,
@@ -229,17 +256,23 @@ class Tour {
     required this.description,
     required this.seats,
     required this.guideId,
+    List<DateTime>? dates,
     this.accessories = const [],
     this.visits = 0,
     this.scans = 0,
-  });
+  }) : dates = (dates == null || dates.isEmpty) ? [start] : dates;
   final String id;
   final String title;
   final String city;
   final String category;
   final String language;
   final String duration;
+
+  /// Prossima uscita (o l'ultima, se sono tutte passate).
   final DateTime start;
+
+  /// Tutte le date del tour, in ordine: lo stesso tour esce più volte.
+  final List<DateTime> dates;
   final double price;
   final String meetingPoint;
   final String description;
@@ -252,6 +285,21 @@ class Tour {
   bool get isPackage => accessories.isNotEmpty;
   String get url => '$publicSiteUrl?tour=$id';
 
+  /// Date ancora da svolgere.
+  List<DateTime> get upcoming {
+    final now = DateTime.now();
+    return dates.where((d) => !d.isBefore(now)).toList();
+  }
+
+  /// Passato quando anche l'ultima data è alle spalle.
+  bool get isPast => dates.last.isBefore(DateTime.now());
+
+  /// Prossima data da mostrare negli elenchi.
+  DateTime get nextStart {
+    final u = upcoming;
+    return u.isEmpty ? dates.last : u.first;
+  }
+
   factory Tour.fromJson(Map<String, dynamic> j) => Tour(
         id: j['id'] as String,
         title: j['title'] as String? ?? '',
@@ -260,6 +308,9 @@ class Tour {
         language: j['language'] as String? ?? '',
         duration: j['duration'] as String? ?? '',
         start: DateTime.parse(j['start'] as String).toLocal(),
+        dates: (j['dates'] as List?)
+            ?.map((d) => DateTime.parse(d as String).toLocal())
+            .toList(),
         price: (j['price'] as num).toDouble(),
         meetingPoint: j['meetingPoint'] as String? ?? '',
         description: j['description'] as String? ?? '',
@@ -283,9 +334,13 @@ class BookingRequest {
     required this.createdAt,
     this.userId,
     this.status = 'inviata',
+    this.start,
   });
   final String? id;
   final String tourId;
+
+  /// Data del tour scelta dal turista (le richieste vecchie non ce l'hanno).
+  final DateTime? start;
   final String name;
   final String email;
   final String phone;
@@ -310,17 +365,28 @@ class BookingRequest {
         createdAt: DateTime.parse(j['createdAt'] as String).toLocal(),
         userId: j['userId'] as String?,
         status: j['status'] as String? ?? 'inviata',
+        start: j['start'] == null
+            ? null
+            : DateTime.parse(j['start'] as String).toLocal(),
       );
 }
 
-/// Voce del carrello: un tour con il numero di persone da richiedere.
+/// Voce del carrello: un tour, la data scelta e il numero di persone.
 class CartItem {
-  CartItem(this.tourId, {this.people = 2});
+  CartItem(this.tourId, {this.people = 2, this.start});
   final String tourId;
   int people;
 
-  factory CartItem.fromJson(Map<String, dynamic> j) =>
-      CartItem(j['tourId'] as String, people: (j['people'] as num).toInt());
+  /// Data scelta; null = la prossima uscita del tour.
+  DateTime? start;
+
+  factory CartItem.fromJson(Map<String, dynamic> j) => CartItem(
+        j['tourId'] as String,
+        people: (j['people'] as num).toInt(),
+        start: j['start'] == null
+            ? null
+            : DateTime.parse(j['start'] as String).toLocal(),
+      );
 }
 
 /// Prova del consenso WhatsApp (BR-011D).

@@ -90,7 +90,7 @@ class _TourCard extends StatelessWidget {
                               const TextStyle(color: kPrimary, fontSize: 13)),
                       Text(
                           t.dashTourLine(
-                              fmtDate(tour.start),
+                              tourDatesLabel(context, tour),
                               fmtPrice(tour.price),
                               tour.seats,
                               tour.visits,
