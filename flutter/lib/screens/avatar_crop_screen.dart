@@ -28,6 +28,31 @@ Rect visibleRect(Matrix4 transform, double side) {
   return Rect.fromLTWH(-t.x / scale, -t.y / scale, side / scale, side / scale);
 }
 
+/// Lato da usare in memoria: le foto più grandi di [_maxDecodedSide] si
+/// riducono mantenendo le proporzioni.
+ui.TargetImageSize avatarDecodeSize(int width, int height) {
+  if (math.max(width, height) <= _maxDecodedSide) {
+    return ui.TargetImageSize(width: width, height: height);
+  }
+  return width >= height
+      ? const ui.TargetImageSize(width: _maxDecodedSide)
+      : const ui.TargetImageSize(height: _maxDecodedSide);
+}
+
+/// Decodifica la foto scelta. Usa instantiateImageCodecWithSize perché
+/// ImageDescriptor.width/height non esistono sul web (lì davano sempre
+/// "immagine non valida").
+Future<ui.Image> decodeAvatarSource(Uint8List bytes) async {
+  final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+  final codec = await ui.instantiateImageCodecWithSize(buffer,
+      getTargetSize: avatarDecodeSize);
+  try {
+    return (await codec.getNextFrame()).image;
+  } finally {
+    codec.dispose();
+  }
+}
+
 /// Sceglie la parte di foto da tenere; restituisce il PNG ritagliato.
 class AvatarCropScreen extends StatefulWidget {
   const AvatarCropScreen({super.key, required this.bytes});
@@ -59,16 +84,12 @@ class _AvatarCropScreenState extends State<AvatarCropScreen> {
 
   Future<void> _decode() async {
     try {
-      final buffer = await ui.ImmutableBuffer.fromUint8List(widget.bytes);
-      final info = await ui.ImageDescriptor.encoded(buffer);
-      final wide = info.width >= info.height;
-      final tooBig = math.max(info.width, info.height) > _maxDecodedSide;
-      final codec = await info.instantiateCodec(
-        targetWidth: tooBig && wide ? _maxDecodedSide : null,
-        targetHeight: tooBig && !wide ? _maxDecodedSide : null,
-      );
-      final frame = await codec.getNextFrame();
-      if (mounted) setState(() => _image = frame.image);
+      final image = await decodeAvatarSource(widget.bytes);
+      if (mounted) {
+        setState(() => _image = image);
+      } else {
+        image.dispose();
+      }
     } catch (_) {
       if (mounted) setState(() => _failed = true);
     }

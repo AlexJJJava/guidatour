@@ -405,7 +405,7 @@
   "avatarSaved": "Foto aggiornata",
   "avatarRemoved": "Foto rimossa",
   "avatarError": "Non siamo riusciti a salvare la foto. Riprova.",
-  "avatarInvalid": "Questo file non è un’immagine valida.",
+  "avatarInvalid": "Non riusciamo a leggere questo file. Usa una foto JPG, PNG o WebP (le foto HEIC dell’iPhone vanno prima convertite o condivise come JPG).",
   "save": "Salva",
   "validationAtLeastOneLanguage": "Scegli almeno una lingua",
   "markAllRead": "Segna tutte come lette",

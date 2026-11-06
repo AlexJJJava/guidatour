@@ -203,7 +203,7 @@
   "avatarSaved": "Foto actualizada",
   "avatarRemoved": "Foto eliminada",
   "avatarError": "No hemos podido guardar la foto. Inténtalo de nuevo.",
-  "avatarInvalid": "Este archivo no es una imagen válida.",
+  "avatarInvalid": "No podemos leer este archivo. Usa una foto JPG, PNG o WebP (convierte antes las fotos HEIC del iPhone o compártelas como JPG).",
   "save": "Guardar",
   "validationAtLeastOneLanguage": "Elige al menos un idioma",
   "markAllRead": "Marcar todas como leídas",
