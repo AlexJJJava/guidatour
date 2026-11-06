@@ -156,10 +156,11 @@ const tests = [
   ['Backend online', 'Admin', 3, 'Superato', 'Registrazioni, consensi, limiti del ruolo'],
   ['Backend online', 'Tentativi di scavalcare i ruoli', 6, 'Superato', 'Revoca consensi provata solo su id inesistente: nel database non ci sono consensi'],
   ['Backend online', 'Foto profilo', 5, 'Superato', 'Caricamento, rimozione, cartelle altrui, formato e indirizzi esterni'],
+  ['Backend online', 'Pagine SEO', 12, 'Superato', 'npm run test:site: titolo, descrizione, canonical, hreflang, JSON-LD Event e ItemList, 404 e 410 noindex, sitemap senza [TEST], robots, immagini, API invariate'],
   ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, ruoli dal profilo, login senza cambio pagina, menu lingua, carrello e richieste, approvazioni, Gestione admin, Account e profilo, pallino, ritaglio foto, locandina PDF, blocchi, link QR, layout', 87, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
   ['Non coperto', 'Prova end-to-end nel browser', 0, 'Da provare', 'Clic reali sul sito pubblicato'],
 ];
-const wsT = sheet('Test', 'Esiti del 2 novembre 2026. Comando backend: npm run test:roles (cartella nodeBE).',
+const wsT = sheet('Test', 'Esiti del 6 novembre 2026. Comandi backend: npm run test:roles e npm run test:site (cartella nodeBE).',
   ['Area', 'Gruppo', 'N. test', 'Esito', 'Note'], tests, [20, 34, 10, 14, 76]);
 const lt = 4 + tests.length;
 wsT.getCell(lt + 1, 2).value = 'Totale test';
@@ -172,7 +173,7 @@ const todo = [
   [2, 'MVP', 'Date multiple per tour', 'Ogni tour ha una sola data e poi scade', F],
   [3, 'MVP', 'Notifiche email', "Oggi gli avvisi sono solo dentro l'app", F],
   [4, 'MVP', 'Locandina PDF', 'A4 con foto, QR, prezzo e organizzatore; pulsanti Scarica PDF e Stampa', 'Fatto'],
-  [5, 'MVP', 'SEO', 'Pagine indicizzabili, sitemap, robots.txt, dati strutturati, titolo del sito', F],
+  [5, 'MVP', 'SEO', 'Pagine HTML dal backend: home, città, città + categoria, tour (IT/EN/ES), sitemap, robots.txt, dati strutturati Event, 404/410. Da portare sul dominio definitivo e inviare a Google Search Console', 'Fatto'],
   [6, 'MVP', 'Privacy e termini', 'Pagine vere e cancellazione dei dati su richiesta', F],
   [7, 'MVP', 'Admin completo', 'Area Gestione: panoramica, sospensione professionisti, eliminazione tour, approvazioni, consensi (migrazione 0007)', 'Fatto'],
   [8, 'MVP', 'Recupero password', "Non presente nell'app", F],
@@ -221,6 +222,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['06/11/2026', 'SEO: pagine pubbliche', 'Il backend serve pagine HTML vere (home, /roma, /roma/visita-guidata, /tour/ID) con titolo e descrizione propri, dati strutturati, sitemap e robots; il pulsante Prenota apre l’app. L’app Flutter ha titolo vero ed è noindex', 'Test SEO e ruoli sul backend online, schermate'],
   ['05/11/2026', 'Tolto "verificato"', 'Non si parla più di tour operator verificato o non verificato: tolte l’etichetta “verificato” da Account e scheda tour e la parola dalle frasi su tour operator e pacchetti (home, modulo tour, FAQ, messaggio del backend)', 'Test app e backend'],
   ['05/11/2026', 'Approvazioni: Tutte di default', 'La scheda Approvazioni parte da Tutte, in ordine di data, con data e stato colorato su ogni registrazione; filtri In attesa, Approvate, Rifiutate. Fix: si approvano i nuovi ruoli di chi è già approvato', 'Test app e backend, schermata sul sito'],
   ['05/11/2026', 'Prenotazioni → Richieste', 'I professionisti hanno la voce Richieste; turista e visitatore non hanno più Prenotazioni: il carrello mostra Da inviare e Richieste inviate e l’icona conta anche le risposte nuove', 'Test app, schermate sul sito'],
