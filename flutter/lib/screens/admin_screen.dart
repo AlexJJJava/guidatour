@@ -553,7 +553,7 @@ class _TourRow extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(kRadiusSm),
-                child: Image.asset(categoryImage(tour.category),
+                child: Image.asset(tourImage(tour),
                     width: 56, height: 56, fit: BoxFit.cover),
               ),
               const SizedBox(width: 12),

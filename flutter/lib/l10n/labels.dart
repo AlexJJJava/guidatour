@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 import '../models.dart';
 import 'gen/app_localizations.dart';
@@ -96,10 +97,26 @@ String assignmentStatusLabel(BuildContext context, AssignmentStatus status) {
   };
 }
 
+/// Data breve e leggibile nella lingua scelta: "sab 26 gen · 21:00"
+/// (l'anno solo se non è quello in corso).
+String fmtFriendlyDate(BuildContext context, DateTime d) {
+  try {
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final sameYear = d.year == DateTime.now().year;
+    final day = DateFormat(sameYear ? 'EEE d MMM' : 'EEE d MMM y', locale)
+        .format(d)
+        .replaceAll('.', '');
+    return '$day · ${DateFormat.Hm(locale).format(d)}';
+  } catch (_) {
+    // Dati della lingua non caricati (non dovrebbe succedere): formato numerico.
+    return fmtDate(d);
+  }
+}
+
 /// Data per gli elenchi: la prossima uscita e quante altre ce ne sono.
 String tourDatesLabel(BuildContext context, Tour tour) {
   final more = tour.upcoming.length - 1;
-  final next = fmtDate(tour.nextStart);
+  final next = fmtFriendlyDate(context, tour.nextStart);
   return more > 0 ? '$next · ${l10n(context).moreDates(more)}' : next;
 }
 

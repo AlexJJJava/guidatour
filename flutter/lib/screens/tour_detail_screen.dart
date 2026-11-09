@@ -45,6 +45,16 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     return up.isEmpty ? null : up.first;
   }();
 
+  /// Modulo di richiesta: la barra in basso ci porta con lo scorrimento.
+  final _bookingKey = GlobalKey();
+
+  void _scrollToBooking() {
+    final ctx = _bookingKey.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(ctx,
+        duration: const Duration(milliseconds: 450), curve: Curves.easeOutCubic);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -83,56 +93,118 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
         }
       },
     );
+    final width = MediaQuery.sizeOf(context).width;
+    final narrow = width < 600;
+    final photoHeight = (width * 0.6).clamp(240.0, 380.0);
+    final accent = categoryColor(tour.category);
     return Scaffold(
+      // Sul telefono prezzo e "Prenota" restano sempre a portata di dito.
+      bottomNavigationBar: narrow
+          ? _BookBar(tour: tour, onBook: _scrollToBooking)
+          : null,
       body: PageBody(
         maxWidth: 860,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Hero(
-              tag: 'tour-color-${tour.id}',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(kRadius),
-                child: Image.asset(categoryImage(tour.category),
-                    height: (MediaQuery.sizeOf(context).width * 0.55)
-                        .clamp(180.0, 280.0),
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    color: photoShade(categoryImage(tour.category)),
-                    colorBlendMode: BlendMode.srcATop),
+            // Foto grande con titolo sopra e sfumatura scura per leggerlo.
+            ClipRRect(
+              borderRadius: BorderRadius.circular(kRadius),
+              child: SizedBox(
+                height: photoHeight,
+                width: double.infinity,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Hero(
+                      tag: 'tour-color-${tour.id}',
+                      child: Image.asset(tourImage(tour),
+                          fit: BoxFit.cover,
+                          color: photoShade(tourImage(tour)),
+                          colorBlendMode: BlendMode.srcATop),
+                    ),
+                    const IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: [0.3, 1],
+                            colors: [Color(0x00000000), Color(0xB3000000)],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: kGapSm,
+                      right: kGapSm,
+                      child: Material(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        shape: const CircleBorder(),
+                        child: favButton,
+                      ),
+                    ),
+                    Positioned(
+                      left: narrow ? kGapLg : kGapXl,
+                      right: narrow ? kGapLg : kGapXl,
+                      bottom: narrow ? kGapLg : 22,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: kGapXs),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.94),
+                              borderRadius:
+                                  BorderRadius.circular(kRadiusPill),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(categoryIcon(tour.category),
+                                    size: 14, color: accent),
+                                const SizedBox(width: 5),
+                                Flexible(
+                                  child: Text(
+                                      '${categoryLabel(context, tour.category)} · ${cityLabel(context, tour.city)}',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: accent)),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(tour.title,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontFamily: kSerif,
+                                  fontSize: narrow ? 26 : 34,
+                                  height: 1.1,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  shadows: const [
+                                    Shadow(
+                                        color: Color(0x66000000),
+                                        blurRadius: 12)
+                                  ])),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 22),
-            Text(
-                '${categoryLabel(context, tour.category)} · ${cityLabel(context, tour.city)}'
-                    .toUpperCase(),
-                style: const TextStyle(
-                    fontSize: 12,
-                    letterSpacing: 1,
-                    fontWeight: FontWeight.w700,
-                    color: kMuted)),
-            const SizedBox(height: 6),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(tour.title,
-                      style: const TextStyle(
-                          fontFamily: kSerif,
-                          fontSize: 30,
-                          height: 1.1,
-                          fontWeight: FontWeight.w800,
-                          color: kInk)),
-                ),
-                favButton,
-              ],
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Wrap(
               spacing: 20,
               runSpacing: 8,
               children: [
-                _Fact(Icons.event, fmtDate(_date ?? tour.nextStart)),
+                _Fact(Icons.event, fmtFriendlyDate(context, _date ?? tour.nextStart)),
                 _Fact(Icons.schedule, tour.duration),
                 _Fact(Icons.language, languageLabel(context, tour.language)),
                 _Fact(Icons.euro, fmtPrice(tour.price)),
@@ -152,7 +224,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                 children: [
                   for (final d in tour.upcoming)
                     ChoiceChip(
-                      label: Text(fmtDate(d)),
+                      label: Text(fmtFriendlyDate(context, d)),
                       selected: _date == d,
                       onSelected: (_) => setState(() => _date = d),
                     ),
@@ -184,10 +256,12 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
             Card(
               margin: EdgeInsets.zero,
               child: ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: kSand,
-                  child: Icon(Icons.person_outline, color: kPrimary),
-                ),
+                leading: guide == null
+                    ? const CircleAvatar(
+                        backgroundColor: kSand,
+                        child: Icon(Icons.person_outline, color: kPrimary),
+                      )
+                    : UserAvatar(user: guide, radius: 22),
                 title: Text(guide?.name ?? '',
                     style: const TextStyle(fontWeight: FontWeight.w700)),
                 subtitle: Text(
@@ -216,11 +290,73 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
               label: Text(inCart ? t.inCart : t.addToCart),
             ),
             const SizedBox(height: 20),
-            BookingForm(tour: tour, date: _date),
+            BookingForm(key: _bookingKey, tour: tour, date: _date),
             const SizedBox(height: 28),
             WhatsAppOptInCard(source: 'Scheda tour: ${tour.title}'),
             const PlatformDisclaimer(),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Barra fissa in basso (telefono): prezzo a sinistra, "Prenota" a destra.
+class _BookBar extends StatelessWidget {
+  const _BookBar({required this.tour, required this.onBook});
+  final Tour tour;
+  final VoidCallback onBook;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = l10n(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: kSurface,
+        border: const Border(top: BorderSide(color: kLine)),
+        boxShadow: [
+          BoxShadow(
+              color: kInk.withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, -4)),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(kGapLg, 10, kGapLg, 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    style: const TextStyle(fontSize: 12, color: kMuted),
+                    children: [
+                      TextSpan(text: '${t.tourFrom} '),
+                      TextSpan(
+                          text: fmtPrice(tour.price),
+                          style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: kInk)),
+                      TextSpan(text: '  ${t.tourPerPerson}'),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: kGapMd),
+              FilledButton(
+                key: const ValueKey('book-bar-button'),
+                onPressed: onBook,
+                style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 46),
+                    padding: const EdgeInsets.symmetric(horizontal: 22)),
+                child: Text(t.detailBookNow),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -31,7 +31,7 @@ class PosterScreen extends StatelessWidget {
           guide == null ? '' : rolesLabel(context, guide.roles)),
       scanHint: t.posterScanHint,
       link: link,
-      imageAsset: categoryImage(tour.category),
+      imageAsset: tourImage(tour),
       notice: guide?.onlyAccompagnatore == true ? t.accompagnatoreNotice : null,
     );
   }

@@ -571,45 +571,75 @@ class _TrustItem extends StatelessWidget {
       );
 }
 
-class _CategoryBubble extends StatelessWidget {
+class _CategoryBubble extends StatefulWidget {
   const _CategoryBubble({required this.category, required this.size});
   final String category;
   final double size;
 
   @override
+  State<_CategoryBubble> createState() => _CategoryBubbleState();
+}
+
+class _CategoryBubbleState extends State<_CategoryBubble> {
+  /// Mouse sopra o dito premuto: anello oro e cerchio leggermente più grande.
+  bool _active = false;
+
+  void _set(bool v) {
+    if (_active != v) setState(() => _active = v);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(kRadius),
-      onTap: () => _openSearch(context, category: category),
-      child: Column(
-        children: [
-          Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: kSurface, width: 4),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 14,
-                    offset: const Offset(0, 4)),
-              ],
-              image: DecorationImage(
-                  image: AssetImage(categoryImage(category)),
-                  colorFilter: photoFilter(categoryImage(category)),
-                  fit: BoxFit.cover),
+    final category = widget.category;
+    final size = widget.size;
+    return MouseRegion(
+      onEnter: (_) => _set(true),
+      onExit: (_) => _set(false),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(kRadius),
+        onTap: () => _openSearch(context, category: category),
+        onHighlightChanged: _set,
+        child: Column(
+          children: [
+            AnimatedScale(
+              scale: _active ? 1.06 : 1,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: _active ? kGold : kSurface, width: 4),
+                  boxShadow: [
+                    BoxShadow(
+                        color: (_active ? kPrimary : Colors.black)
+                            .withValues(alpha: _active ? 0.3 : 0.15),
+                        blurRadius: _active ? 20 : 14,
+                        offset: const Offset(0, 4)),
+                  ],
+                  image: DecorationImage(
+                      image: AssetImage(categoryImage(category)),
+                      colorFilter: photoFilter(categoryImage(category)),
+                      fit: BoxFit.cover),
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(categoryLabel(context, category),
-              textAlign: TextAlign.center,
+            const SizedBox(height: 8),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
               style: TextStyle(
                   fontFamily: kSerif,
                   fontSize: size < 120 ? 13 : 16,
                   fontWeight: FontWeight.w700,
-                  color: kInk)),
-        ],
+                  color: _active ? categoryColor(category) : kInk),
+              child: Text(categoryLabel(context, category),
+                  textAlign: TextAlign.center),
+            ),
+          ],
+        ),
       ),
     );
   }

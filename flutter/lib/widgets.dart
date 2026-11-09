@@ -551,12 +551,57 @@ class ResponsiveGrid extends StatelessWidget {
         spacing: gap,
         runSpacing: gap,
         children: [
-          for (final child in children)
-            SizedBox(width: w, height: height, child: child),
+          for (final (i, child) in children.indexed)
+            SizedBox(
+                width: w,
+                height: height,
+                child: FadeSlideIn(index: i, child: child)),
         ],
       );
     });
   }
+}
+
+/// Comparsa morbida dal basso, una card dopo l'altra (indice = ritardo).
+/// Ritardo con un Interval e non con un timer: nei test non restano timer
+/// in sospeso e l'elemento è subito presente e toccabile.
+class FadeSlideIn extends StatefulWidget {
+  const FadeSlideIn({super.key, required this.index, required this.child});
+  final int index;
+  final Widget child;
+
+  @override
+  State<FadeSlideIn> createState() => _FadeSlideInState();
+}
+
+class _FadeSlideInState extends State<FadeSlideIn>
+    with SingleTickerProviderStateMixin {
+  static const _step = 70; // ms tra una card e la successiva
+  static const _run = 380; // ms di ogni comparsa
+
+  late final int _delay = math.min(widget.index, 8) * _step;
+  late final _c = AnimationController(
+      vsync: this, duration: Duration(milliseconds: _delay + _run))
+    ..forward();
+  late final _anim = CurvedAnimation(
+      parent: _c,
+      curve: Interval(_delay / (_delay + _run), 1, curve: Curves.easeOutCubic));
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+        opacity: _anim,
+        child: SlideTransition(
+          position:
+              Tween(begin: const Offset(0, 0.06), end: Offset.zero).animate(_anim),
+          child: widget.child,
+        ),
+      );
 }
 
 const _categoryIcons = {
@@ -586,7 +631,21 @@ const kPhotoShade = Color(0x52000000);
 
 /// Le foto notturne sono già scure: niente velo.
 Color? photoShade(String asset) =>
-    asset.endsWith('cat_serale.jpg') ? null : kPhotoShade;
+    asset.contains('cat_serale') ? null : kPhotoShade;
+
+/// Quante foto ci sono per categoria: cat_x.jpg più cat_x_2..4.jpg (Pexels,
+/// vedi assets/CREDITI_FOTO.txt).
+const _photosPerCategory = 4;
+
+/// Foto di un tour: sempre la stessa per lo stesso tour, ma diversa tra tour
+/// della stessa categoria (così due card vicine non mostrano la stessa foto).
+/// Somma dei caratteri dell'id e non hashCode, che cambia tra web e telefono.
+String tourImage(Tour tour) {
+  final base = categoryImage(tour.category);
+  final n = tour.id.codeUnits.fold<int>(0, (a, c) => a * 31 + c & 0x7fffffff) %
+      _photosPerCategory;
+  return n == 0 ? base : base.replaceFirst('.jpg', '_${n + 1}.jpg');
+}
 
 ColorFilter? photoFilter(String asset) {
   final shade = photoShade(asset);
@@ -650,9 +709,9 @@ class _TourCardState extends State<TourCard> {
                           scale: _hover ? 1.05 : 1,
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeOut,
-                          child: Image.asset(categoryImage(tour.category),
+                          child: Image.asset(tourImage(tour),
                               fit: BoxFit.cover,
-                              color: photoShade(categoryImage(tour.category)),
+                              color: photoShade(tourImage(tour)),
                               colorBlendMode: BlendMode.srcATop),
                         ),
                       ),
@@ -759,8 +818,22 @@ class _TourCardState extends State<TourCard> {
                         ),
                         const SizedBox(height: 6),
                         if (guide != null)
-                          _CardFact(Icons.person_outline,
-                              '${guide.name} · ${rolesLabel(context, guide.roles)}'),
+                          // Pallino con foto o iniziali: più calore e fiducia
+                          // di un'icona generica.
+                          Row(
+                            children: [
+                              UserAvatar(user: guide, radius: 11),
+                              const SizedBox(width: 7),
+                              Expanded(
+                                child: Text(
+                                    '${guide.name} · ${rolesLabel(context, guide.roles)}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontSize: 12, color: kMuted)),
+                              ),
+                            ],
+                          ),
                         const Spacer(),
                         Text.rich(
                           TextSpan(

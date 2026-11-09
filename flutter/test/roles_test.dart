@@ -1276,6 +1276,69 @@ void main() {
       appState.requests = [];
     });
 
+    test('foto per tour: stabile, varia tra tour, file presenti', () {
+      final seen = <String>{};
+      for (final c in tourCategories) {
+        for (var i = 0; i < 40; i++) {
+          final tour = Tour(
+              id: 'id$i',
+              title: 'T',
+              city: 'Roma',
+              category: c,
+              language: 'Italiano',
+              duration: '1 ora',
+              start: d1,
+              price: 10,
+              meetingPoint: 'P',
+              description: 'D',
+              seats: 5,
+              guideId: 'g1');
+          final img = tourImage(tour);
+          expect(tourImage(tour), img); // sempre la stessa per lo stesso tour
+          expect(File(img).existsSync(), isTrue, reason: img);
+          seen.add(img);
+        }
+      }
+      // 4 foto per ognuna delle 6 categorie, tutte usate.
+      expect(seen.length, tourCategories.length * 4);
+    });
+
+    testWidgets('data leggibile nella lingua scelta', (tester) async {
+      late String label;
+      await tester.pumpWidget(page(Builder(builder: (context) {
+        label = fmtFriendlyDate(context, DateTime(2030, 6, 4, 21, 0));
+        return const SizedBox();
+      })));
+      expect(label, 'mar 4 giu 2030 · 21:00');
+    });
+
+    testWidgets('scheda tour sul telefono: barra Prenota porta al modulo',
+        (tester) async {
+      sized(tester, const Size(390, 844));
+      seed(user(Role.turista),
+          owner: Guide(
+              id: 'g1', name: 'Guida', email: 'g@e.it', role: Role.guida));
+      final tour = multi('g1');
+      await tester.pumpWidget(page(TourDetailScreen(tour: tour)));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('book-bar-button')), findsOneWidget);
+      expect(find.text(t.detailBookNow), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('book-bar-button')));
+      await tester.pumpAndSettle();
+      expect(find.text(t.bookingSectionTitle).hitTestable(), findsOneWidget);
+    });
+
+    testWidgets('scheda tour su computer: niente barra in basso',
+        (tester) async {
+      sized(tester, const Size(1280, 900));
+      seed(user(Role.turista),
+          owner: Guide(
+              id: 'g1', name: 'Guida', email: 'g@e.it', role: Role.guida));
+      await tester.pumpWidget(page(TourDetailScreen(tour: multi('g1'))));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('book-bar-button')), findsNothing);
+    });
+
     testWidgets('locandina: ogni settimana alla stessa ora', (tester) async {
       late String label;
       await tester.pumpWidget(page(Builder(builder: (context) {

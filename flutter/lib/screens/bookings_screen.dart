@@ -47,7 +47,7 @@ Widget _thumb(Tour? tour) => ClipRRect(
               height: 64,
               color: kSand,
               child: const Icon(Icons.event_busy, color: kMuted))
-          : Image.asset(categoryImage(tour.category),
+          : Image.asset(tourImage(tour),
               width: 64, height: 64, fit: BoxFit.cover),
     );
 

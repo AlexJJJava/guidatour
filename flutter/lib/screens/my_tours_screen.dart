@@ -73,7 +73,7 @@ class _TourCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(kRadiusSm),
-                  child: Image.asset(categoryImage(tour.category),
+                  child: Image.asset(tourImage(tour),
                       width: 64, height: 64, fit: BoxFit.cover),
                 ),
                 const SizedBox(width: 14),

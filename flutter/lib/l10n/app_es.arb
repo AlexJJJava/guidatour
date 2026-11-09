@@ -384,6 +384,7 @@
   "formRepeatUntil": "Repetir la última fecha hasta el",
   "formMaxDates": "Como máximo {max} fechas por tour.",
   "detailChooseDate": "Elige la fecha",
+  "detailBookNow": "Reservar",
   "cartChangeDate": "Cambiar fecha",
   "requestForDate": "Para el {date}",
   "moreDates": "{count, plural, =1{+1 fecha más} other{+{count} fechas más}}",

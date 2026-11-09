@@ -139,7 +139,7 @@ class _AssignmentCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(kRadiusSm),
               child: tour == null
                   ? Container(width: 56, height: 56, color: kSand)
-                  : Image.asset(categoryImage(tour!.category),
+                  : Image.asset(tourImage(tour!),
                       width: 56, height: 56, fit: BoxFit.cover),
             ),
             const SizedBox(width: 12),

@@ -384,6 +384,7 @@
   "formRepeatUntil": "Repeat the last date until",
   "formMaxDates": "At most {max} dates per tour.",
   "detailChooseDate": "Choose the date",
+  "detailBookNow": "Book now",
   "cartChangeDate": "Change date",
   "requestForDate": "For {date}",
   "moreDates": "{count, plural, =1{+1 more date} other{+{count} more dates}}",

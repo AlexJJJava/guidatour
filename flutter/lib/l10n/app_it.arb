@@ -725,6 +725,7 @@
     }
   },
   "detailChooseDate": "Scegli la data",
+  "detailBookNow": "Prenota",
   "cartChangeDate": "Cambia data",
   "requestForDate": "Per il {date}",
   "@requestForDate": {
