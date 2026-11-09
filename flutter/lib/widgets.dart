@@ -769,10 +769,11 @@ class _TourCardState extends State<TourCard> {
                               TextSpan(text: '${t.tourFrom} '),
                               TextSpan(
                                   text: fmtPrice(tour.price),
+                                  // Inter: le cifre in Playfair si leggono male.
                                   style: const TextStyle(
-                                      fontFamily: kSerif,
-                                      fontSize: 22,
+                                      fontSize: 20,
                                       fontWeight: FontWeight.w700,
+                                      letterSpacing: -0.2,
                                       color: kInk)),
                               TextSpan(text: '  ${t.tourPerPerson}'),
                             ],
