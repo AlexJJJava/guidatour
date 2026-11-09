@@ -73,7 +73,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     final favButton = IconButton(
       tooltip: fav ? t.favRemoveTooltip : t.favAddTooltip,
       icon: Icon(fav ? Icons.favorite : Icons.favorite_border,
-          color: fav ? Colors.red : null),
+          color: fav ? kDanger : null),
       onPressed: () async {
         if (_needsTourist(context)) return;
         try {
@@ -323,7 +323,7 @@ class _BookingFormState extends State<BookingForm> {
           TextFormField(
             controller: _name,
             decoration: InputDecoration(
-                labelText: t.fieldFullName, border: const OutlineInputBorder()),
+                labelText: t.fieldFullName),
             validator: (v) =>
                 (v == null || v.trim().isEmpty) ? t.validationRequired : null,
           ),
@@ -332,7 +332,7 @@ class _BookingFormState extends State<BookingForm> {
             controller: _email,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
-                labelText: t.fieldEmail, border: const OutlineInputBorder()),
+                labelText: t.fieldEmail),
             validator: (v) =>
                 (v == null || !v.contains('@')) ? t.validationEmail : null,
           ),
@@ -341,8 +341,7 @@ class _BookingFormState extends State<BookingForm> {
             controller: _phone,
             keyboardType: TextInputType.phone,
             decoration: InputDecoration(
-                labelText: t.fieldPhoneOptional,
-                border: const OutlineInputBorder()),
+                labelText: t.fieldPhoneOptional),
           ),
           const SizedBox(height: 12),
           Row(
@@ -370,8 +369,7 @@ class _BookingFormState extends State<BookingForm> {
             controller: _message,
             maxLines: 3,
             decoration: InputDecoration(
-                labelText: t.fieldMessageOptional,
-                border: const OutlineInputBorder()),
+                labelText: t.fieldMessageOptional),
           ),
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,

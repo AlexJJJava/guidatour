@@ -72,11 +72,7 @@ class _ApprovalsPanelState extends State<ApprovalsPanel> {
           future: _future,
           builder: (context, snap) {
             if (snap.connectionState != ConnectionState.done) {
-              return const Padding(
-                padding: EdgeInsets.all(32),
-                child:
-                    Center(child: CircularProgressIndicator(color: kPrimary)),
-              );
+              return const SkeletonList();
             }
             if (snap.hasError) {
               return InfoBanner('${snap.error}', warning: true);

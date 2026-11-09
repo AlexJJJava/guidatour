@@ -234,10 +234,7 @@ class _AdminStat extends StatelessWidget {
   }
 }
 
-Widget _loading() => const Padding(
-      padding: EdgeInsets.all(32),
-      child: Center(child: CircularProgressIndicator(color: kPrimary)),
-    );
+Widget _loading() => const SkeletonList();
 
 class _OverviewTab extends StatefulWidget {
   const _OverviewTab({required this.onOpenTab});
@@ -340,14 +337,14 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: alert ? const Color(0xFFFBE3E1) : kGold.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(20),
+          color: alert ? kDangerBg : kGold.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(kRadiusPill),
         ),
         child: Text(label,
             style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: alert ? const Color(0xFFA32A20) : kOnGold)),
+                color: alert ? kDanger : kOnGold)),
       );
 }
 
@@ -376,7 +373,8 @@ class _ProfessionalsTabState extends State<_ProfessionalsTab> {
                 onPressed: () => Navigator.pop(ctx, false),
                 child: Text(t.cancel)),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              style: FilledButton.styleFrom(
+                  backgroundColor: kDanger, foregroundColor: Colors.white),
               onPressed: () => Navigator.pop(ctx, true),
               child: Text(t.adminSuspend),
             ),
@@ -457,7 +455,7 @@ class _ProCard extends StatelessWidget {
             icon: const Icon(Icons.play_arrow, size: 18),
             label: Text(t.adminReactivate))
         : OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+            style: OutlinedButton.styleFrom(foregroundColor: kDanger),
             onPressed: onToggle,
             icon: const Icon(Icons.block, size: 18),
             label: Text(t.adminSuspend));
@@ -554,7 +552,7 @@ class _TourRow extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(kRadiusSm),
                 child: Image.asset(categoryImage(tour.category),
                     width: 56, height: 56, fit: BoxFit.cover),
               ),
@@ -593,7 +591,7 @@ class _TourRow extends StatelessWidget {
                     child: Text(t.adminOpen)),
               if (onDelete != null)
                 OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                  style: OutlinedButton.styleFrom(foregroundColor: kDanger),
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete_outline, size: 18),
                   label: Text(t.deleteTour),
@@ -629,7 +627,8 @@ class _ToursTabState extends State<_ToursTab> {
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(t.cancel)),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(
+                  backgroundColor: kDanger, foregroundColor: Colors.white),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(t.deleteTour),
           ),
@@ -723,7 +722,7 @@ class _ConsentsTabState extends State<_ConsentsTab> {
                     child: ListTile(
                       leading: Icon(
                           c.revoked ? Icons.block : Icons.check_circle_outline,
-                          color: c.revoked ? Colors.red : kPrimary),
+                          color: c.revoked ? kDanger : kPrimary),
                       title: Text(c.phone,
                           style: const TextStyle(fontWeight: FontWeight.w600)),
                       subtitle: Text(

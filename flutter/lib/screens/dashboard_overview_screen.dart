@@ -27,7 +27,7 @@ class _StatTile extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: kSurface,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(kRadiusSm),
         border: Border.all(color: kLine),
       ),
       child: Column(
@@ -162,7 +162,7 @@ class DashboardOverviewScreen extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(
                         c.revoked ? Icons.block : Icons.check_circle_outline,
-                        color: c.revoked ? Colors.red : kPrimary),
+                        color: c.revoked ? kDanger : kPrimary),
                     title: Text(c.phone),
                     subtitle: Text(
                         '${t.consentLine(fmtDate(c.at), c.source, c.sender)}'

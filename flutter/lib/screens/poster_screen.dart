@@ -70,7 +70,7 @@ class PosterScreen extends StatelessWidget {
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(kRadiusSm),
                 border: Border.all(color: const Color(0xFFEAE2D3)),
               ),
               child: DefaultTextStyle.merge(

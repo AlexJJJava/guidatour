@@ -58,7 +58,7 @@ class _WhatsAppOptInCardState extends State<WhatsAppOptInCard> {
     final t = l10n(context);
     return Material(
       color: kSand,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(kRadiusSm),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
         child: _done

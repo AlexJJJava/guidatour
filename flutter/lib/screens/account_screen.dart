@@ -120,9 +120,9 @@ class AccountScreen extends StatelessWidget {
                     const Divider(height: 1, color: kLine),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.logout, color: Colors.red),
+                      leading: const Icon(Icons.logout, color: kDanger),
                       title: Text(t.logout,
-                          style: const TextStyle(color: Colors.red)),
+                          style: const TextStyle(color: kDanger)),
                       onTap: appState.logout,
                     ),
                   ],
@@ -182,7 +182,7 @@ class _ProfileHeader extends StatelessWidget {
                             horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: kNight,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(kRadiusPill),
                         ),
                         child: Text(roleLabel(context, r),
                             style: const TextStyle(
@@ -198,7 +198,7 @@ class _ProfileHeader extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: kSurface,
                           border: Border.all(color: kNight),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(kRadiusPill),
                         ),
                         child: Text(
                             '${roleLabel(context, r)} · ${t.profileRolesPendingTag}',
@@ -211,7 +211,7 @@ class _ProfileHeader extends StatelessWidget {
                             horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: kSurface,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(kRadiusPill),
                         ),
                         child: Text(t.adminBadge,
                             style: const TextStyle(

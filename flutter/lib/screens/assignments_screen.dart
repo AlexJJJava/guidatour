@@ -50,7 +50,7 @@ class AssignmentsScreen extends StatelessWidget {
                       ? Wrap(spacing: 4, children: [
                           IconButton(
                             tooltip: t.reject,
-                            icon: const Icon(Icons.close, color: Colors.red),
+                            icon: const Icon(Icons.close, color: kDanger),
                             onPressed: () async {
                               try {
                                 await appState.respond(a, false);
@@ -136,7 +136,7 @@ class _AssignmentCard extends StatelessWidget {
         child: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(kRadiusSm),
               child: tour == null
                   ? Container(width: 56, height: 56, color: kSand)
                   : Image.asset(categoryImage(tour!.category),

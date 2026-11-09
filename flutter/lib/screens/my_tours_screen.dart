@@ -72,7 +72,7 @@ class _TourCard extends StatelessWidget {
             Row(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(kRadiusSm),
                   child: Image.asset(categoryImage(tour.category),
                       width: 64, height: 64, fit: BoxFit.cover),
                 ),
@@ -129,7 +129,7 @@ class _TourCard extends StatelessWidget {
                   label: Text(t.editTour),
                 ),
                 OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                  style: OutlinedButton.styleFrom(foregroundColor: kDanger),
                   onPressed: () => _delete(context, tour),
                   icon: const Icon(Icons.delete_outline, size: 18),
                   label: Text(t.deleteTour),
@@ -154,7 +154,8 @@ class _TourCard extends StatelessWidget {
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(t.cancel)),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(
+                  backgroundColor: kDanger, foregroundColor: Colors.white),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(t.deleteTour),
           ),

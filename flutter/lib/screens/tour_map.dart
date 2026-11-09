@@ -100,7 +100,7 @@ class _TourMeetingPointMapState extends State<TourMeetingPointMap> {
         SectionHeading(title: t.mapTitle),
         const SizedBox(height: 10),
         ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(kRadiusSm),
           child: SizedBox(
             height: 200,
             child: FutureBuilder<LatLng?>(

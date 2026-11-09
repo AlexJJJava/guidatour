@@ -95,7 +95,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: kSand,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(kRadiusSm),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

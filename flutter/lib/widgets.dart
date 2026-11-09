@@ -57,6 +57,78 @@ const kDesktopWidth = 1024.0;
 /// Raggio d'angolo condiviso da card e contenitori arrotondati.
 const kRadius = 12.0;
 
+/// Raggio di pulsanti, campi e riquadri piccoli.
+const kRadiusSm = 10.0;
+
+/// Raggio delle etichette "a pillola" (categorie, stati, selettori).
+const kRadiusPill = 20.0;
+
+/// Spaziature: sempre multipli di questa scala.
+const kGapXs = 4.0;
+const kGapSm = 8.0;
+const kGapMd = 12.0;
+const kGapLg = 16.0;
+const kGapXl = 24.0;
+
+/// Rosso mattone per azioni distruttive ed errori (intonato alla palette calda).
+const kDanger = Color(0xFFA32A20);
+const kDangerBg = Color(0xFFFBE3E1);
+
+/// Verde per conferme ed esiti positivi.
+const kSuccess = Color(0xFF1F6B3A);
+const kSuccessBg = Color(0xFFDDF1E3);
+
+/// Ombra morbida e calda di card e riquadri in rilievo.
+List<BoxShadow> kSoftShadow([double lift = 0]) => [
+      BoxShadow(
+        color: const Color(0xFF6B4A12).withValues(alpha: 0.08 + lift * 0.04),
+        blurRadius: 18 + lift * 10,
+        offset: Offset(0, 6 + lift * 4),
+      ),
+      BoxShadow(
+        color: kInk.withValues(alpha: 0.04),
+        blurRadius: 3,
+        offset: const Offset(0, 1),
+      ),
+    ];
+
+/// Scala tipografica dell'app: titoli in Playfair, il resto in Inter.
+/// Le schermate usano questi stili invece di dimensioni scritte a mano.
+const kTextTheme = TextTheme(
+  displaySmall: TextStyle(
+      fontFamily: kSerif, fontSize: 30, height: 1.15, fontWeight: FontWeight.w700, color: kInk),
+  headlineSmall: TextStyle(
+      fontFamily: kSerif, fontSize: 24, height: 1.2, fontWeight: FontWeight.w700, color: kInk),
+  titleLarge: TextStyle(
+      fontFamily: kSerif, fontSize: 20, height: 1.2, fontWeight: FontWeight.w700, color: kInk),
+  titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: kInk),
+  titleSmall: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: kInk),
+  bodyLarge: TextStyle(fontSize: 15, height: 1.45, color: kInk),
+  bodyMedium: TextStyle(fontSize: 14, height: 1.4, color: kInk),
+  bodySmall: TextStyle(fontSize: 12, height: 1.4, color: kMuted),
+  labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+  labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+  labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3),
+);
+
+/// Aggiunge la scala tipografica a un tema già costruito. Va fatto dopo:
+/// `ThemeData(fontFamily: ...)` imporrebbe Inter anche ai titoli in Playfair.
+ThemeData withAppText(ThemeData base) =>
+    base.copyWith(textTheme: base.textTheme.merge(kTextTheme));
+
+/// Colore d'accento per ogni categoria: tutti della stessa famiglia calda,
+/// per riconoscere le categorie a colpo d'occhio sulle card.
+const _categoryColors = {
+  'Visita guidata': Color(0xFF9A6B1F),
+  'Tour a piedi': Color(0xFF5E7A3A),
+  'Enogastronomico': Color(0xFFA34A2A),
+  'Bambini e famiglie': Color(0xFF2F6F7A),
+  'Serale': Color(0xFF3E4A7A),
+  'Accompagnamento': Color(0xFF7A4A6B),
+};
+
+Color categoryColor(String c) => _categoryColors[c] ?? kPrimary;
+
 /// Etichetta maiuscola e spaziata sopra i titoli di sezione.
 class Eyebrow extends StatelessWidget {
   const Eyebrow(this.text, {super.key, this.color = kMuted});
@@ -157,7 +229,7 @@ class BrandLogo extends StatelessWidget {
               const SizedBox(height: 4),
               Text(tagline!.toUpperCase(),
                   style: TextStyle(
-                      fontSize: 8.5,
+                      fontSize: 9,
                       letterSpacing: 1.6,
                       color: fg.withValues(alpha: 0.8))),
             ],
@@ -524,135 +596,198 @@ ColorFilter? photoFilter(String asset) {
 String categoryImage(String c) =>
     _categoryImages[c] ?? 'assets/images/cat_visita.jpg';
 
-class TourCard extends StatelessWidget {
+class TourCard extends StatefulWidget {
   const TourCard({super.key, required this.tour, required this.onTap});
   final Tour tour;
   final VoidCallback onTap;
 
   @override
+  State<TourCard> createState() => _TourCardState();
+}
+
+class _TourCardState extends State<TourCard> {
+  /// Mouse sopra la card (web/desktop): si alza e la foto si avvicina.
+  bool _hover = false;
+
+  @override
   Widget build(BuildContext context) {
+    final tour = widget.tour;
+    final onTap = widget.onTap;
     final t = l10n(context);
     final guide = appState.guideById(tour.guideId);
     final user = appState.currentUser;
     final canFavorite = user != null && !user.role.isProfessional;
     final favorite = appState.isFavorite(tour.id);
-    return Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: _cardPhotoHeight,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Hero(
-                    tag: 'tour-color-${tour.id}',
-                    child: Image.asset(categoryImage(tour.category),
-                        fit: BoxFit.cover,
-                        color: photoShade(categoryImage(tour.category)),
-                        colorBlendMode: BlendMode.srcATop),
+    final accent = categoryColor(tour.category);
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, _hover ? -3 : 0, 0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(kRadius),
+          boxShadow: kSoftShadow(_hover ? 1 : 0),
+        ),
+        child: Material(
+          color: kSurface,
+          borderRadius: BorderRadius.circular(kRadius),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: _cardPhotoHeight,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Hero(
+                        tag: 'tour-color-${tour.id}',
+                        child: AnimatedScale(
+                          scale: _hover ? 1.05 : 1,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                          child: Image.asset(categoryImage(tour.category),
+                              fit: BoxFit.cover,
+                              color: photoShade(categoryImage(tour.category)),
+                              colorBlendMode: BlendMode.srcATop),
+                        ),
+                      ),
+                      // Sfumatura scura in basso: profondità e stacco dal testo.
+                      const IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              stops: [0.45, 1],
+                              colors: [Color(0x00000000), Color(0x59000000)],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 10,
+                        left: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: kGapXs),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.94),
+                            borderRadius: BorderRadius.circular(kRadiusPill),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(categoryIcon(tour.category),
+                                  size: 13, color: accent),
+                              const SizedBox(width: 5),
+                              Text(categoryLabel(context, tour.category),
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: accent)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (canFavorite)
+                        Positioned(
+                          top: 2,
+                          right: 2,
+                          child: IconButton(
+                            onPressed: () => runOrSnack(context,
+                                () => appState.toggleFavorite(tour.id)),
+                            icon: Icon(
+                                favorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: Colors.white,
+                                shadows: const [
+                                  Shadow(color: Colors.black45, blurRadius: 6)
+                                ]),
+                          ),
+                        ),
+                    ],
                   ),
-                  Positioned(
-                    top: 10,
-                    left: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(categoryLabel(context, tour.category),
-                          style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFFC0392B))),
-                    ),
-                  ),
-                  if (canFavorite)
-                    Positioned(
-                      top: 2,
-                      right: 2,
-                      child: IconButton(
-                        onPressed: () => runOrSnack(
-                            context, () => appState.toggleFavorite(tour.id)),
-                        icon: Icon(
-                            favorite ? Icons.favorite : Icons.favorite_border,
-                            color: Colors.white,
-                            shadows: const [
-                              Shadow(color: Colors.black45, blurRadius: 6)
-                            ]),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.event, size: 14, color: kPrimary),
-                        const SizedBox(width: 5),
-                        Text(tourDatesLabel(context, tour),
-                            style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: kPrimary)),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(tour.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontFamily: kSerif,
-                            fontSize: 19,
-                            height: 1.2,
-                            fontWeight: FontWeight.w700,
-                            color: kInk)),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                            child: _CardFact(Icons.schedule, tour.duration)),
-                        Expanded(
-                            child: _CardFact(Icons.translate,
-                                languageLabel(context, tour.language))),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    if (guide != null)
-                      _CardFact(Icons.person_outline,
-                          '${guide.name} · ${rolesLabel(context, guide.roles)}'),
-                    const Spacer(),
-                    Text.rich(
-                      TextSpan(
-                        style: const TextStyle(fontSize: 13, color: kInk),
-                        children: [
-                          TextSpan(text: '${t.tourFrom} '),
-                          TextSpan(
-                              text: fmtPrice(tour.price),
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.w700)),
-                          TextSpan(text: '  ${t.tourPerPerson}'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    GoldButton(t.tourDiscover, onPressed: onTap, expand: true),
-                  ],
                 ),
-              ),
+                Container(height: 3, color: accent.withValues(alpha: 0.85)),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 10, 14, kGapMd),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.event, size: 14, color: kPrimary),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(tourDatesLabel(context, tour),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: kPrimary)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(tour.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontFamily: kSerif,
+                                fontSize: 19,
+                                height: 1.2,
+                                fontWeight: FontWeight.w700,
+                                color: kInk)),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                                child:
+                                    _CardFact(Icons.schedule, tour.duration)),
+                            Expanded(
+                                child: _CardFact(Icons.translate,
+                                    languageLabel(context, tour.language))),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        if (guide != null)
+                          _CardFact(Icons.person_outline,
+                              '${guide.name} · ${rolesLabel(context, guide.roles)}'),
+                        const Spacer(),
+                        Text.rich(
+                          TextSpan(
+                            style: const TextStyle(fontSize: 12, color: kMuted),
+                            children: [
+                              TextSpan(text: '${t.tourFrom} '),
+                              TextSpan(
+                                  text: fmtPrice(tour.price),
+                                  style: const TextStyle(
+                                      fontFamily: kSerif,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w700,
+                                      color: kInk)),
+                              TextSpan(text: '  ${t.tourPerPerson}'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        GoldButton(t.tourDiscover,
+                            onPressed: onTap, expand: true),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -673,7 +808,7 @@ class _CardFact extends StatelessWidget {
             child: Text(text,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12.5, color: kMuted)),
+                style: const TextStyle(fontSize: 12, color: kMuted)),
           ),
         ],
       );
@@ -691,8 +826,11 @@ class InfoBanner extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
-      decoration:
-          BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(kRadiusSm),
+        border: Border.all(color: fg.withValues(alpha: 0.18)),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -718,14 +856,14 @@ class StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (bg, fg) = switch (tone) {
-      PillTone.ok => (const Color(0xFFDDF1E3), const Color(0xFF1F6B3A)),
-      PillTone.alert => (const Color(0xFFFBE3E1), const Color(0xFFA32A20)),
+      PillTone.ok => (kSuccessBg, kSuccess),
+      PillTone.alert => (kDangerBg, kDanger),
       PillTone.waiting => (const Color(0xFFF8E3B5), kOnGold),
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration:
-          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: kGapXs),
+      decoration: BoxDecoration(
+          color: bg, borderRadius: BorderRadius.circular(kRadiusPill)),
       child: Text(label,
           style:
               TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: fg)),
@@ -802,29 +940,133 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40),
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: kGapLg),
       child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: kPrimary.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Doppio cerchio dorato: più "illustrazione" di una sola icona.
+              Container(
+                width: 104,
+                height: 104,
+                decoration: BoxDecoration(
+                  color: kGold.withValues(alpha: 0.14),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: kGold.withValues(alpha: 0.28),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 34, color: kPrimary),
+                ),
               ),
-              child: Icon(icon, size: 30, color: kPrimary),
-            ),
-            const SizedBox(height: 14),
-            Text(message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: kMuted)),
-          ],
+              const SizedBox(height: kGapLg),
+              Text(message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontFamily: kSerif,
+                      fontSize: 19,
+                      height: 1.3,
+                      fontWeight: FontWeight.w600,
+                      color: kInk)),
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+/// Segnaposto che pulsa mentre i dati arrivano (il primo avvio su Render può
+/// essere lento): fa intuire la forma del contenuto meglio di una rotellina.
+class SkeletonBox extends StatefulWidget {
+  const SkeletonBox(
+      {super.key, this.width, this.height = 14, this.radius = kRadiusSm});
+  final double? width;
+  final double height;
+  final double radius;
+
+  @override
+  State<SkeletonBox> createState() => _SkeletonBoxState();
+}
+
+class _SkeletonBoxState extends State<SkeletonBox>
+    with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 900))
+    ..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+        opacity: Tween(begin: 0.45, end: 1.0)
+            .animate(CurvedAnimation(parent: _c, curve: Curves.easeInOut)),
+        child: Container(
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            color: kLine,
+            borderRadius: BorderRadius.circular(widget.radius),
+          ),
+        ),
+      );
+}
+
+/// Elenco segnaposto (righe con avatar e due linee di testo) per le liste in
+/// caricamento.
+class SkeletonList extends StatelessWidget {
+  const SkeletonList({super.key, this.rows = 4});
+  final int rows;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: kGapLg),
+        child: Column(
+          children: [
+            for (var i = 0; i < rows; i++)
+              Container(
+                margin: const EdgeInsets.only(bottom: kGapMd),
+                padding: const EdgeInsets.all(kGapLg),
+                decoration: BoxDecoration(
+                  color: kSurface,
+                  borderRadius: BorderRadius.circular(kRadius),
+                  border: Border.all(color: kLine),
+                ),
+                child: Row(
+                  children: [
+                    const SkeletonBox(width: 40, height: 40, radius: 20),
+                    const SizedBox(width: kGapMd),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FractionallySizedBox(
+                              widthFactor: i.isEven ? 0.55 : 0.4,
+                              child: const SkeletonBox(height: 14)),
+                          const SizedBox(height: kGapSm),
+                          FractionallySizedBox(
+                              widthFactor: i.isEven ? 0.8 : 0.7,
+                              child: const SkeletonBox(height: 10)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      );
 }
 
 /// Disclaimer sul ruolo della piattaforma nell'MVP (BRD §15.1).
@@ -861,7 +1103,7 @@ class CityPicker extends StatelessWidget {
         return Material(
           color: kSurface,
           elevation: 1,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(kRadiusPill),
           child: PopupMenuButton<String>(
             tooltip: t.fieldCity,
             initialValue: city ?? _allItaly,
@@ -912,7 +1154,7 @@ class LanguagePicker extends StatelessWidget {
         return Material(
           color: kSurface,
           elevation: 1,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(kRadiusPill),
           child: PopupMenuButton<Locale>(
             tooltip: localeDisplayName(locale),
             initialValue: locale,

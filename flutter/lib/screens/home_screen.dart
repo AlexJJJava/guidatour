@@ -405,7 +405,7 @@ class _HeroSearchPanelState extends State<_HeroSearchPanel> {
   Widget build(BuildContext context) {
     final t = l10n(context);
     const valueStyle =
-        TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: kInk);
+        TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: kInk);
     final type = _PanelField(
       icon: Icons.tour_outlined,
       label: t.heroTourType,
@@ -440,7 +440,15 @@ class _HeroSearchPanelState extends State<_HeroSearchPanel> {
         controller: _controller,
         onSubmitted: (_) => _go(),
         style: valueStyle,
-        decoration: InputDecoration.collapsed(
+        // Senza bordo né sfondo: il campo sta già dentro la barra di ricerca
+        // (i bordi del tema vanno annullati uno per uno).
+        decoration: InputDecoration(
+            isCollapsed: true,
+            filled: false,
+            contentPadding: EdgeInsets.zero,
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
             hintText: t.searchHint,
             hintStyle: valueStyle.copyWith(
                 color: kMuted, fontWeight: FontWeight.w400)),

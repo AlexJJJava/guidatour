@@ -163,7 +163,7 @@ const tests = [
   ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, ruoli dal profilo, login senza cambio pagina, menu lingua, carrello e richieste, approvazioni, Gestione admin, Account e profilo, pallino, ritaglio foto, lettura delle foto (JPG vero, foto grandi ridotte, file non validi), locandina PDF, blocchi, link QR, date multiple, layout', 100, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
   ['Non coperto', 'Prova end-to-end nel browser', 0, 'Da provare', 'Clic reali sul sito pubblicato'],
 ];
-const wsT = sheet('Test', 'Esiti del 6 novembre 2026. Comandi backend: npm run test:roles e npm run test:site (cartella nodeBE).',
+const wsT = sheet('Test', 'Esiti del 9 novembre 2026. Comandi backend: npm run test:roles e npm run test:site (cartella nodeBE).',
   ['Area', 'Gruppo', 'N. test', 'Esito', 'Note'], tests, [20, 34, 10, 14, 76]);
 const lt = 4 + tests.length;
 wsT.getCell(lt + 1, 2).value = 'Totale test';
@@ -225,6 +225,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['09/11/2026', 'Grafica rifinita, stessi colori', 'Tema completato (campi di testo sabbia con bordo oro, messaggi blu notte, finestre e menu arrotondati, scala tipografica unica); rosso mattone al posto del rosso puro; card dei tour con colore per categoria, sfumatura sulla foto, effetto al passaggio del mouse e prezzo in Playfair; stati vuoti illustrati e segnaposto animati al posto delle rotelline; raggi e spaziature uniformi', 'Test app (100 superati), schermate del sito a 1300 e 400 px'],
   ['06/11/2026', 'Schema del database', 'Immagine dello schema del DB (tabelle, colonne, relazioni e azioni alla cancellazione) in docs/GuidaTour_Schema_DB.png e .svg; si rigenera con npm run docs:db. schema.sql allineato alle colonne aggiunte dalle migrazioni', 'Confronto con schema.sql e migrazioni 0002-0009'],
   ['06/11/2026', 'Città accanto alla lingua', 'Nelle finestre strette (sotto 1024 px) la scelta della città andava a capo sotto la barra: ora resta nella barra in alto a sinistra della lingua e si accorcia con i puntini se manca spazio', 'Test app (nessuna pagina sfora da 320 px in su); schermate del sito a 1000, 600 e 360 px'],
   ['06/11/2026', 'Fix foto profilo sul sito', 'Sul sito ogni foto risultava "non valida": la lettura usava una funzione di Flutter che sul web non esiste. Ora si legge in modo compatibile; messaggio con i formati accettati (JPG, PNG, WebP)', 'Test app; caricamento e salvataggio provati sul sito pubblicato'],

@@ -248,15 +248,14 @@ class _TourFormScreenState extends State<TourFormScreen> {
               TextFormField(
                 controller: _title,
                 decoration: InputDecoration(
-                    labelText: t.fieldTourTitle,
-                    border: const OutlineInputBorder()),
+                    labelText: t.fieldTourTitle),
                 validator: required,
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
                 initialValue: _city,
                 decoration: InputDecoration(
-                    labelText: t.fieldCity, border: const OutlineInputBorder()),
+                    labelText: t.fieldCity),
                 items: [
                   for (final c in tourCities)
                     DropdownMenuItem(
@@ -268,8 +267,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
               DropdownButtonFormField<String>(
                 initialValue: _category,
                 decoration: InputDecoration(
-                    labelText: t.fieldCategory,
-                    border: const OutlineInputBorder()),
+                    labelText: t.fieldCategory),
                 items: [
                   for (final c in categories)
                     DropdownMenuItem(
@@ -281,8 +279,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
               DropdownButtonFormField<String>(
                 initialValue: _language,
                 decoration: InputDecoration(
-                    labelText: t.fieldLanguage,
-                    border: const OutlineInputBorder()),
+                    labelText: t.fieldLanguage),
                 items: [
                   for (final l in tourLanguages)
                     DropdownMenuItem(
@@ -343,8 +340,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
                       child: TextFormField(
                         controller: _duration,
                         decoration: InputDecoration(
-                            labelText: t.fieldDuration,
-                            border: const OutlineInputBorder()),
+                            labelText: t.fieldDuration),
                         validator: required,
                       ),
                     ),
@@ -354,8 +350,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
                         controller: _price,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
-                            labelText: t.fieldPrice,
-                            border: const OutlineInputBorder()),
+                            labelText: t.fieldPrice),
                         validator: (v) =>
                             double.tryParse((v ?? '').replaceAll(',', '.')) ==
                                     null
@@ -369,8 +364,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
                         controller: _seats,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
-                            labelText: t.fieldSeats,
-                            border: const OutlineInputBorder()),
+                            labelText: t.fieldSeats),
                         validator: (v) => (int.tryParse(v ?? '') ?? 0) < 1
                             ? t.validationAtLeastOne
                             : null,
@@ -383,8 +377,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
               TextFormField(
                 controller: _meeting,
                 decoration: InputDecoration(
-                    labelText: t.fieldMeetingPoint,
-                    border: const OutlineInputBorder()),
+                    labelText: t.fieldMeetingPoint),
                 validator: required,
               ),
               const SizedBox(height: 14),
@@ -392,8 +385,7 @@ class _TourFormScreenState extends State<TourFormScreen> {
                 controller: _description,
                 maxLines: 4,
                 decoration: InputDecoration(
-                    labelText: t.fieldDescription,
-                    border: const OutlineInputBorder()),
+                    labelText: t.fieldDescription),
                 validator: required,
               ),
               const SizedBox(height: 18),

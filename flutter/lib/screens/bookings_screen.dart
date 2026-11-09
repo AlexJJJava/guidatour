@@ -40,7 +40,7 @@ Widget _statusPill(BuildContext context, String status) => StatusPill(
 
 /// Miniatura della categoria del tour, a sinistra delle schede.
 Widget _thumb(Tour? tour) => ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(kRadiusSm),
       child: tour == null
           ? Container(
               width: 64,
@@ -197,7 +197,7 @@ class _ReceivedBookings extends StatelessWidget {
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: kPageYellow,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(kRadiusSm),
                           ),
                           child: Text('“${r.message}”',
                               style: const TextStyle(
@@ -213,7 +213,7 @@ class _ReceivedBookings extends StatelessWidget {
                           children: [
                             OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.red),
+                                  foregroundColor: kDanger),
                               onPressed: () => runOrSnack(
                                   context,
                                   () => appState.setRequestStatus(

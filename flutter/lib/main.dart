@@ -34,7 +34,10 @@ class GuidaTourApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final buttonShape =
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10));
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusSm));
+    OutlineInputBorder field(Color c, [double w = 1]) => OutlineInputBorder(
+        borderRadius: BorderRadius.circular(kRadiusSm),
+        borderSide: BorderSide(color: c, width: w));
     return ValueListenableBuilder<Locale>(
       valueListenable: localeController,
       builder: (context, locale, _) {
@@ -49,7 +52,7 @@ class GuidaTourApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          theme: ThemeData(
+          theme: withAppText(ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
               seedColor: kGold,
@@ -60,9 +63,80 @@ class GuidaTourApp extends StatelessWidget {
               surface: kSurface,
               onSurface: kInk,
               outline: kLine,
+              error: kDanger,
             ),
             scaffoldBackgroundColor: kCream,
             fontFamily: 'Inter',
+            // Campi di testo: sfondo sabbia chiaro, bordo oro quando attivi.
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: kCream,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              border: field(kLine),
+              enabledBorder: field(kLine),
+              focusedBorder: field(kPrimary, 1.6),
+              errorBorder: field(kDanger),
+              focusedErrorBorder: field(kDanger, 1.6),
+              disabledBorder: field(kLine.withValues(alpha: 0.6)),
+              labelStyle: const TextStyle(color: kMuted),
+              floatingLabelStyle: const TextStyle(
+                  color: kPrimary, fontWeight: FontWeight.w600),
+              hintStyle: TextStyle(color: kMuted.withValues(alpha: 0.8)),
+              prefixIconColor: kMuted,
+              suffixIconColor: kMuted,
+            ),
+            // Messaggi: fascia blu notte mobile, testo crema, azione oro.
+            snackBarTheme: SnackBarThemeData(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: kNight,
+              contentTextStyle:
+                  const TextStyle(color: kCream, fontSize: 14, height: 1.35),
+              actionTextColor: kGold,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(kRadiusSm)),
+              elevation: 4,
+            ),
+            dialogTheme: DialogThemeData(
+              backgroundColor: kSurface,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(kRadius)),
+              titleTextStyle: const TextStyle(
+                  fontFamily: kSerif,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w700,
+                  color: kInk),
+              contentTextStyle:
+                  const TextStyle(fontSize: 14, height: 1.45, color: kInk),
+            ),
+            bottomSheetTheme: const BottomSheetThemeData(
+              backgroundColor: kSurface,
+              surfaceTintColor: Colors.transparent,
+              showDragHandle: true,
+              shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(kRadius * 1.5))),
+            ),
+            progressIndicatorTheme: const ProgressIndicatorThemeData(
+              color: kPrimary,
+              linearTrackColor: kLine,
+            ),
+            tooltipTheme: TooltipThemeData(
+              decoration: BoxDecoration(
+                  color: kNight, borderRadius: BorderRadius.circular(6)),
+              textStyle: const TextStyle(color: kCream, fontSize: 12),
+            ),
+            listTileTheme: const ListTileThemeData(
+              iconColor: kPrimary,
+              titleTextStyle: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: kInk),
+              subtitleTextStyle:
+                  TextStyle(fontFamily: 'Inter', fontSize: 13, color: kMuted),
+            ),
             // Transizioni leggere e coerenti tra le pagine su tutte le
             // piattaforme (incluse nel framework, nessun pacchetto in più).
             pageTransitionsTheme: const PageTransitionsTheme(builders: {
@@ -83,8 +157,8 @@ class GuidaTourApp extends StatelessWidget {
                   color: kInk),
             ),
             cardTheme: CardThemeData(
-              elevation: 3,
-              shadowColor: kInk.withValues(alpha: 0.14),
+              elevation: 2,
+              shadowColor: const Color(0xFF6B4A12).withValues(alpha: 0.16),
               color: kSurface,
               surfaceTintColor: Colors.transparent,
               shape: RoundedRectangleBorder(
@@ -118,6 +192,7 @@ class GuidaTourApp extends StatelessWidget {
               selectedColor: kGold,
               secondaryLabelStyle: TextStyle(color: kOnGold),
               side: BorderSide.none,
+              shape: StadiumBorder(),
             ),
             navigationBarTheme: NavigationBarThemeData(
               backgroundColor: kSurface,
@@ -133,13 +208,19 @@ class GuidaTourApp extends StatelessWidget {
                   color: s.contains(WidgetState.selected) ? kInk : kMuted)),
             ),
             dividerTheme: const DividerThemeData(color: kLine),
-            popupMenuTheme: const PopupMenuThemeData(color: kSand),
+            popupMenuTheme: PopupMenuThemeData(
+              color: kSurface,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(kRadiusSm),
+                  side: const BorderSide(color: kLine)),
+            ),
             scrollbarTheme: ScrollbarThemeData(
               thumbColor: WidgetStatePropertyAll(kGold.withValues(alpha: 0.7)),
               trackColor: const WidgetStatePropertyAll(kSurface),
               trackBorderColor: const WidgetStatePropertyAll(kLine),
             ),
-          ),
+          )),
           home: const _Startup(),
         );
       },
@@ -176,7 +257,13 @@ class _StartupState extends State<_Startup> {
                 children: [
                   const BrandLogo(light: false),
                   const SizedBox(height: 24),
-                  const CircularProgressIndicator(color: kPrimary),
+                  // Barra sottile dorata: più discreta di una rotellina accanto al logo.
+                  const SizedBox(
+                    width: 180,
+                    child: LinearProgressIndicator(
+                        minHeight: 4,
+                        borderRadius: BorderRadius.all(Radius.circular(2))),
+                  ),
                   const SizedBox(height: 16),
                   Text(l10n(context).startupLoading,
                       style: const TextStyle(color: kMuted)),

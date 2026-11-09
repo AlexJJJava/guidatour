@@ -197,8 +197,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     TextFormField(
                       controller: _name,
                       decoration: InputDecoration(
-                          labelText: t.fieldName,
-                          border: const OutlineInputBorder()),
+                          labelText: t.fieldName),
                       validator: (v) => (v == null || v.trim().isEmpty)
                           ? t.validationRequired
                           : null,
@@ -208,16 +207,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       controller: _bio,
                       maxLines: 4,
                       decoration: InputDecoration(
-                          labelText: t.fieldBio,
-                          border: const OutlineInputBorder()),
+                          labelText: t.fieldBio),
                     ),
                     if (_user.role.isProfessional) ...[
                       const SizedBox(height: 14),
                       DropdownButtonFormField<String>(
                         initialValue: _city,
                         decoration: InputDecoration(
-                            labelText: t.fieldCity,
-                            border: const OutlineInputBorder()),
+                            labelText: t.fieldCity),
                         items: [
                           for (final c in tourCities)
                             DropdownMenuItem(

@@ -70,7 +70,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   filled: true,
                   fillColor: kSurface,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(kRadiusSm),
                     borderSide: const BorderSide(color: kLine),
                   ),
                 ),
