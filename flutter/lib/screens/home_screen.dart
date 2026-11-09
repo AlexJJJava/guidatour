@@ -31,6 +31,14 @@ double heroPhotoAlignmentY(Size box) {
 }
 
 void _openSearch(BuildContext context, {String query = '', String? category}) {
+  // Nell'app si passa alla voce "Tour" del menu con i risultati.
+  final openSearch =
+      context.getInheritedWidgetOfExactType<ShellScope>()?.openSearch;
+  if (openSearch != null) {
+    openSearch(query: query, category: category);
+    return;
+  }
+  // Home mostrata da sola (fuori dalla struttura dell'app): pagina sopra.
   Navigator.of(context).push(
     MaterialPageRoute(
       builder: (_) => Scaffold(

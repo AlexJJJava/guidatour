@@ -249,10 +249,14 @@ class ShellScope extends InheritedWidget {
     required this.goHome,
     required this.open,
     required this.root,
+    this.openSearch,
     required super.child,
   });
   final VoidCallback goHome;
   final void Function(Widget page) open;
+
+  /// Passa alla voce "Tour" con ricerca e categoria già impostate.
+  final void Function({String query, String? category})? openSearch;
 
   /// Pagina della voce di menu scelta.
   final Widget root;

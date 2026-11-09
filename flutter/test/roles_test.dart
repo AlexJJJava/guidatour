@@ -21,6 +21,7 @@ import 'package:guidatour/screens/favorites_screen.dart';
 import 'package:guidatour/screens/home_screen.dart';
 import 'package:guidatour/screens/my_tours_screen.dart';
 import 'package:guidatour/screens/profile_edit_screen.dart';
+import 'package:guidatour/screens/search_screen.dart';
 import 'package:guidatour/screens/tour_detail_screen.dart';
 import 'package:guidatour/screens/tour_form_screen.dart';
 import 'package:guidatour/state.dart';
@@ -303,6 +304,73 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text(t.guidesTitle, skipOffstage: false), findsNothing);
     expect(find.byType(SiteFooter, skipOffstage: false), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  for (final size in const [Size(1920, 1400), Size(412, 915)]) {
+    testWidgets(
+        'ricerca dalla home: si passa alla voce Tour e il risultato apre la scheda (${size.width})',
+        (tester) async {
+      sized(tester, size);
+      seed(user(Role.turista), owner: user(Role.guida));
+      await tester.pumpWidget(const GuidaTourApp());
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.enterText(find.byType(TextField).first, 'prova');
+      await tester.tap(find.text(t.heroSearch));
+      await tester.pumpAndSettle();
+      // Non una pagina sopra Scopri: la home non c'è più, si è sulla voce Tour
+      // con la ricerca già scritta.
+      expect(find.byType(HomeScreen, skipOffstage: false), findsNothing);
+      expect(find.byType(SearchScreen), findsOneWidget);
+      expect(
+          find.descendant(
+              of: find.byType(SearchScreen),
+              matching: find.widgetWithText(TextField, 'prova')),
+          findsOneWidget);
+      if (size.width < 1024) {
+        expect(
+            tester.widget<NavigationBar>(find.byType(NavigationBar))
+                .selectedIndex,
+            1);
+      }
+      final result = find.descendant(
+          of: find.byType(SearchScreen), matching: find.byType(TourCard));
+      expect(result, findsOneWidget);
+      await tester.ensureVisible(result);
+      await tester.pumpAndSettle();
+      await tester.tap(result);
+      await tester.pumpAndSettle();
+      expect(find.byType(TourDetailScreen), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+  }
+
+  testWidgets('cerchio categoria in home: voce Tour con la categoria scelta',
+      (tester) async {
+    sized(tester, const Size(1920, 2400));
+    seed(user(Role.turista), owner: user(Role.guida));
+    await tester.pumpWidget(const GuidaTourApp());
+    await tester.pump(const Duration(milliseconds: 100));
+    final bubble = find.text(categoryLabel(
+        tester.element(find.byType(HomeScreen)), 'Serale'));
+    await tester.ensureVisible(bubble.first);
+    await tester.pumpAndSettle();
+    await tester.tap(bubble.first);
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeScreen, skipOffstage: false), findsNothing);
+    final serale = find.descendant(
+        of: find.byType(SearchScreen),
+        matching: find.widgetWithText(ChoiceChip, 'Serale'));
+    expect(tester.widget<ChoiceChip>(serale).selected, isTrue);
+    // Dal menu, invece, la pagina Tour riparte senza filtri.
+    await tester.tap(find.text(t.navDiscover).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(t.navSearch).first);
+    await tester.pumpAndSettle();
+    final tutti = find.descendant(
+        of: find.byType(SearchScreen),
+        matching: find.widgetWithText(ChoiceChip, t.filterAll));
+    expect(tester.widget<ChoiceChip>(tutti).selected, isTrue);
     await tester.pumpWidget(const SizedBox());
   });
 

@@ -401,7 +401,31 @@ class _AppShellState extends State<AppShell> {
       _navKey.currentState?.popUntil((r) => r.isFirst);
       return;
     }
-    setState(() => _reset(i));
+    setState(() {
+      // Dal menu la pagina Tour si apre senza filtri.
+      _searchQuery = '';
+      _searchCategory = null;
+      _reset(i);
+    });
+  }
+
+  /// Ricerca e categoria con cui aprire la voce "Tour" (dalla home).
+  String _searchQuery = '';
+  String? _searchCategory;
+
+  /// Cambia a ogni ricerca dalla home: la pagina Tour riparte con i nuovi
+  /// filtri anche se era già aperta.
+  int _searchSeq = 0;
+
+  /// "Cerca tour" e i cerchi delle categorie in home: si passa alla voce
+  /// "Tour" (sempre la seconda) con i risultati, non una pagina sopra Scopri.
+  void _openSearch({String query = '', String? category}) {
+    setState(() {
+      _searchQuery = query;
+      _searchCategory = category;
+      _searchSeq++;
+      _reset(1);
+    });
   }
 
   void _reset(int i) {
@@ -600,7 +624,12 @@ class _AppShellState extends State<AppShell> {
                   onOpenSearch: () => _select(1),
                   onOpenAccount: openAccount,
                 )
-              : items[_index].$4!;
+              : items[_index].$4 is SearchScreen
+                  ? SearchScreen(
+                      key: ValueKey('search-$_searchSeq'),
+                      initialQuery: _searchQuery,
+                      initialCategory: _searchCategory)
+                  : items[_index].$4!;
           // In home l'intestazione sta sopra la foto; nelle altre pagine in alto.
           final showHeader = !home || _depth > 0;
           final inner = NavigatorPopHandler(
@@ -632,6 +661,7 @@ class _AppShellState extends State<AppShell> {
           final body = ShellScope(
             goHome: () => _select(0),
             open: _open,
+            openSearch: _openSearch,
             root: root,
             child: content,
           );
