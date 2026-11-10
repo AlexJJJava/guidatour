@@ -257,7 +257,7 @@ class _Hero extends StatelessWidget {
               colors: [
                 // Sul telefono il testo sta sopra la parte illuminata.
                 Colors.black.withValues(alpha: wide ? 0.78 : 0.75),
-                Colors.black.withValues(alpha: wide ? 0.4 : 0.6),
+                Colors.black.withValues(alpha: wide ? 0.55 : 0.65),
                 Colors.black.withValues(alpha: wide ? 0.1 : 0.4),
               ],
               stops: const [0, 0.55, 1],
@@ -309,7 +309,8 @@ class _Hero extends StatelessWidget {
                                     style: const TextStyle(
                                         fontSize: 14,
                                         height: 1.4,
-                                        color: Colors.white)),
+                                        color: Colors.white,
+                                        shadows: kTextOnPhotoShadow)),
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -568,11 +569,14 @@ class _TrustItem extends StatelessWidget {
                   style: TextStyle(
                       fontSize: compact ? 12 : 13,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white)),
+                      color: Colors.white,
+                      shadows: kTextOnPhotoShadow)),
               if (!compact)
                 Text(body,
-                    style:
-                        const TextStyle(fontSize: 12, color: Colors.white70)),
+                    style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xE6FFFFFF),
+                        shadows: kTextOnPhotoShadow)),
             ],
           ),
         ],
@@ -758,7 +762,7 @@ class _Feature extends StatelessWidget {
               height: 34,
               decoration:
                   const BoxDecoration(color: kSand, shape: BoxShape.circle),
-              child: Icon(icon, size: 19, color: kPrimary),
+              child: Icon(icon, size: 19, color: kPrimaryText),
             ),
             const SizedBox(width: 14),
             Flexible(

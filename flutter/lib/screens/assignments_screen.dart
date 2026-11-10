@@ -152,7 +152,7 @@ class _AssignmentCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(incoming ? Icons.call_received : Icons.call_made,
-                          size: 16, color: kPrimary),
+                          size: 16, color: kPrimaryText),
                       const SizedBox(width: 4),
                       Flexible(
                           child: Text(who,

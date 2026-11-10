@@ -295,7 +295,7 @@ class _Count extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: kPrimary, size: 20),
+          Icon(icon, color: kPrimaryText, size: 20),
           const SizedBox(height: 6),
           Text('$value',
               style: const TextStyle(
@@ -319,7 +319,7 @@ class _Fact extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 18, color: kPrimary),
+            Icon(icon, size: 18, color: kPrimaryText),
             const SizedBox(width: 10),
             Expanded(child: Text(text, style: const TextStyle(color: kInk))),
           ],

@@ -112,7 +112,7 @@ class SentRequestsList extends StatelessWidget {
                               Text(t.cartNewAnswer,
                                   key: ValueKey('new-answer-${r.id}'),
                                   style: const TextStyle(
-                                      color: kPrimary,
+                                      color: kPrimaryText,
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700)),
                             ],
@@ -169,7 +169,7 @@ class _ReceivedBookings extends StatelessWidget {
                                         fontWeight: FontWeight.w700,
                                         fontSize: 15)),
                                 Text(tour?.title ?? t.tourUnavailable,
-                                    style: const TextStyle(color: kPrimary)),
+                                    style: const TextStyle(color: kPrimaryText)),
                                 if (r.start != null)
                                   Text(t.requestForDate(fmtDate(r.start!)),
                                       key: ValueKey('request-date-${r.id}'),

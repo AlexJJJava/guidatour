@@ -172,7 +172,7 @@ class _RegistrationCard extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.event_outlined, size: 16, color: kPrimary),
+              const Icon(Icons.event_outlined, size: 16, color: kPrimaryText),
               const SizedBox(width: 6),
               Text(t.approvalsRegisteredOn(fmtDate(guide.createdAt!)),
                   style: const TextStyle(

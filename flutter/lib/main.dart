@@ -73,15 +73,15 @@ class GuidaTourApp extends StatelessWidget {
               fillColor: kCream,
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-              border: field(kLine),
-              enabledBorder: field(kLine),
+              border: field(kFieldLine),
+              enabledBorder: field(kFieldLine),
               focusedBorder: field(kPrimary, 1.6),
               errorBorder: field(kDanger),
               focusedErrorBorder: field(kDanger, 1.6),
               disabledBorder: field(kLine.withValues(alpha: 0.6)),
               labelStyle: const TextStyle(color: kMuted),
               floatingLabelStyle:
-                  const TextStyle(color: kPrimary, fontWeight: FontWeight.w600),
+                  const TextStyle(color: kPrimaryText, fontWeight: FontWeight.w600),
               hintStyle: TextStyle(color: kMuted.withValues(alpha: 0.8)),
               prefixIconColor: kMuted,
               suffixIconColor: kMuted,
@@ -128,7 +128,7 @@ class GuidaTourApp extends StatelessWidget {
               textStyle: const TextStyle(color: kCream, fontSize: 12),
             ),
             listTileTheme: const ListTileThemeData(
-              iconColor: kPrimary,
+              iconColor: kPrimaryText,
               titleTextStyle: TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 15,
@@ -161,8 +161,10 @@ class GuidaTourApp extends StatelessWidget {
               shadowColor: const Color(0xFF6B4A12).withValues(alpha: 0.16),
               color: kSurface,
               surfaceTintColor: Colors.transparent,
+              // Bordo sottile: la card si stacca anche dal crema e dal giallo.
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(kRadius),
+                side: const BorderSide(color: kLine),
               ),
             ),
             filledButtonTheme: FilledButtonThemeData(
@@ -180,12 +182,12 @@ class GuidaTourApp extends StatelessWidget {
             outlinedButtonTheme: OutlinedButtonThemeData(
               style: OutlinedButton.styleFrom(
                 foregroundColor: kInk,
-                side: const BorderSide(color: kLine),
+                side: const BorderSide(color: kFieldLine),
                 shape: buttonShape,
               ),
             ),
             textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(foregroundColor: kPrimary),
+              style: TextButton.styleFrom(foregroundColor: kPrimaryText),
             ),
             chipTheme: const ChipThemeData(
               backgroundColor: kSand,
@@ -196,10 +198,11 @@ class GuidaTourApp extends StatelessWidget {
             ),
             navigationBarTheme: NavigationBarThemeData(
               backgroundColor: kSurface,
-              indicatorColor: kSand,
+              // Oro chiaro: la voce selezionata si vede subito sul bianco.
+              indicatorColor: kGold.withValues(alpha: 0.55),
               surfaceTintColor: Colors.transparent,
               iconTheme: WidgetStateProperty.resolveWith((s) => IconThemeData(
-                  color: s.contains(WidgetState.selected) ? kPrimary : kMuted)),
+                  color: s.contains(WidgetState.selected) ? kInk : kMuted)),
               labelTextStyle: WidgetStateProperty.resolveWith((s) => TextStyle(
                   fontSize: 11.5,
                   fontWeight: s.contains(WidgetState.selected)

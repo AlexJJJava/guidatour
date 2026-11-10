@@ -86,7 +86,7 @@ class _TourCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(categoryLabel(context, tour.category),
                           style:
-                              const TextStyle(color: kPrimary, fontSize: 13)),
+                              const TextStyle(color: kPrimaryText, fontSize: 13)),
                       Text(
                           t.dashTourLine(
                               tourDatesLabel(context, tour),

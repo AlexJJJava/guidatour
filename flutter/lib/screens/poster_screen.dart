@@ -82,7 +82,7 @@ class PosterScreen extends StatelessWidget {
                         style: const TextStyle(
                             letterSpacing: 2,
                             fontSize: 12,
-                            color: kPrimary,
+                            color: kPrimaryText,
                             fontWeight: FontWeight.w800)),
                     const SizedBox(height: 14),
                     Text(tour.title,
@@ -105,7 +105,7 @@ class PosterScreen extends StatelessWidget {
                         style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
-                            color: kPrimary)),
+                            color: kPrimaryText)),
                     const SizedBox(height: 6),
                     Text(
                         t.posterByGuide(

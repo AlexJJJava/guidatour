@@ -493,7 +493,7 @@ class _ProCard extends StatelessWidget {
                           style: const TextStyle(
                               color: kOnGold, fontWeight: FontWeight.w600)),
                     Text(rolesLabel(context, roles),
-                        style: const TextStyle(color: kPrimary)),
+                        style: const TextStyle(color: kPrimaryText)),
                     Text(
                         '${guide.email} · ${cityLabel(context, guide.city)}'
                         ' · ${t.adminToursCount(tours)}',

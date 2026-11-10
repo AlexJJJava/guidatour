@@ -400,7 +400,7 @@ class _Fact extends StatelessWidget {
   Widget build(BuildContext context) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: kPrimary),
+          Icon(icon, size: 18, color: kPrimaryText),
           const SizedBox(width: 6),
           Flexible(
               child: Text(text,

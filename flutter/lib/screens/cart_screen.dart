@@ -108,7 +108,7 @@ class _CartBodyState extends State<_CartBody> {
                 style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
-                    color: kPrimary)),
+                    color: kPrimaryText)),
           ],
         ),
         CheckboxListTile(

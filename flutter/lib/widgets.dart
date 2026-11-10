@@ -10,8 +10,13 @@ import 'screens/faq_screen.dart';
 import 'screens/legal_screen.dart';
 import 'state.dart';
 
-/// Oro scuro: icone, link e accenti su fondo chiaro.
+/// Oro scuro: icone grandi, riempimenti e accenti su fondo chiaro.
 const kPrimary = Color(0xFFB4832F);
+
+/// Oro bruno per testi, link e icone piccole su fondo chiaro: kPrimary come
+/// testo non arriva al contrasto minimo (3:1), questo supera 4,5:1 anche sul
+/// giallo delle pagine interne.
+const kPrimaryText = Color(0xFF8A6020);
 
 /// Oro chiaro dei pulsanti principali.
 const kGold = Color(0xFFF2C36B);
@@ -22,7 +27,8 @@ const kOnGold = Color(0xFF1E2A33);
 /// Oro dei titoli in corsivo sulle foto.
 const kGoldText = Color(0xFFF0C878);
 const kInk = Color(0xFF1E2A33);
-const kMuted = Color(0xFF6B6F76);
+/// Grigio dei testi secondari: almeno 5,5:1 anche sulla sabbia.
+const kMuted = Color(0xFF5A5E65);
 
 /// Sfondo delle pagine.
 const kCream = Color(0xFFFBF7F0);
@@ -40,7 +46,12 @@ const kHeaderGradient = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
 );
-const kLine = Color(0xFFEAE2D3);
+/// Bordi e divisori: visibili su bianco e crema, sempre caldi.
+const kLine = Color(0xFFDCD0BA);
+
+/// Bordo dei campi di testo e dei pulsanti outlined: almeno 3:1 sul bianco,
+/// così si capisce dove scrivere.
+const kFieldLine = Color(0xFF968669);
 
 /// Blu notte di intestazione e footer.
 const kNight = Color(0xFF1F2A33);
@@ -662,8 +673,12 @@ const _categoryIcons = {
 IconData categoryIcon(String c) => _categoryIcons[c] ?? Icons.explore_outlined;
 
 
-/// Velo nero sulle foto per il tema scuro (circa un terzo di luce in meno).
-const kPhotoShade = Color(0x52000000);
+/// Velo nero sulle foto (40% di luce in meno): i titoli chiari restano
+/// leggibili anche sulle foto luminose.
+const kPhotoShade = Color(0x66000000);
+
+/// Ombra dei testi piccoli sopra le foto: li stacca dalle zone luminose.
+const kTextOnPhotoShadow = [Shadow(color: Color(0x99000000), blurRadius: 6)];
 
 /// Le foto notturne sono già scure: niente velo.
 Color? photoShade(String asset) =>
@@ -791,7 +806,12 @@ class _TourCardState extends State<TourCard> {
         ),
         child: Material(
           color: kSurface,
-          borderRadius: BorderRadius.circular(kRadius),
+          // Bordo sottile oltre all'ombra: la card si stacca anche dagli
+          // sfondi chiari (bianco su crema da solo ha contrasto 1,07).
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(kRadius),
+            side: BorderSide(color: _hover ? kFieldLine : kLine),
+          ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
@@ -823,7 +843,7 @@ class _TourCardState extends State<TourCard> {
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               stops: [0.45, 1],
-                              colors: [Color(0x00000000), Color(0x59000000)],
+                              colors: [Color(0x00000000), Color(0x80000000)],
                             ),
                           ),
                         ),
@@ -882,7 +902,7 @@ class _TourCardState extends State<TourCard> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.event, size: 14, color: kPrimary),
+                            const Icon(Icons.event, size: 14, color: kPrimaryText),
                             const SizedBox(width: 5),
                             Expanded(
                               child: Text(tourDatesLabel(context, tour),
@@ -891,7 +911,7 @@ class _TourCardState extends State<TourCard> {
                                   style: const TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
-                                      color: kPrimary)),
+                                      color: kPrimaryText)),
                             ),
                           ],
                         ),
@@ -996,7 +1016,7 @@ class InfoBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = warning ? const Color(0xFFFFF1D6) : kSand;
-    final fg = warning ? const Color(0xFF7A4B00) : kPrimary;
+    final fg = warning ? const Color(0xFF7A4B00) : kPrimaryText;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -1082,7 +1102,7 @@ class GoldPanel extends StatelessWidget {
                         decoration: BoxDecoration(
                             color: kGold.withValues(alpha: 0.3),
                             shape: BoxShape.circle),
-                        child: Icon(icon, size: 18, color: kPrimary),
+                        child: Icon(icon, size: 18, color: kPrimaryText),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -1293,7 +1313,7 @@ class CityPicker extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.location_on, size: 18, color: kPrimary),
+                  const Icon(Icons.location_on, size: 18, color: kPrimaryText),
                   const SizedBox(width: 4),
                   Flexible(
                     child: Text(
@@ -1342,7 +1362,7 @@ class LanguagePicker extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.language, size: 18, color: kPrimary),
+                  const Icon(Icons.language, size: 18, color: kPrimaryText),
                   const SizedBox(width: 6),
                   Text(locale.languageCode.toUpperCase(),
                       style: const TextStyle(
