@@ -24,7 +24,6 @@ class MyToursScreen extends StatelessWidget {
         final mine =
             appState.myTours.where((tour) => tour.guideId == user.id).toList();
         return PageBody(
-          maxWidth: 900,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

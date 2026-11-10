@@ -138,7 +138,6 @@ class _ReceivedBookings extends StatelessWidget {
     final t = l10n(context);
     final reqs = appState.requests;
     return PageBody(
-      maxWidth: 900,
       title: t.bookingsTitleReceived,
       subtitle: t.pageBookingsReceivedSub,
       icon: Icons.inbox_outlined,

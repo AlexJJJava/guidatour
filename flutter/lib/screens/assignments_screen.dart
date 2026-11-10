@@ -24,7 +24,6 @@ class AssignmentsScreen extends StatelessWidget {
         final received =
             appState.assignments.where((a) => a.toGuideId == user.id).toList();
         return PageBody(
-          maxWidth: 900,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

@@ -20,7 +20,6 @@ class FavoritesScreen extends StatelessWidget {
         if (appState.currentUser == null) return const AuthScreen();
         if (!appState.isTourist) {
           return PageBody(
-            maxWidth: 480,
             child: InfoBanner(t.favoritesTouristOnly),
           );
         }

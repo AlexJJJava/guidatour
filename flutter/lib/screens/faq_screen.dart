@@ -21,7 +21,6 @@ class FaqScreen extends StatelessWidget {
     ];
     return Scaffold(
       body: PageBody(
-        maxWidth: 760,
         title: t.faqTitle,
         subtitle: t.pageFaqSub,
         icon: Icons.help_outline,

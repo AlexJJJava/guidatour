@@ -225,6 +225,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['10/11/2026', 'Tutte le pagine della stessa larghezza', 'Panoramica, I miei tour, Assegnazioni, Richieste, Account, Carrello, FAQ e avvisi "solo turisti" usano la larghezza standard (1240 px). Account: Profilo e Azioni affiancati su schermo largo. Accesso: fascia del titolo larga, modulo stretto e centrato. Restano strette solo scheda tour, locandina e ritaglio foto, per leggibilità', 'Test app (120 superati); schermate di Accesso e Account a 1300 px'],
   ['10/11/2026', 'Gestione larga come le altre pagine', 'La pagina Gestione era limitata a 1080 px: ora usa la larghezza standard (1240 px) come Tour e Preferiti', 'Test app (120 superati)'],
   ['10/11/2026', 'Dalla scheda si torna ai tour', 'In cima alla scheda tour c’è "Torna ai tour" (dall’elenco Tour) o "Indietro" (da home, preferiti, carrello…): si ritrova l’elenco con ricerca, filtri e scorrimento com’erano', 'Test app (120 superati, 2 nuovi: computer e telefono)'],
   ['10/11/2026', 'Controllo di tutti i pulsanti', 'Verificate le destinazioni di menu, intestazione, home, footer, carrello, account, scheda tour, I miei tour, richieste e Gestione: tutte corrette. Fix: carrello, pallino dell’account e FAQ del footer premuti di nuovo aprivano una seconda pagina uguale sopra la prima; ora riportano a quella già aperta', 'Test app (118 superati, 11 nuovi sui pulsanti)'],

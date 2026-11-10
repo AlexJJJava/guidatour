@@ -24,7 +24,6 @@ class CartScreen extends StatelessWidget {
         if (appState.currentUser == null) return const AuthScreen();
         if (!appState.isTourist) {
           return PageBody(
-            maxWidth: 480,
             child: InfoBanner(t.cartTouristOnly),
           );
         }
@@ -65,7 +64,6 @@ class _CartBodyState extends State<_CartBody> {
     final t = l10n(context);
     final items = appState.cart;
     return PageBody(
-      maxWidth: 900,
       title: t.cartTitle,
       subtitle: t.pageCartSub,
       icon: Icons.shopping_cart_outlined,

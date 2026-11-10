@@ -68,7 +68,6 @@ class DashboardOverviewScreen extends StatelessWidget {
         final alerts = appState.overbookingAlerts(user.id);
         final rate = visits == 0 ? 0 : (reqs * 100 / visits);
         return PageBody(
-          maxWidth: 900,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

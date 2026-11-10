@@ -24,7 +24,6 @@ class AccountScreen extends StatelessWidget {
         void edit() => Navigator.of(context)
             .push(MaterialPageRoute(builder: (_) => const ProfileEditScreen()));
         return PageBody(
-          maxWidth: 760,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -73,61 +72,79 @@ class AccountScreen extends StatelessWidget {
                       ],
               ),
               const SizedBox(height: 18),
-              GoldPanel(
-                title: t.accountProfileSection,
-                icon: Icons.person_outline,
-                child: Column(
+              // Su schermo largo Profilo e Azioni affiancati: a tutta
+              // larghezza i riquadri sarebbero troppo allungati.
+              LayoutBuilder(builder: (context, c) {
+                final profile = GoldPanel(
+                  title: t.accountProfileSection,
+                  icon: Icons.person_outline,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.bio.isEmpty ? t.accountBioEmpty : user.bio,
+                        style: TextStyle(
+                            height: 1.5,
+                            color: user.bio.isEmpty ? kMuted : kInk,
+                            fontStyle: user.bio.isEmpty
+                                ? FontStyle.italic
+                                : FontStyle.normal),
+                      ),
+                      const SizedBox(height: 14),
+                      _Fact(Icons.mail_outline, user.email),
+                      _Fact(
+                          Icons.translate,
+                          user.languages
+                              .map((l) => languageLabel(context, l))
+                              .join(', ')),
+                      if (pro)
+                        _Fact(Icons.place_outlined,
+                            cityLabel(context, user.city)),
+                      if (user.createdAt != null)
+                        _Fact(Icons.event_outlined,
+                            t.accountMemberSince(fmtDate(user.createdAt!))),
+                    ],
+                  ),
+                );
+                final actions = GoldPanel(
+                  title: t.accountActions,
+                  icon: Icons.settings_outlined,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading:
+                            const Icon(Icons.edit_outlined, color: kPrimary),
+                        title: Text(t.editProfile),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: edit,
+                      ),
+                      const Divider(height: 1, color: kLine),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.logout, color: kDanger),
+                        title: Text(t.logout,
+                            style: const TextStyle(color: kDanger)),
+                        onTap: appState.logout,
+                      ),
+                    ],
+                  ),
+                );
+                if (c.maxWidth < 900) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [profile, const SizedBox(height: 16), actions],
+                  );
+                }
+                return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      user.bio.isEmpty ? t.accountBioEmpty : user.bio,
-                      style: TextStyle(
-                          height: 1.5,
-                          color: user.bio.isEmpty ? kMuted : kInk,
-                          fontStyle: user.bio.isEmpty
-                              ? FontStyle.italic
-                              : FontStyle.normal),
-                    ),
-                    const SizedBox(height: 14),
-                    _Fact(Icons.mail_outline, user.email),
-                    _Fact(
-                        Icons.translate,
-                        user.languages
-                            .map((l) => languageLabel(context, l))
-                            .join(', ')),
-                    if (pro)
-                      _Fact(
-                          Icons.place_outlined, cityLabel(context, user.city)),
-                    if (user.createdAt != null)
-                      _Fact(Icons.event_outlined,
-                          t.accountMemberSince(fmtDate(user.createdAt!))),
+                    Expanded(flex: 3, child: profile),
+                    const SizedBox(width: 16),
+                    Expanded(flex: 2, child: actions),
                   ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              GoldPanel(
-                title: t.accountActions,
-                icon: Icons.settings_outlined,
-                child: Column(
-                  children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.edit_outlined, color: kPrimary),
-                      title: Text(t.editProfile),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: edit,
-                    ),
-                    const Divider(height: 1, color: kLine),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.logout, color: kDanger),
-                      title: Text(t.logout,
-                          style: const TextStyle(color: kDanger)),
-                      onTap: appState.logout,
-                    ),
-                  ],
-                ),
-              ),
+                );
+              }),
             ],
           ),
         );
