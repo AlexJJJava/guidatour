@@ -31,7 +31,6 @@ class _AdminScreenState extends State<AdminScreen> {
       (t.adminTabWhatsapp, Icons.chat_bubble_outline),
     ];
     return PageBody(
-      maxWidth: 1080,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
