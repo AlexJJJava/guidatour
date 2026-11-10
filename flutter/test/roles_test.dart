@@ -409,8 +409,42 @@ void main() {
       await openHome(tester, user(Role.turista));
       await tapAndSettle(tester, find.byType(TourCard).first);
       expect(find.byType(TourDetailScreen), findsOneWidget);
+      // "Indietro" riporta alla home.
+      expect(find.text(t.detailBack), findsOneWidget);
+      await tapAndSettle(tester, find.byKey(const ValueKey('tour-back')));
+      expect(find.byType(TourDetailScreen, skipOffstage: false), findsNothing);
+      expect(find.byType(HomeScreen), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
+
+    for (final size in const [Size(1920, 1400), Size(412, 915)]) {
+      testWidgets(
+          'dalla scheda "Torna ai tour" con ricerca e filtri di prima (${size.width})',
+          (tester) async {
+        await openHome(tester, user(Role.turista), size: size);
+        await tester.enterText(find.byType(TextField).first, 'prova');
+        await tapAndSettle(tester, find.text(t.heroSearch));
+        final chip = find.descendant(
+            of: find.byType(SearchScreen),
+            matching: find.widgetWithText(ChoiceChip, 'Accompagnamento'));
+        await tapAndSettle(tester, chip);
+        final card = find.descendant(
+            of: find.byType(SearchScreen), matching: find.byType(TourCard));
+        await tapAndSettle(tester, card);
+        expect(find.byType(TourDetailScreen), findsOneWidget);
+        expect(find.text(t.detailBackToTours), findsOneWidget);
+        await tapAndSettle(tester, find.byKey(const ValueKey('tour-back')));
+        expect(find.byType(TourDetailScreen, skipOffstage: false), findsNothing);
+        expect(
+            find.descendant(
+                of: find.byType(SearchScreen),
+                matching: find.widgetWithText(TextField, 'prova')),
+            findsOneWidget);
+        expect(tester.widget<ChoiceChip>(chip).selected, isTrue);
+        expect(card, findsOneWidget);
+        await tester.pumpWidget(const SizedBox());
+      });
+    }
 
     for (final size in const [Size(1920, 1400), Size(412, 915)]) {
       testWidgets('carrello premuto due volte: un solo carrello (${size.width})',

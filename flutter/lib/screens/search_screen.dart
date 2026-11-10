@@ -104,7 +104,9 @@ class _SearchScreenState extends State<SearchScreen> {
               else
                 ResponsiveGrid(children: [
                   for (final tour in results)
-                    TourCard(tour: tour, onTap: () => openTour(context, tour)),
+                    TourCard(
+                        tour: tour,
+                        onTap: () => openTour(context, tour, fromList: true)),
                 ]),
               const PlatformDisclaimer(),
             ],

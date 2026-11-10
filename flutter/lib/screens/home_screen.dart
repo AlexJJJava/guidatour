@@ -619,8 +619,8 @@ class _CategoryBubbleState extends State<_CategoryBubble> {
                 height: size,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                      color: _active ? kGold : kSurface, width: 4),
+                  border:
+                      Border.all(color: _active ? kGold : kSurface, width: 4),
                   boxShadow: [
                     BoxShadow(
                         color: (_active ? kPrimary : Colors.black)

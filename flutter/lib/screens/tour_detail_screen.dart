@@ -7,8 +7,10 @@ import '../widgets.dart';
 import 'tour_map.dart';
 import 'whatsapp_optin.dart';
 
+/// [fromList]: aperto dall'elenco dei tour; il link in alto dice "Torna ai
+/// tour" e riporta all'elenco con ricerca e filtri com'erano.
 void openTour(BuildContext context, Tour t,
-    {bool fromQr = false, DateTime? date}) {
+    {bool fromQr = false, DateTime? date, bool fromList = false}) {
   if (fromQr) {
     // Il conteggio non deve fermare chi ha appena inquadrato il QR.
     appState.recordScan(t).catchError((_) {});
@@ -17,13 +19,18 @@ void openTour(BuildContext context, Tour t,
   }
   Navigator.of(context).push(
     MaterialPageRoute(
-        builder: (_) => TourDetailScreen(tour: t, initialDate: date)),
+        builder: (_) =>
+            TourDetailScreen(tour: t, initialDate: date, fromList: fromList)),
   );
 }
 
 class TourDetailScreen extends StatefulWidget {
-  const TourDetailScreen({super.key, required this.tour, this.initialDate});
+  const TourDetailScreen(
+      {super.key, required this.tour, this.initialDate, this.fromList = false});
   final Tour tour;
+
+  /// Aperto dall'elenco dei tour (vedi [openTour]).
+  final bool fromList;
 
   /// Data proposta (es. dal link di una pagina pubblica), se è tra le prossime.
   final DateTime? initialDate;
@@ -52,7 +59,8 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     final ctx = _bookingKey.currentContext;
     if (ctx == null) return;
     Scrollable.ensureVisible(ctx,
-        duration: const Duration(milliseconds: 450), curve: Curves.easeOutCubic);
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeOutCubic);
   }
 
   @override
@@ -99,14 +107,32 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     final accent = categoryColor(tour.category);
     return Scaffold(
       // Sul telefono prezzo e "Prenota" restano sempre a portata di dito.
-      bottomNavigationBar: narrow
-          ? _BookBar(tour: tour, onBook: _scrollToBooking)
-          : null,
+      bottomNavigationBar:
+          narrow ? _BookBar(tour: tour, onBook: _scrollToBooking) : null,
       body: PageBody(
         maxWidth: 860,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Ritorno alla pagina di prima: l'elenco resta sotto, quindi
+            // ricerca, filtri e scorrimento sono quelli lasciati.
+            if (Navigator.of(context).canPop()) ...[
+              TextButton.icon(
+                key: const ValueKey('tour-back'),
+                onPressed: () => Navigator.of(context).maybePop(),
+                style: TextButton.styleFrom(
+                  foregroundColor: kInk,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: kGapSm, vertical: kGapSm),
+                  textStyle: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+                icon: const Icon(Icons.arrow_back, size: 18),
+                label:
+                    Text(widget.fromList ? t.detailBackToTours : t.detailBack),
+              ),
+              const SizedBox(height: kGapSm),
+            ],
             // Foto grande con titolo sopra e sfumatura scura per leggerlo.
             ClipRRect(
               borderRadius: BorderRadius.circular(kRadius),
@@ -156,8 +182,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                 horizontal: 10, vertical: kGapXs),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.94),
-                              borderRadius:
-                                  BorderRadius.circular(kRadiusPill),
+                              borderRadius: BorderRadius.circular(kRadiusPill),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -204,7 +229,8 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
               spacing: 20,
               runSpacing: 8,
               children: [
-                _Fact(Icons.event, fmtFriendlyDate(context, _date ?? tour.nextStart)),
+                _Fact(Icons.event,
+                    fmtFriendlyDate(context, _date ?? tour.nextStart)),
                 _Fact(Icons.schedule, tour.duration),
                 _Fact(Icons.language, languageLabel(context, tour.language)),
                 _Fact(Icons.euro, fmtPrice(tour.price)),
@@ -458,8 +484,7 @@ class _BookingFormState extends State<BookingForm> {
           const SizedBox(height: 12),
           TextFormField(
             controller: _name,
-            decoration: InputDecoration(
-                labelText: t.fieldFullName),
+            decoration: InputDecoration(labelText: t.fieldFullName),
             validator: (v) =>
                 (v == null || v.trim().isEmpty) ? t.validationRequired : null,
           ),
@@ -467,8 +492,7 @@ class _BookingFormState extends State<BookingForm> {
           TextFormField(
             controller: _email,
             keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
-                labelText: t.fieldEmail),
+            decoration: InputDecoration(labelText: t.fieldEmail),
             validator: (v) =>
                 (v == null || !v.contains('@')) ? t.validationEmail : null,
           ),
@@ -476,8 +500,7 @@ class _BookingFormState extends State<BookingForm> {
           TextFormField(
             controller: _phone,
             keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-                labelText: t.fieldPhoneOptional),
+            decoration: InputDecoration(labelText: t.fieldPhoneOptional),
           ),
           const SizedBox(height: 12),
           Row(
@@ -504,8 +527,7 @@ class _BookingFormState extends State<BookingForm> {
           TextFormField(
             controller: _message,
             maxLines: 3,
-            decoration: InputDecoration(
-                labelText: t.fieldMessageOptional),
+            decoration: InputDecoration(labelText: t.fieldMessageOptional),
           ),
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,

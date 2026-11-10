@@ -726,6 +726,8 @@
   },
   "detailChooseDate": "Scegli la data",
   "detailBookNow": "Prenota",
+  "detailBackToTours": "Torna ai tour",
+  "detailBack": "Indietro",
   "cartChangeDate": "Cambia data",
   "requestForDate": "Per il {date}",
   "@requestForDate": {

@@ -385,6 +385,8 @@
   "formMaxDates": "Como máximo {max} fechas por tour.",
   "detailChooseDate": "Elige la fecha",
   "detailBookNow": "Reservar",
+  "detailBackToTours": "Volver a los tours",
+  "detailBack": "Atrás",
   "cartChangeDate": "Cambiar fecha",
   "requestForDate": "Para el {date}",
   "moreDates": "{count, plural, =1{+1 fecha más} other{+{count} fechas más}}",
