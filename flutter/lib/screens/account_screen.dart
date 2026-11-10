@@ -127,6 +127,16 @@ class AccountScreen extends StatelessWidget {
                             style: const TextStyle(color: kDanger)),
                         onTap: appState.logout,
                       ),
+                      const Divider(height: 1, color: kLine),
+                      ListTile(
+                        key: const ValueKey('delete-account'),
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.delete_forever_outlined,
+                            color: kDanger),
+                        title: Text(t.deleteAccount,
+                            style: const TextStyle(color: kDanger)),
+                        onTap: () => confirmDeleteAccount(context),
+                      ),
                     ],
                   ),
                 );
@@ -315,4 +325,44 @@ class _Fact extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// Chiede conferma e cancella l'account con tutti i dati (diritto all'oblio).
+Future<void> confirmDeleteAccount(BuildContext context) async {
+  final t = l10n(context);
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(t.deleteAccountTitle),
+      content: Text(t.deleteAccountBody),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancel)),
+        FilledButton(
+          key: const ValueKey('delete-account-confirm'),
+          style: FilledButton.styleFrom(
+              backgroundColor: kDanger, foregroundColor: Colors.white),
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(t.deleteAccountConfirm),
+        ),
+      ],
+    ),
+  );
+  if (ok != true || !context.mounted) return;
+  // Dopo la cancellazione la pagina Account si chiude: il messaggio va
+  // mostrato con il messenger preso adesso.
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    await appState.deleteAccount();
+    messenger.showSnackBar(SnackBar(content: Text(t.deleteAccountDone)));
+  } catch (e) {
+    final msg = '$e';
+    messenger.showSnackBar(SnackBar(
+        content: Text(msg.contains('admin_account')
+            ? t.deleteAccountAdmin
+            // Funzione non ancora creata sul database (migrazione 0010).
+            : msg.contains('delete_my_account') || msg.contains('PGRST202')
+                ? t.deleteAccountUnavailable
+                : msg)));
+  }
 }

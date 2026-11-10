@@ -80,8 +80,8 @@ class GuidaTourApp extends StatelessWidget {
               focusedErrorBorder: field(kDanger, 1.6),
               disabledBorder: field(kLine.withValues(alpha: 0.6)),
               labelStyle: const TextStyle(color: kMuted),
-              floatingLabelStyle: const TextStyle(
-                  color: kPrimary, fontWeight: FontWeight.w600),
+              floatingLabelStyle:
+                  const TextStyle(color: kPrimary, fontWeight: FontWeight.w600),
               hintStyle: TextStyle(color: kMuted.withValues(alpha: 0.8)),
               prefixIconColor: kMuted,
               suffixIconColor: kMuted,
@@ -115,8 +115,8 @@ class GuidaTourApp extends StatelessWidget {
               surfaceTintColor: Colors.transparent,
               showDragHandle: true,
               shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(kRadius * 1.5))),
+                  borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(kRadius * 1.5))),
             ),
             progressIndicatorTheme: const ProgressIndicatorThemeData(
               color: kPrimary,
@@ -373,6 +373,7 @@ class _AppShellState extends State<AppShell> {
   /// Login, logout o cambio di ruolo: si resta sulla stessa pagina se è
   /// ancora consentita, altrimenti si torna a Scopri.
   void _keepPage(List<_NavItem> items, {required bool wasGuest}) {
+    _tabHistory.clear();
     final nowGuest = appState.currentUser == null;
     if (nowGuest && _accountOpen) {
       _reset(items.indexWhere((i) => i.$4 is AccountScreen));
@@ -409,15 +410,48 @@ class _AppShellState extends State<AppShell> {
     }
     setState(() {
       // Dal menu la pagina Tour si apre senza filtri.
-      _searchQuery = '';
-      _searchCategory = null;
+      if (i == 1) {
+        _searchQuery = '';
+        _searchCategory = null;
+        _searchLanguage = null;
+      }
+      _remember();
       _reset(i);
     });
+  }
+
+  /// Voci visitate prima di quella attuale: "indietro" (browser o telefono),
+  /// quando nella voce non c'è più niente da chiudere, torna alla precedente.
+  final _tabHistory = <int>[];
+
+  void _remember() {
+    _tabHistory.add(_index);
+    if (_tabHistory.length > 30) _tabHistory.removeAt(0);
+  }
+
+  /// Indietro: prima si chiudono le pagine aperte nella voce, poi si torna
+  /// alla voce precedente (la pagina Tour con la ricerca che aveva).
+  void _back() {
+    final nav = _navKey.currentState;
+    if (nav != null && nav.canPop()) {
+      nav.maybePop();
+    } else if (_tabHistory.isNotEmpty) {
+      setState(() => _reset(_tabHistory.removeLast()));
+    }
+  }
+
+  /// La pagina Tour comunica ricerca e filtri: tornandoci con "indietro"
+  /// si ritrovano. Niente setState: servono solo alla prossima apertura.
+  void _rememberSearch(String query, String? category, String? language) {
+    _searchQuery = query;
+    _searchCategory = category;
+    _searchLanguage = language;
   }
 
   /// Ricerca e categoria con cui aprire la voce "Tour" (dalla home).
   String _searchQuery = '';
   String? _searchCategory;
+  String? _searchLanguage;
 
   /// Cambia a ogni ricerca dalla home: la pagina Tour riparte con i nuovi
   /// filtri anche se era già aperta.
@@ -429,7 +463,9 @@ class _AppShellState extends State<AppShell> {
     setState(() {
       _searchQuery = query;
       _searchCategory = category;
+      _searchLanguage = null;
       _searchSeq++;
+      if (_index != 1) _remember();
       _reset(1);
     });
   }
@@ -649,12 +685,18 @@ class _AppShellState extends State<AppShell> {
                   ? SearchScreen(
                       key: ValueKey('search-$_searchSeq'),
                       initialQuery: _searchQuery,
-                      initialCategory: _searchCategory)
+                      initialCategory: _searchCategory,
+                      initialLanguage: _searchLanguage)
                   : items[_index].$4!;
           // In home l'intestazione sta sopra la foto; nelle altre pagine in alto.
           final showHeader = !home || _depth > 0;
-          final inner = NavigatorPopHandler(
-            onPopWithResult: (_) => _navKey.currentState?.maybePop(),
+          // Indietro del browser o del telefono: pagine aperte, poi voci
+          // visitate; solo quando non resta niente esce dall'app.
+          final inner = PopScope(
+            canPop: _depth == 0 && _tabHistory.isEmpty,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) _back();
+            },
             child: Navigator(
               key: _navKey,
               observers: [_observer],
@@ -683,6 +725,7 @@ class _AppShellState extends State<AppShell> {
             goHome: () => _select(0),
             open: _open,
             openSearch: _openSearch,
+            rememberSearch: _rememberSearch,
             root: root,
             child: content,
           );
@@ -932,7 +975,9 @@ class _MobileTopBar extends StatelessWidget {
             ConstrainedBox(
               constraints: BoxConstraints(
                   maxWidth: (MediaQuery.sizeOf(context).width *
-                          (MediaQuery.sizeOf(context).width < 400 ? 0.25 : 0.32))
+                          (MediaQuery.sizeOf(context).width < 400
+                              ? 0.25
+                              : 0.32))
                       .clamp(72.0, 200.0)),
               child: const CityPicker(),
             ),

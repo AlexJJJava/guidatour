@@ -629,8 +629,10 @@ class _CategoryBubbleState extends State<_CategoryBubble> {
                         offset: const Offset(0, 4)),
                   ],
                   image: DecorationImage(
-                      image: AssetImage(categoryImage(category)),
-                      colorFilter: photoFilter(categoryImage(category)),
+                      image: AssetImage(
+                          categoryImage(category, city: appState.city)),
+                      colorFilter: photoFilter(
+                          categoryImage(category, city: appState.city)),
                       fit: BoxFit.cover),
                 ),
               ),

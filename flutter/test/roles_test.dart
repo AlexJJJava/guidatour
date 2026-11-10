@@ -21,6 +21,7 @@ import 'package:guidatour/screens/favorites_screen.dart';
 import 'package:guidatour/screens/home_screen.dart';
 import 'package:guidatour/screens/my_tours_screen.dart';
 import 'package:guidatour/screens/profile_edit_screen.dart';
+import 'package:guidatour/screens/legal_screen.dart';
 import 'package:guidatour/screens/search_screen.dart';
 import 'package:guidatour/screens/tour_detail_screen.dart';
 import 'package:guidatour/screens/tour_form_screen.dart';
@@ -221,8 +222,8 @@ void main() {
         // Intestazione con il logo e il pallino.
         expect(find.byType(BrandLogo), findsWidgets);
         expect(find.byKey(const ValueKey('user-avatar')), findsOneWidget);
-        // Footer con il solo link FAQ e senza scelta della lingua (in fondo:
-        // su telefono si scorre).
+        // Footer con marchio, FAQ, Privacy e Termini, senza scelta della
+        // lingua (in fondo: su telefono si scorre).
         await tester.scrollUntilVisible(
             find.byKey(const ValueKey('footer-brand')), 300,
             scrollable: find.byType(Scrollable).last);
@@ -232,7 +233,11 @@ void main() {
             find.descendant(of: footer, matching: find.byType(LanguagePicker)),
             findsNothing);
         expect(find.descendant(of: footer, matching: find.byType(InkWell)),
-            findsNWidgets(2));
+            findsNWidgets(4));
+        for (final k in ['footer-faq', 'footer-privacy', 'footer-terms']) {
+          expect(find.descendant(of: footer, matching: find.byKey(ValueKey(k))),
+              findsOneWidget);
+        }
         // Il marchio nel footer riporta a Scopri.
         await tester.ensureVisible(find.byKey(const ValueKey('footer-brand')));
         await tester.tap(find.byKey(const ValueKey('footer-brand')));
@@ -487,6 +492,121 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(ProfileEditScreen, skipOffstage: false), findsNothing);
       expect(find.byType(AccountScreen, skipOffstage: false), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    for (final (key, title) in [
+      ('footer-privacy', t.privacyTitle),
+      ('footer-terms', t.termsTitle),
+    ]) {
+      testWidgets('footer: $title', (tester) async {
+        await openHome(tester, null);
+        final link = find.byKey(ValueKey(key));
+        await tapAndSettle(tester, link.first);
+        expect(find.byType(LegalScreen), findsOneWidget);
+        expect(find.text(title), findsWidgets);
+        expect(find.text(t.legalUpdated(legalUpdatedOn)), findsOneWidget);
+        // Di nuovo dal footer della stessa pagina: nessun doppione.
+        await tester.scrollUntilVisible(link, 400,
+            scrollable: find
+                .descendant(
+                    of: find.byType(LegalScreen),
+                    matching: find.byType(Scrollable))
+                .first);
+        await tapAndSettle(tester, link.first);
+        expect(find.byType(LegalScreen, skipOffstage: false), findsOneWidget);
+        await tester.pumpWidget(const SizedBox());
+      });
+    }
+
+    testWidgets('modulo di richiesta: link all\'informativa', (tester) async {
+      await openHome(tester, user(Role.turista));
+      await tapAndSettle(tester, find.byType(TourCard).first);
+      await tapAndSettle(tester,
+          find.byKey(const ValueKey('legal-link-privacy')).first);
+      expect(find.byType(LegalScreen), findsOneWidget);
+      // Indietro si torna alla scheda del tour.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(LegalScreen, skipOffstage: false), findsNothing);
+      expect(find.byType(TourDetailScreen), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('Elimina account chiede conferma; Annulla non cancella',
+        (tester) async {
+      await openHome(tester, user(Role.turista));
+      await tester.tap(find.byType(UserAvatar).first);
+      await tester.pumpAndSettle();
+      await tapAndSettle(tester, find.byKey(const ValueKey('delete-account')));
+      expect(find.text(t.deleteAccountTitle), findsOneWidget);
+      expect(find.text(t.deleteAccountBody), findsOneWidget);
+      await tester.tap(find.text(t.cancel));
+      await tester.pumpAndSettle();
+      expect(find.text(t.deleteAccountTitle), findsNothing);
+      expect(appState.currentUser, isNotNull);
+      expect(find.byType(AccountScreen), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('indietro dopo un cambio di voce torna alla voce precedente',
+        (tester) async {
+      await openHome(tester, user(Role.turista), size: const Size(412, 915));
+      await tester.enterText(find.byType(TextField).first, 'prova');
+      await tapAndSettle(tester, find.text(t.heroSearch));
+      onToursPage();
+      // Tour → Preferiti dal menu in basso.
+      await tester.tap(find.text(t.navFavorites).last);
+      await tester.pumpAndSettle();
+      expect(find.byType(FavoritesScreen), findsOneWidget);
+      // Indietro: di nuovo Tour con la ricerca di prima.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(
+          find.descendant(
+              of: find.byType(SearchScreen),
+              matching: find.widgetWithText(TextField, 'prova')),
+          findsOneWidget);
+      expect(
+          tester.widget<NavigationBar>(find.byType(NavigationBar))
+              .selectedIndex,
+          1);
+      // Indietro ancora: Scopri.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(HomeScreen), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('ricerca scritta in Tour ritrovata tornando indietro',
+        (tester) async {
+      await openHome(tester, user(Role.turista));
+      await tester.tap(find.text(t.navSearch).first);
+      await tester.pumpAndSettle();
+      await tester.enterText(
+          find.descendant(
+              of: find.byType(SearchScreen), matching: find.byType(TextField)),
+          'notte');
+      await tester.pump();
+      await tester.tap(find.text(t.navFavorites).first);
+      await tester.pumpAndSettle();
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(
+          find.descendant(
+              of: find.byType(SearchScreen),
+              matching: find.widgetWithText(TextField, 'notte')),
+          findsOneWidget);
+      // Dal menu, invece, Tour riparte vuota.
+      await tester.tap(find.text(t.navDiscover).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(t.navSearch).first);
+      await tester.pumpAndSettle();
+      expect(
+          find.descendant(
+              of: find.byType(SearchScreen),
+              matching: find.widgetWithText(TextField, 'notte')),
+          findsNothing);
       await tester.pumpWidget(const SizedBox());
     });
 
@@ -1500,31 +1620,47 @@ void main() {
       appState.requests = [];
     });
 
-    test('foto per tour: stabile, varia tra tour, file presenti', () {
+    test('foto per tour: della sua città o neutra, stabile, file presenti', () {
+      final cityOf = {for (final (f, c) in allCategoryPhotos) f: c};
       final seen = <String>{};
-      for (final c in tourCategories) {
-        for (var i = 0; i < 40; i++) {
-          final tour = Tour(
-              id: 'id$i',
-              title: 'T',
-              city: 'Roma',
-              category: c,
-              language: 'Italiano',
-              duration: '1 ora',
-              start: d1,
-              price: 10,
-              meetingPoint: 'P',
-              description: 'D',
-              seats: 5,
-              guideId: 'g1');
-          final img = tourImage(tour);
-          expect(tourImage(tour), img); // sempre la stessa per lo stesso tour
-          expect(File(img).existsSync(), isTrue, reason: img);
-          seen.add(img);
+      for (final city in tourCities) {
+        for (final c in tourCategories) {
+          for (var i = 0; i < 40; i++) {
+            final tour = Tour(
+                id: 'id$i',
+                title: 'T',
+                city: city,
+                category: c,
+                language: 'Italiano',
+                duration: '1 ora',
+                start: d1,
+                price: 10,
+                meetingPoint: 'P',
+                description: 'D',
+                seats: 5,
+                guideId: 'g1');
+            final img = tourImage(tour);
+            expect(tourImage(tour), img); // sempre la stessa per lo stesso tour
+            expect(cityOf.containsKey(img), isTrue, reason: img);
+            // Mai la foto di un'altra città.
+            expect(cityOf[img] == null || cityOf[img] == city, isTrue,
+                reason: '$img per un tour di $city');
+            seen.add(img);
+          }
         }
       }
-      // 4 foto per ognuna delle 6 categorie, tutte usate.
-      expect(seen.length, tourCategories.length * 4);
+      for (final (f, _) in allCategoryPhotos) {
+        expect(File(f).existsSync(), isTrue, reason: f);
+        expect(seen, contains(f), reason: 'foto mai usata: $f');
+      }
+      // Cerchi delle categorie: con una città scelta niente foto di altre città.
+      for (final city in tourCities) {
+        for (final c in tourCategories) {
+          final img = categoryImage(c, city: city);
+          expect(cityOf[img] == null || cityOf[img] == city, isTrue,
+              reason: '$img nel cerchio per $city');
+        }
+      }
     });
 
     testWidgets('data leggibile nella lingua scelta', (tester) async {

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../l10n/labels.dart';
 import '../state.dart';
 import '../widgets.dart';
+import '../legal_texts.dart';
+import 'legal_screen.dart';
 
 /// Opt-in WhatsApp consent-first (BRD §13.1): il consenso è esplicito e tracciato.
 ///
@@ -115,6 +117,7 @@ class _WhatsAppOptInCardState extends State<WhatsAppOptInCard> {
                         button,
                       ]),
                       consent,
+                      const LegalLink(kind: LegalKind.privacy),
                     ],
                   );
                 }
@@ -125,6 +128,7 @@ class _WhatsAppOptInCardState extends State<WhatsAppOptInCard> {
                     const SizedBox(height: 10),
                     phone,
                     consent,
+                    const LegalLink(kind: LegalKind.privacy),
                     button,
                   ],
                 );

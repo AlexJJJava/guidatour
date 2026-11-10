@@ -23,6 +23,8 @@ Node 18+.
 
 6. Foto profilo (migrazione 0005): bucket pubblico `avatars`, ognuno scrive solo in `<id utente>/`; l'app carica direttamente e salva l'indirizzo con `PATCH /me`.
 
+7. Cancellazione account (migrazione 0010): funzione `delete_my_account()` chiamata dall'app con `rpc` (non passa dal backend). Cancella richieste inviate, consensi WhatsApp e l'utente Auth (a cascata profilo, tour, preferiti, carrello, avvisi, proposte); rifiuta gli admin. La foto la toglie prima l'app con le API di Storage.
+
 ## Architettura
 
 - `src/index.ts`: app Hono, CORS, gestione errori, montaggio rotte.

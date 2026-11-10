@@ -4,6 +4,8 @@ import '../l10n/labels.dart';
 import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
+import '../legal_texts.dart';
+import 'legal_screen.dart';
 import 'tour_map.dart';
 import 'whatsapp_optin.dart';
 
@@ -537,6 +539,7 @@ class _BookingFormState extends State<BookingForm> {
             title: Text(t.bookingPrivacyConsent,
                 style: const TextStyle(fontSize: 13)),
           ),
+          const LegalLink(kind: LegalKind.privacy),
           const SizedBox(height: 8),
           FilledButton(
             onPressed: _sending ? null : _submit,

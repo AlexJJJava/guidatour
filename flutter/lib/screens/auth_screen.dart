@@ -4,6 +4,8 @@ import '../l10n/labels.dart';
 import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
+import '../legal_texts.dart';
+import 'legal_screen.dart';
 
 /// Account demo per velocizzare i test manuali: TOGLIERE prima del lancio
 /// reale (o quando la registrazione vera sostituisce questi dati finti).
@@ -235,6 +237,8 @@ class _AuthScreenState extends State<AuthScreen> {
                         title: Text(t.authTermsText,
                             style: const TextStyle(fontSize: 13)),
                       ),
+                      const LegalLink(kind: LegalKind.terms),
+                      const LegalLink(kind: LegalKind.privacy),
                     ],
                     const SizedBox(height: 14),
                     FilledButton(

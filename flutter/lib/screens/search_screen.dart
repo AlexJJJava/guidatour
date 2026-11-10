@@ -7,9 +7,14 @@ import '../widgets.dart';
 import 'tour_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key, this.initialQuery = '', this.initialCategory});
+  const SearchScreen(
+      {super.key,
+      this.initialQuery = '',
+      this.initialCategory,
+      this.initialLanguage});
   final String initialQuery;
   final String? initialCategory;
+  final String? initialLanguage;
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -19,7 +24,14 @@ class _SearchScreenState extends State<SearchScreen> {
   late final TextEditingController _controller =
       TextEditingController(text: widget.initialQuery);
   late String? _category = widget.initialCategory;
-  String? _language;
+  late String? _language = widget.initialLanguage;
+
+  /// Ricerca e filtri passano alla struttura dell'app: tornando qui con
+  /// "indietro" da un'altra voce si ritrovano com'erano.
+  void _report() => context
+      .getInheritedWidgetOfExactType<ShellScope>()
+      ?.rememberSearch
+      ?.call(_controller.text, _category, _language);
 
   @override
   void dispose() {
@@ -58,7 +70,10 @@ class _SearchScreenState extends State<SearchScreen> {
               const SizedBox(height: 16),
               TextField(
                 controller: _controller,
-                onChanged: (_) => setState(() {}),
+                onChanged: (_) {
+                  setState(() {});
+                  _report();
+                },
                 decoration: InputDecoration(
                   hintText: t.searchHint,
                   prefixIcon: const Icon(Icons.search),
@@ -66,7 +81,10 @@ class _SearchScreenState extends State<SearchScreen> {
                       ? null
                       : IconButton(
                           icon: const Icon(Icons.close),
-                          onPressed: () => setState(_controller.clear)),
+                          onPressed: () {
+                            setState(_controller.clear);
+                            _report();
+                          }),
                   filled: true,
                   fillColor: kSurface,
                   border: OutlineInputBorder(
@@ -83,8 +101,10 @@ class _SearchScreenState extends State<SearchScreen> {
                     ...tourCategories.map((c) => categoryLabel(context, c))
                   ],
                   [null, ...tourCategories],
-                  _category,
-                  (v) => setState(() => _category = v)),
+                  _category, (v) {
+                setState(() => _category = v);
+                _report();
+              }),
               const SizedBox(height: 8),
               _chips(
                   context,
@@ -93,8 +113,10 @@ class _SearchScreenState extends State<SearchScreen> {
                     ...tourLanguages.map((l) => languageLabel(context, l))
                   ],
                   [null, ...tourLanguages],
-                  _language,
-                  (v) => setState(() => _language = v)),
+                  _language, (v) {
+                setState(() => _language = v);
+                _report();
+              }),
               const SizedBox(height: 22),
               Text(t.searchResultsCount(results.length),
                   style: const TextStyle(color: kMuted)),

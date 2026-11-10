@@ -770,5 +770,22 @@
       }
     }
   },
+  "privacyTitle": "Informativa privacy",
+  "privacySub": "Quali dati trattiamo, perché e come puoi esercitare i tuoi diritti.",
+  "termsTitle": "Termini d’uso",
+  "termsSub": "Le regole per usare GuidaTour, per turisti e professionisti.",
+  "legalUpdated": "Ultimo aggiornamento: {date}",
+  "@legalUpdated": {"placeholders":{"date":{"type":"String"}}},
+  "footerPrivacy": "Privacy",
+  "footerTerms": "Termini d’uso",
+  "legalReadPrivacy": "Leggi l’informativa privacy",
+  "legalReadTerms": "Leggi i termini d’uso",
+  "deleteAccount": "Elimina account",
+  "deleteAccountTitle": "Eliminare l’account?",
+  "deleteAccountBody": "Verranno cancellati per sempre il profilo, la foto, i preferiti, il carrello, le richieste che hai inviato e i consensi WhatsApp. Se sei un professionista, anche i tuoi tour e le richieste ricevute. Non si può annullare.",
+  "deleteAccountConfirm": "Elimina definitivamente",
+  "deleteAccountDone": "Account eliminato. Tutti i tuoi dati sono stati cancellati.",
+  "deleteAccountAdmin": "Gli account admin non si eliminano dall’app: va fatto dalla dashboard Supabase.",
+  "deleteAccountUnavailable": "Eliminazione non ancora attiva sul server. Riprova più tardi o scrivici ai contatti indicati nell’informativa privacy.",
   "weekdayNames": "lunedì,martedì,mercoledì,giovedì,venerdì,sabato,domenica"
 }

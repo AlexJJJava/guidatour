@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'l10n/labels.dart';
 import 'l10n/locale_controller.dart';
 import 'models.dart';
+import 'legal_texts.dart';
 import 'screens/faq_screen.dart';
+import 'screens/legal_screen.dart';
 import 'state.dart';
 
 /// Oro scuro: icone, link e accenti su fondo chiaro.
@@ -96,19 +98,33 @@ List<BoxShadow> kSoftShadow([double lift = 0]) => [
 /// Le schermate usano questi stili invece di dimensioni scritte a mano.
 const kTextTheme = TextTheme(
   displaySmall: TextStyle(
-      fontFamily: kSerif, fontSize: 30, height: 1.15, fontWeight: FontWeight.w700, color: kInk),
+      fontFamily: kSerif,
+      fontSize: 30,
+      height: 1.15,
+      fontWeight: FontWeight.w700,
+      color: kInk),
   headlineSmall: TextStyle(
-      fontFamily: kSerif, fontSize: 24, height: 1.2, fontWeight: FontWeight.w700, color: kInk),
+      fontFamily: kSerif,
+      fontSize: 24,
+      height: 1.2,
+      fontWeight: FontWeight.w700,
+      color: kInk),
   titleLarge: TextStyle(
-      fontFamily: kSerif, fontSize: 20, height: 1.2, fontWeight: FontWeight.w700, color: kInk),
-  titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: kInk),
+      fontFamily: kSerif,
+      fontSize: 20,
+      height: 1.2,
+      fontWeight: FontWeight.w700,
+      color: kInk),
+  titleMedium:
+      TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: kInk),
   titleSmall: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: kInk),
   bodyLarge: TextStyle(fontSize: 15, height: 1.45, color: kInk),
   bodyMedium: TextStyle(fontSize: 14, height: 1.4, color: kInk),
   bodySmall: TextStyle(fontSize: 12, height: 1.4, color: kMuted),
   labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
   labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-  labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3),
+  labelSmall:
+      TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.3),
 );
 
 /// Aggiunge la scala tipografica a un tema già costruito. Va fatto dopo:
@@ -250,9 +266,16 @@ class ShellScope extends InheritedWidget {
     required this.open,
     required this.root,
     this.openSearch,
+    this.rememberSearch,
     required super.child,
   });
+
+  /// La pagina Tour comunica ricerca e filtri correnti, per ritrovarli
+  /// tornando con "indietro" da un'altra voce.
+  final void Function(String query, String? category, String? language)?
+      rememberSearch;
   final VoidCallback goHome;
+
   /// Apre una pagina sotto intestazione e footer. Con [name] non apre doppioni:
   /// se è già aperta si torna a quella.
   final void Function(Widget page, {String? name}) open;
@@ -421,15 +444,32 @@ class SiteFooter extends StatelessWidget {
       children: [
         Text(t.footerLinks, style: heading),
         const SizedBox(height: 10),
-        InkWell(
-          key: const ValueKey('footer-faq'),
-          onTap: () => shell?.open(const FaqScreen(), name: 'faq'),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Text(t.faqTitle,
-                style: const TextStyle(fontSize: 13, color: Colors.white70)),
+        for (final (key, label, open) in [
+          (
+            'footer-faq',
+            t.faqTitle,
+            () => shell?.open(const FaqScreen(), name: 'faq')
           ),
-        ),
+          (
+            'footer-privacy',
+            t.footerPrivacy,
+            () => openLegal(context, LegalKind.privacy)
+          ),
+          (
+            'footer-terms',
+            t.footerTerms,
+            () => openLegal(context, LegalKind.terms)
+          ),
+        ])
+          InkWell(
+            key: ValueKey(key),
+            onTap: open,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Text(label,
+                  style: const TextStyle(fontSize: 13, color: Colors.white70)),
+            ),
+          ),
       ],
     );
     return Container(
@@ -603,8 +643,8 @@ class _FadeSlideInState extends State<FadeSlideIn>
   Widget build(BuildContext context) => FadeTransition(
         opacity: _anim,
         child: SlideTransition(
-          position:
-              Tween(begin: const Offset(0, 0.06), end: Offset.zero).animate(_anim),
+          position: Tween(begin: const Offset(0, 0.06), end: Offset.zero)
+              .animate(_anim),
           child: widget.child,
         ),
       );
@@ -621,16 +661,6 @@ const _categoryIcons = {
 
 IconData categoryIcon(String c) => _categoryIcons[c] ?? Icons.explore_outlined;
 
-/// Una foto per categoria (Unsplash, in assets/images): i tour non hanno
-/// ancora immagini proprie.
-const _categoryImages = {
-  'Visita guidata': 'assets/images/cat_visita.jpg',
-  'Tour a piedi': 'assets/images/cat_piedi.jpg',
-  'Enogastronomico': 'assets/images/cat_food.jpg',
-  'Bambini e famiglie': 'assets/images/cat_famiglie.jpg',
-  'Serale': 'assets/images/cat_serale.jpg',
-  'Accompagnamento': 'assets/images/cat_accompagnamento.jpg',
-};
 
 /// Velo nero sulle foto per il tema scuro (circa un terzo di luce in meno).
 const kPhotoShade = Color(0x52000000);
@@ -639,18 +669,84 @@ const kPhotoShade = Color(0x52000000);
 Color? photoShade(String asset) =>
     asset.contains('cat_serale') ? null : kPhotoShade;
 
-/// Quante foto ci sono per categoria: cat_x.jpg più cat_x_2..4.jpg (Pexels,
-/// vedi assets/CREDITI_FOTO.txt).
-const _photosPerCategory = 4;
+/// Foto di ogni categoria con la città che vi si riconosce (null = nessuna
+/// città riconoscibile). Un tour mostra solo foto della sua città o neutre:
+/// mai il Colosseo per un tour di Milano. Crediti in assets/CREDITI_FOTO.txt.
+const _categoryPhotos = <String, List<(String, String?)>>{
+  'Visita guidata': [
+    ('cat_visita.jpg', 'Roma'),
+    ('cat_visita_2.jpg', 'Firenze'),
+    ('cat_visita_3.jpg', 'Roma'),
+    ('cat_visita_4.jpg', 'Venezia'),
+    ('cat_visita_5.jpg', null),
+    ('cat_visita_6.jpg', null),
+  ],
+  'Tour a piedi': [
+    ('cat_piedi.jpg', null),
+    ('cat_piedi_2.jpg', 'Venezia'),
+    ('cat_piedi_3.jpg', null),
+    ('cat_piedi_4.jpg', null),
+  ],
+  'Enogastronomico': [
+    ('cat_food.jpg', null),
+    ('cat_food_2.jpg', null),
+    ('cat_food_3.jpg', null),
+    ('cat_food_4.jpg', null),
+  ],
+  'Bambini e famiglie': [
+    ('cat_famiglie.jpg', null),
+    ('cat_famiglie_2.jpg', null),
+    ('cat_famiglie_3.jpg', null),
+    ('cat_famiglie_4.jpg', null),
+  ],
+  'Serale': [
+    ('cat_serale.jpg', 'Roma'),
+    ('cat_serale_2.jpg', 'Firenze'),
+    ('cat_serale_3.jpg', 'Venezia'),
+    ('cat_serale_4.jpg', 'Firenze'),
+    ('cat_serale_5.jpg', null),
+    ('cat_serale_6.jpg', null),
+  ],
+  'Accompagnamento': [
+    ('cat_accompagnamento.jpg', null),
+    ('cat_accompagnamento_2.jpg', null),
+    ('cat_accompagnamento_3.jpg', null),
+    ('cat_accompagnamento_4.jpg', null),
+  ],
+};
 
-/// Foto di un tour: sempre la stessa per lo stesso tour, ma diversa tra tour
-/// della stessa categoria (così due card vicine non mostrano la stessa foto).
-/// Somma dei caratteri dell'id e non hashCode, che cambia tra web e telefono.
+List<(String, String?)> _photosOf(String category) =>
+    _categoryPhotos[category] ?? _categoryPhotos['Visita guidata']!;
+
+/// Tutte le foto delle categorie con la loro città (per i test).
+Iterable<(String, String?)> get allCategoryPhotos => _categoryPhotos.values
+    .expand((l) => l)
+    .map((p) => ('assets/images/${p.$1}', p.$2));
+
+/// Foto di un tour: della sua città o neutra, sempre la stessa per lo stesso
+/// tour ma diversa tra tour vicini. Somma dei caratteri dell'id e non
+/// hashCode, che cambia tra web e telefono.
 String tourImage(Tour tour) {
-  final base = categoryImage(tour.category);
+  final pool = [
+    for (final (file, city) in _photosOf(tour.category))
+      if (city == null || city == tour.city) file,
+  ];
   final n = tour.id.codeUnits.fold<int>(0, (a, c) => a * 31 + c & 0x7fffffff) %
-      _photosPerCategory;
-  return n == 0 ? base : base.replaceFirst('.jpg', '_${n + 1}.jpg');
+      pool.length;
+  return 'assets/images/${pool[n]}';
+}
+
+/// Foto che rappresenta una categoria (cerchi in home). Con una città
+/// scelta: una foto di quella città se c'è, altrimenti una neutra; per tutta
+/// Italia la prima, la più riconoscibile.
+String categoryImage(String c, {String? city}) {
+  final photos = _photosOf(c);
+  final file = city == null
+      ? photos.first.$1
+      : (photos.where((p) => p.$2 == city).firstOrNull ??
+              photos.firstWhere((p) => p.$2 == null))
+          .$1;
+  return 'assets/images/$file';
 }
 
 ColorFilter? photoFilter(String asset) {
@@ -658,8 +754,6 @@ ColorFilter? photoFilter(String asset) {
   return shade == null ? null : ColorFilter.mode(shade, BlendMode.srcATop);
 }
 
-String categoryImage(String c) =>
-    _categoryImages[c] ?? 'assets/images/cat_visita.jpg';
 
 class TourCard extends StatefulWidget {
   const TourCard({super.key, required this.tour, required this.onTap});

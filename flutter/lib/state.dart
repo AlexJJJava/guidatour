@@ -328,6 +328,24 @@ class AppState extends ChangeNotifier {
 
   Future<void> logout() => Supabase.instance.client.auth.signOut();
 
+  /// Cancella l'account e tutti i dati collegati (funzione delete_my_account,
+  /// migrazione 0010), poi chiude la sessione. La foto si toglie prima con
+  /// Storage: il database non può cancellare i file.
+  Future<void> deleteAccount() async {
+    final client = Supabase.instance.client;
+    if (currentUser?.avatarUrl != null) {
+      try {
+        await client.storage
+            .from('avatars')
+            .remove(['${currentUser!.id}/avatar.png']);
+      } catch (_) {
+        // Una foto non cancellata non deve bloccare la cancellazione.
+      }
+    }
+    await client.rpc('delete_my_account');
+    await client.auth.signOut();
+  }
+
   // --- Admin: approvazione registrazioni ---
 
   /// Registrazioni professionali nello stato indicato.

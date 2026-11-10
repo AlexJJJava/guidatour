@@ -18,3 +18,12 @@ const publicSiteUrl = String.fromEnvironment(
 const supabaseUrl = 'https://oetmzmnysdblzulxhywt.supabase.co';
 const supabaseAnonKey =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ldG16bW55c2RibHp1bHhoeXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMDkzMjAsImV4cCI6MjEwODU4NTMyMH0.sZ7d66UvjNofidouXWEyyA-5vWoWngQYzHB7coV67d8';
+
+/// Titolare del trattamento e contatto privacy mostrati nell'informativa e
+/// nei termini. DA COMPLETARE prima del lancio (nome o ragione sociale,
+/// indirizzo, email): finché restano tra parentesi quadre si vede che mancano.
+const legalOwner = '[nome o ragione sociale e indirizzo del titolare]';
+const legalContactEmail = '[email di contatto privacy]';
+
+/// Data dell'ultima modifica di informativa e termini (gg/mm/aaaa).
+const legalUpdatedOn = '10/11/2026';

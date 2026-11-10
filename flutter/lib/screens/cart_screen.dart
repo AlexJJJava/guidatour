@@ -6,6 +6,8 @@ import '../l10n/labels.dart';
 import '../models.dart';
 import '../state.dart';
 import '../widgets.dart';
+import '../legal_texts.dart';
+import 'legal_screen.dart';
 import 'auth_screen.dart';
 import 'bookings_screen.dart';
 import 'tour_detail_screen.dart';
@@ -116,6 +118,7 @@ class _CartBodyState extends State<_CartBody> {
           onChanged: (v) => setState(() => _privacy = v ?? false),
           title: Text(t.cartShareConsent, style: const TextStyle(fontSize: 13)),
         ),
+        const LegalLink(kind: LegalKind.privacy),
         FilledButton(
           onPressed: !_privacy
               ? null

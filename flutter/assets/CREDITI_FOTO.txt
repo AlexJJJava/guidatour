@@ -1,10 +1,13 @@
 Foto delle categorie.
 cat_*.jpg senza numero: Unsplash (licenza Unsplash).
-cat_*_2/3/4.jpg: Pexels (licenza Pexels, uso libero anche commerciale, attribuzione non richiesta).
+cat_*_2..6.jpg: Pexels (licenza Pexels, uso libero anche commerciale, attribuzione non richiesta).
 ID Pexels (https://www.pexels.com/photo/<id>/):
-visita 2=23223545 3=30726095 4=39504146
+visita 2=23223545 3=30726095 4=39504146 5=16960921 6=18250524
 piedi 2=16543440 3=17788271 4=15382092
 food 2=2422444 3=35074679 4=8775044
 famiglie 2=1194209 3=3811863 4=8576304
-serale 2=29625157 3=20557250 4=3766511
+serale 2=29625157 3=20557250 4=3766511 5=17813247 6=18073940
 accompagnamento 2=1546328 3=18999517 4=28672385
+
+Foto con citta riconoscibile (usate solo per i tour di quella citta, vedi _categoryPhotos in lib/widgets.dart):
+Roma: cat_visita, cat_visita_3, cat_serale. Firenze: cat_visita_2, cat_serale_2, cat_serale_4. Venezia: cat_visita_4, cat_serale_3, cat_piedi_2.

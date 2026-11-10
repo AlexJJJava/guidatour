@@ -160,7 +160,7 @@ const tests = [
   ['Backend online', 'Date multiple', 6, 'Superato', 'Tour con più date in ordine; ricerca per data; richiesta e carrello con la data (data estranea rifiutata); modifica delle date senza toccare gli altri campi; tour con la sola data; limiti'],
   ['Backend online', 'Foto profilo', 5, 'Superato', 'Caricamento, rimozione, cartelle altrui, formato e indirizzi esterni'],
   ['Backend online', 'Pagine SEO', 12, 'Superato', 'npm run test:site: titolo, descrizione, canonical, hreflang, JSON-LD Event e ItemList, 404 e 410 noindex, sitemap senza [TEST], robots, immagini, API invariate'],
-  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, ruoli dal profilo, login senza cambio pagina, menu lingua, carrello e richieste, approvazioni, Gestione admin, Account e profilo, pallino, ritaglio foto, lettura delle foto (JPG vero, foto grandi ridotte, file non validi), locandina PDF, blocchi, link QR, date multiple, foto per tour, data leggibile, barra Prenota, ricerca dalla home sulla voce Tour, destinazioni dei pulsanti, ritorno ai tour dalla scheda, layout', 120, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
+  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, ruoli dal profilo, login senza cambio pagina, menu lingua, carrello e richieste, approvazioni, Gestione admin, Account e profilo, pallino, ritaglio foto, lettura delle foto (JPG vero, foto grandi ridotte, file non validi), locandina PDF, blocchi, link QR, date multiple, foto per tour, data leggibile, barra Prenota, ricerca dalla home sulla voce Tour, destinazioni dei pulsanti, ritorno ai tour dalla scheda, privacy e termini, elimina account, indietro tra le voci, foto per città, layout', 126, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
   ['Non coperto', 'Prova end-to-end nel browser', 0, 'Da provare', 'Clic reali sul sito pubblicato'],
 ];
 const wsT = sheet('Test', 'Esiti del 10 novembre 2026. Comandi backend: npm run test:roles e npm run test:site (cartella nodeBE).',
@@ -177,7 +177,7 @@ const todo = [
   [3, 'MVP', 'Notifiche email', "Oggi gli avvisi sono solo dentro l'app", F],
   [4, 'MVP', 'Locandina PDF', 'A4 con foto, QR, prezzo e organizzatore; pulsanti Scarica PDF e Stampa', 'Fatto'],
   [5, 'MVP', 'SEO', 'Pagine HTML dal backend: home, città, città + categoria, tour (IT/EN/ES), sitemap, robots.txt, dati strutturati Event, 404/410. Da portare sul dominio definitivo e inviare a Google Search Console', 'Fatto'],
-  [6, 'MVP', 'Privacy e termini', 'Pagine vere e cancellazione dei dati su richiesta', F],
+  [6, 'MVP', 'Privacy e termini', 'Fatte: informativa e termini (IT/EN/ES) dal footer e accanto a ogni consenso; Elimina account in Account. Mancano: migrazione 0010 sul database, titolare e email in app_config.dart, revisione di un legale', 'In corso'],
   [7, 'MVP', 'Admin completo', 'Area Gestione: panoramica, sospensione professionisti, eliminazione tour, approvazioni, consensi (migrazione 0007)', 'Fatto'],
   [8, 'MVP', 'Recupero password', "Non presente nell'app", F],
   [9, 'MVP', 'Conferma email e rimozione accessi rapidi', 'Da fare prima del lancio', F],
@@ -225,6 +225,9 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['10/11/2026', 'Indietro del browser tra le voci', 'Indietro (browser o telefono) chiude prima le pagine aperte e poi torna alla voce del menu precedente; la pagina Tour ritrova ricerca e filtri. Dentro una voce funzionava già', 'Test app (2 nuovi); prova cliccando sul sito'],
+  ['10/11/2026', 'Foto della città giusta', 'Ogni foto ha la sua città (o nessuna): un tour mostra solo foto della sua città o neutre, mai il Colosseo a Milano; 4 foto neutre nuove (musei, sere). I cerchi delle categorie seguono la città scelta', 'Test app su tutte le città e categorie'],
+  ['10/11/2026', 'Privacy e termini', 'Informativa privacy e termini d’uso in IT/EN/ES (bozza sui dati reali dell’app), nel footer e accanto ai consensi di registrazione, richiesta, carrello e WhatsApp. Account › Elimina account cancella tutti i dati (migrazione 0010, da eseguire); gli admin no', 'Test app (126 superati, 6 nuovi); schermata della pagina privacy'],
   ['10/11/2026', 'Tutte le pagine della stessa larghezza', 'Panoramica, I miei tour, Assegnazioni, Richieste, Account, Carrello, FAQ e avvisi "solo turisti" usano la larghezza standard (1240 px). Account: Profilo e Azioni affiancati su schermo largo. Accesso: fascia del titolo larga, modulo stretto e centrato. Restano strette solo scheda tour, locandina e ritaglio foto, per leggibilità', 'Test app (120 superati); schermate di Accesso e Account a 1300 px'],
   ['10/11/2026', 'Gestione larga come le altre pagine', 'La pagina Gestione era limitata a 1080 px: ora usa la larghezza standard (1240 px) come Tour e Preferiti', 'Test app (120 superati)'],
   ['10/11/2026', 'Dalla scheda si torna ai tour', 'In cima alla scheda tour c’è "Torna ai tour" (dall’elenco Tour) o "Indietro" (da home, preferiti, carrello…): si ritrova l’elenco con ricerca, filtri e scorrimento com’erano', 'Test app (120 superati, 2 nuovi: computer e telefono)'],
