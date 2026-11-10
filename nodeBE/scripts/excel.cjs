@@ -225,6 +225,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['10/11/2026', 'Schema del database aggiornato', 'schema.sql con la funzione delete_my_account (migrazione 0010); immagine dello schema rigenerata (docs/GuidaTour_Schema_DB.png e .svg) con la nota sulla cancellazione account. Tabelle e colonne invariate dal 06/11', 'npm run docs:db'],
   ['10/11/2026', 'Documento per la revisione legale', 'Doc condiviso con contesto del servizio, 14 punti da verificare (privacy, consumatori, DSA) con colonna Esito, dati mancanti e i due testi italiani completi: https://claude.ai/artifact/Ci9G2zCtPaxLWV3ujz95qC', 'Testi copiati dal codice dell’app'],
   ['10/11/2026', 'Informativa completata (art. 13 GDPR)', 'Aggiunti nelle 3 lingue: quali dati sono obbligatori e cosa succede senza, nessuna decisione automatizzata né profilazione, nessun DPO nominato. Restano titolare, email e revisione legale', 'Test app'],
   ['10/11/2026', 'Migrazione 0010 attiva', 'Elimina account funziona: provato con un account usa e getta (registrazione, preferito, cancellazione: poi login rifiutato e sessione non più valida)', 'Prova sul database reale'],

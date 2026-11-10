@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1174" viewBox="0 0 1600 1174">
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1190" viewBox="0 0 1600 1190">
 <defs>
   <marker id="many" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7"><circle cx="5" cy="5" r="4" fill="#fff" stroke="#3B6EA5" stroke-width="2"/></marker>
   <marker id="one-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#3B6EA5"/></marker>
@@ -19,7 +19,7 @@
 </style>
 <rect width="100%" height="100%" fill="#FBF8F2"/>
 <text x="40" y="52" class="h1">GuidaTour · schema del database</text>
-<text x="40" y="76" class="sub">Supabase Postgres (schema public) · tabelle, colonne e relazioni · aggiornato al 06/11/2026</text>
+<text x="40" y="76" class="sub">Supabase Postgres (schema public) · tabelle, colonne e relazioni · aggiornato al 10/11/2026</text>
 <path d="M570 286 V250" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
 <text x="578" y="272" class="action" fill="#3B6EA5">cascade</text>
 <path d="M1300 150 V118 H734 V345 H720" fill="none" stroke="#3B6EA5" stroke-width="1.6" marker-start="url(#many)" marker-end="url(#one-c)" opacity=".85"/>
@@ -351,7 +351,7 @@
 <text x="328" y="833" class="type">PNG, max 2 MB</text>
 </g>
 <g transform="translate(40 1104)">
-  <rect x="0" y="-22" width="1520" height="56" rx="10" fill="#fff" stroke="#E5E0D6"/>
+  <rect x="0" y="-22" width="1520" height="72" rx="10" fill="#fff" stroke="#E5E0D6"/>
   <rect x="16" y="-6" width="20" height="12" rx="3" fill="#C9963A"/><text x="26" y="3" class="badge">PK</text>
   <text x="44" y="4" class="legend">chiave primaria</text>
   <rect x="160" y="-6" width="20" height="12" rx="3" fill="#3B6EA5"/><text x="170" y="3" class="badge">FK</text>
@@ -361,5 +361,6 @@
   <line x1="880" y1="0" x2="916" y2="0" stroke="#9A6B1F" stroke-width="1.6"/><path d="M916 -4 L924 0 L916 4 z" fill="#9A6B1F"/>
   <text x="934" y="4" class="legend">set null: il record resta, il collegamento si svuota</text>
   <text x="16" y="24" class="sub" style="font-size:11px">Tutte le tabelle sono protette da RLS; avatar_url non è una FK ma l'indirizzo di un file nel bucket avatars.</text>
+  <text x="16" y="40" class="sub" style="font-size:11px">Elimina account: la funzione delete_my_account() (migrazione 0010) cancella le richieste inviate e i consensi WhatsApp dell'utente e il suo account in auth.users; il resto sparisce a cascata. Gli admin non possono cancellarsi.</text>
 </g>
 </svg>

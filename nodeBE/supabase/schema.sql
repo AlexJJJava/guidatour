@@ -366,3 +366,32 @@ end $$;
 create trigger assignments_notify
   after insert or update of status on public.assignments
   for each row execute function public.notify_assignment();
+
+-- ── Cancellazione account (migrazione 0010) ──────────────────────────
+-- L'utente cancella da sé l'account dall'app (rpc). Via le sue richieste
+-- inviate e i consensi WhatsApp, poi l'utente Auth: profilo, tour, preferiti,
+-- carrello, avvisi e proposte spariscono a cascata. Gli admin no.
+create or replace function public.delete_my_account()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  me uuid := auth.uid();
+begin
+  if me is null then
+    raise exception 'not_authenticated' using errcode = '28000';
+  end if;
+  if exists (select 1 from public.profiles where id = me and is_admin) then
+    raise exception 'admin_account' using errcode = '42501';
+  end if;
+
+  delete from public.booking_requests where user_id = me;
+  delete from public.whatsapp_consents where user_id = me;
+  delete from auth.users where id = me;
+end;
+$$;
+
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;

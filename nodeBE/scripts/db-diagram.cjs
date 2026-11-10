@@ -168,9 +168,9 @@ for (const [ft, fc, tt, tc, action] of fks) {
 for (const t of Object.values(tables)) drawTable(t);
 
 const width = COLS[3] + W + 40;
-const height = Math.max(...Object.values(tables).map((t) => t.y + t.h)) + 120;
+const height = Math.max(...Object.values(tables).map((t) => t.y + t.h)) + 136;
 const today = new Date().toLocaleDateString('it-IT');
-const legendY = height - 70;
+const legendY = height - 86;
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
 <defs>
   <marker id="many" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7"><circle cx="5" cy="5" r="4" fill="#fff" stroke="#3B6EA5" stroke-width="2"/></marker>
@@ -196,7 +196,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${
 ${lines.join('\n')}
 ${out.join('\n')}
 <g transform="translate(40 ${legendY})">
-  <rect x="0" y="-22" width="${width - 80}" height="56" rx="10" fill="#fff" stroke="#E5E0D6"/>
+  <rect x="0" y="-22" width="${width - 80}" height="72" rx="10" fill="#fff" stroke="#E5E0D6"/>
   <rect x="16" y="-6" width="20" height="12" rx="3" fill="${GOLD}"/><text x="26" y="3" class="badge">PK</text>
   <text x="44" y="4" class="legend">chiave primaria</text>
   <rect x="160" y="-6" width="20" height="12" rx="3" fill="#3B6EA5"/><text x="170" y="3" class="badge">FK</text>
@@ -206,6 +206,7 @@ ${out.join('\n')}
   <line x1="880" y1="0" x2="916" y2="0" stroke="#9A6B1F" stroke-width="1.6"/><path d="M916 -4 L924 0 L916 4 z" fill="#9A6B1F"/>
   <text x="934" y="4" class="legend">set null: il record resta, il collegamento si svuota</text>
   <text x="16" y="24" class="sub" style="font-size:11px">Tutte le tabelle sono protette da RLS; avatar_url non è una FK ma l'indirizzo di un file nel bucket avatars.</text>
+  <text x="16" y="40" class="sub" style="font-size:11px">Elimina account: la funzione delete_my_account() (migrazione 0010) cancella le richieste inviate e i consensi WhatsApp dell'utente e il suo account in auth.users; il resto sparisce a cascata. Gli admin non possono cancellarsi.</text>
 </g>
 </svg>`;
 
