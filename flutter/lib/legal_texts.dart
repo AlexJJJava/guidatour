@@ -85,6 +85,14 @@ final _privacyIt = <LegalSection>[
     ]
   ),
   (
+    'Dati obbligatori e decisioni automatiche',
+    [
+      'Nome ed email servono per creare l’account e per inviare una richiesta: senza, la guida non può risponderti. Telefono, presentazione, foto e messaggio sono facoltativi. Il numero WhatsApp serve solo se vuoi ricevere aggiornamenti lì.',
+      'Non prendiamo decisioni basate unicamente su trattamenti automatizzati né facciamo profilazione: l’approvazione dei professionisti la decide una persona.',
+      'Non è stato nominato un responsabile della protezione dei dati (DPO): per ogni richiesta vale il contatto indicato all’inizio.',
+    ]
+  ),
+  (
     'Minori',
     [
       'GuidaTour non è pensata per i minori di 14 anni, che non possono creare un account. Le richieste per tour con bambini le invia un adulto.',
@@ -158,6 +166,14 @@ final _privacyEn = <LegalSection>[
     ]
   ),
   (
+    'Required data and automated decisions',
+    [
+      'Name and email are needed to create an account and to send a request: without them the guide cannot reply. Phone, bio, photo and message are optional. A WhatsApp number is needed only if you want updates there.',
+      'We do not take decisions based solely on automated processing and we do not profile users: professionals are approved by a person.',
+      'No data protection officer (DPO) has been appointed: use the contact given at the top for any request.',
+    ]
+  ),
+  (
     'Children',
     [
       'GuidaTour is not intended for children under 14, who cannot create an account. Requests for family tours are sent by an adult.',
@@ -228,6 +244,14 @@ final _privacyEs = <LegalSection>[
       '• Borrar: Cuenta › Eliminar cuenta. Se borran al momento perfil, foto, favoritos, carrito, solicitudes enviadas y consentimientos de WhatsApp; para un profesional también sus tours y las solicitudes recibidas.',
       '• Si enviaste una solicitud sin cuenta, o para los demás derechos, escribe a $legalContactEmail: respondemos en 30 días.',
       'También puedes presentar una reclamación ante la autoridad italiana de protección de datos (www.garanteprivacy.it) o la de tu país.',
+    ]
+  ),
+  (
+    'Datos obligatorios y decisiones automatizadas',
+    [
+      'Nombre y email son necesarios para crear la cuenta y enviar una solicitud: sin ellos el guía no puede responderte. Teléfono, presentación, foto y mensaje son opcionales. El número de WhatsApp solo hace falta si quieres recibir novedades allí.',
+      'No tomamos decisiones basadas únicamente en tratamientos automatizados ni elaboramos perfiles: la aprobación de los profesionales la decide una persona.',
+      'No se ha nombrado un delegado de protección de datos (DPO): para cualquier solicitud vale el contacto indicado al principio.',
     ]
   ),
   (

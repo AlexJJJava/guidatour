@@ -225,6 +225,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['10/11/2026', 'Informativa completata (art. 13 GDPR)', 'Aggiunti nelle 3 lingue: quali dati sono obbligatori e cosa succede senza, nessuna decisione automatizzata né profilazione, nessun DPO nominato. Restano titolare, email e revisione legale', 'Test app'],
   ['10/11/2026', 'Migrazione 0010 attiva', 'Elimina account funziona: provato con un account usa e getta (registrazione, preferito, cancellazione: poi login rifiutato e sessione non più valida)', 'Prova sul database reale'],
   ['10/11/2026', 'Indietro del browser tra le voci', 'Indietro (browser o telefono) chiude prima le pagine aperte e poi torna alla voce del menu precedente; la pagina Tour ritrova ricerca e filtri. Dentro una voce funzionava già', 'Test app (2 nuovi); prova cliccando sul sito'],
   ['10/11/2026', 'Foto della città giusta', 'Ogni foto ha la sua città (o nessuna): un tour mostra solo foto della sua città o neutre, mai il Colosseo a Milano; 4 foto neutre nuove (musei, sere). I cerchi delle categorie seguono la città scelta', 'Test app su tutte le città e categorie'],
