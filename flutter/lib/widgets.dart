@@ -253,7 +253,9 @@ class ShellScope extends InheritedWidget {
     required super.child,
   });
   final VoidCallback goHome;
-  final void Function(Widget page) open;
+  /// Apre una pagina sotto intestazione e footer. Con [name] non apre doppioni:
+  /// se è già aperta si torna a quella.
+  final void Function(Widget page, {String? name}) open;
 
   /// Passa alla voce "Tour" con ricerca e categoria già impostate.
   final void Function({String query, String? category})? openSearch;
@@ -421,7 +423,7 @@ class SiteFooter extends StatelessWidget {
         const SizedBox(height: 10),
         InkWell(
           key: const ValueKey('footer-faq'),
-          onTap: () => shell?.open(const FaqScreen()),
+          onTap: () => shell?.open(const FaqScreen(), name: 'faq'),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Text(t.faqTitle,

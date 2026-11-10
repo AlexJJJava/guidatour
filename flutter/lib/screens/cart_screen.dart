@@ -226,8 +226,9 @@ class CartButton extends StatelessWidget {
         return IconButton(
           tooltip: l10n(context).navCart,
           style: IconButton.styleFrom(backgroundColor: kSurface),
-          onPressed: () =>
-              ShellScope.of(context)?.open(const Scaffold(body: CartScreen())),
+          // Già nel carrello: non si apre un secondo carrello sopra.
+          onPressed: () => ShellScope.of(context)
+              ?.open(const Scaffold(body: CartScreen()), name: 'cart'),
           icon: Badge(
             isLabelVisible: count > 0,
             label: Text('$count'),

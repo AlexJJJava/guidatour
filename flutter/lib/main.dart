@@ -361,24 +361,30 @@ class _AppShellState extends State<AppShell> {
   /// dopo login o logout si resta lì se il nuovo menu la contiene ancora.
   Type _rootType = Null;
 
+  /// Pagine aperte con un nome (carrello, account) nel navigatore attuale:
+  /// premere di nuovo il pulsante riporta a quella pagina invece di aprirne
+  /// una seconda uguale.
+  final _openNames = <String>{};
+
   /// Account aperto dal pallino: dopo il logout si mostra la voce Account.
-  bool _accountOpen = false;
+  bool get _accountOpen => _openNames.contains(_accountRoute);
+  static const _accountRoute = 'account';
 
   /// Login, logout o cambio di ruolo: si resta sulla stessa pagina se è
   /// ancora consentita, altrimenti si torna a Scopri.
   void _keepPage(List<_NavItem> items, {required bool wasGuest}) {
     final nowGuest = appState.currentUser == null;
     if (nowGuest && _accountOpen) {
-      _accountOpen = false;
       _reset(items.indexWhere((i) => i.$4 is AccountScreen));
       return;
     }
     if (!nowGuest && _rootType == AccountScreen) {
       // La voce Account non c'è più: Scopri, con l'Account aperto sopra.
       _reset(0);
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => _open(const _AccountPage()));
-      _accountOpen = true;
+      // Segnato subito: il menu deve già saperlo prima che la pagina si apra.
+      _openNames.add(_accountRoute);
+      WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _open(const _AccountPage(), name: _accountRoute, force: true));
       return;
     }
     final same = items.indexWhere((i) => i.$4.runtimeType == _rootType);
@@ -433,21 +439,36 @@ class _AppShellState extends State<AppShell> {
     _navKey = GlobalKey<NavigatorState>();
     _observer = _newObserver();
     _depth = 0;
+    _openNames.clear();
   }
 
-  /// Apre una pagina sotto intestazione e footer.
-  void _open(Widget page) =>
-      _navKey.currentState?.push(MaterialPageRoute(builder: (_) => page));
+  /// Apre una pagina sotto intestazione e footer. Con [name], se quella
+  /// pagina è già aperta si torna lì (chiudendo quelle sopra) invece di
+  /// aprirne un'altra uguale; [force] apre comunque (nome già segnato).
+  void _open(Widget page, {String? name, bool force = false}) {
+    final nav = _navKey.currentState;
+    if (nav == null) return;
+    if (name != null && !force && _openNames.contains(name)) {
+      nav.popUntil((r) => r.settings.name == name || r.isFirst);
+      return;
+    }
+    if (name != null) _openNames.add(name);
+    final key = _navKey;
+    nav
+        .push(MaterialPageRoute(
+            settings: RouteSettings(name: name), builder: (_) => page))
+        .then((_) {
+      // Solo se il navigatore è ancora lo stesso (cambio voce = elenco nuovo).
+      if (name != null && key == _navKey) _openNames.remove(name);
+    });
+  }
 
   /// Chi è collegato arriva all'Account dal pallino, non dal menu.
   void openAccount() {
     if (appState.currentUser == null) {
       _select(_navItems(context).length - 1);
     } else {
-      _accountOpen = true;
-      _navKey.currentState
-          ?.push(MaterialPageRoute(builder: (_) => const _AccountPage()))
-          .then((_) => _accountOpen = false);
+      _open(const _AccountPage(), name: _accountRoute);
     }
   }
 

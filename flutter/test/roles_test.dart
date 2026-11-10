@@ -345,6 +345,128 @@ void main() {
     });
   }
 
+  group('azioni dei pulsanti', () {
+    Future<void> openHome(WidgetTester tester, Guide? who,
+        {Size size = const Size(1920, 1400)}) async {
+      sized(tester, size);
+      seed(who, owner: user(Role.guida));
+      await tester.pumpWidget(const GuidaTourApp());
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    Future<void> tapAndSettle(WidgetTester tester, Finder f) async {
+      await tester.ensureVisible(f);
+      await tester.pumpAndSettle();
+      await tester.tap(f);
+      await tester.pumpAndSettle();
+    }
+
+    void onToursPage() {
+      expect(find.byType(HomeScreen, skipOffstage: false), findsNothing);
+      expect(find.byType(SearchScreen), findsOneWidget);
+    }
+
+    testWidgets('"Prenota un tour" in alto porta alla voce Tour',
+        (tester) async {
+      await openHome(tester, null);
+      await tapAndSettle(tester, find.text(t.ctaButton).first);
+      onToursPage();
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('"Vedi tutti i tour" porta alla voce Tour', (tester) async {
+      await openHome(tester, null);
+      await tapAndSettle(tester, find.text(t.toursAction).first);
+      onToursPage();
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('"Vedi tutte le esperienze" porta alla voce Tour',
+        (tester) async {
+      await openHome(tester, null);
+      await tapAndSettle(tester, find.text(t.categoriesAction).first);
+      onToursPage();
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('"Prenota un tour" in fondo alla home porta alla voce Tour',
+        (tester) async {
+      await openHome(tester, null);
+      await tapAndSettle(tester, find.text(t.ctaButton).last);
+      onToursPage();
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('"Inizia ora" porta all\'accesso', (tester) async {
+      await openHome(tester, null);
+      await tapAndSettle(tester, find.text(t.proButton));
+      expect(find.byType(HomeScreen, skipOffstage: false), findsNothing);
+      expect(find.byType(AccountScreen), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('card della home apre la scheda del tour', (tester) async {
+      await openHome(tester, user(Role.turista));
+      await tapAndSettle(tester, find.byType(TourCard).first);
+      expect(find.byType(TourDetailScreen), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    for (final size in const [Size(1920, 1400), Size(412, 915)]) {
+      testWidgets('carrello premuto due volte: un solo carrello (${size.width})',
+          (tester) async {
+        await openHome(tester, user(Role.turista), size: size);
+        final cart = find.byTooltip(t.navCart);
+        await tester.tap(cart.first);
+        await tester.pumpAndSettle();
+        await tester.tap(cart.first);
+        await tester.pumpAndSettle();
+        expect(find.byType(CartScreen, skipOffstage: false), findsOneWidget);
+        // Indietro si torna alla home, non a un altro carrello.
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        expect(find.byType(CartScreen, skipOffstage: false), findsNothing);
+        expect(find.byType(HomeScreen), findsOneWidget);
+        await tester.pumpWidget(const SizedBox());
+      });
+    }
+
+    testWidgets('pallino premuto due volte: un solo Account', (tester) async {
+      await openHome(tester, user(Role.turista));
+      final avatar = find.byType(UserAvatar);
+      await tester.tap(avatar.first);
+      await tester.pumpAndSettle();
+      await tester.tap(avatar.first);
+      await tester.pumpAndSettle();
+      expect(find.byType(AccountScreen, skipOffstage: false), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('pallino dal Modifica profilo riporta all\'Account',
+        (tester) async {
+      await openHome(tester, user(Role.turista));
+      await tester.tap(find.byType(UserAvatar).first);
+      await tester.pumpAndSettle();
+      await tapAndSettle(tester, find.text(t.editProfile));
+      expect(find.byType(ProfileEditScreen), findsOneWidget);
+      await tester.tap(find.byType(UserAvatar).first);
+      await tester.pumpAndSettle();
+      expect(find.byType(ProfileEditScreen, skipOffstage: false), findsNothing);
+      expect(find.byType(AccountScreen, skipOffstage: false), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('FAQ dal footer della pagina FAQ: una sola FAQ',
+        (tester) async {
+      await openHome(tester, null);
+      final faq = find.byKey(const ValueKey('footer-faq'));
+      await tapAndSettle(tester, faq.first);
+      await tapAndSettle(tester, faq.first);
+      expect(find.byType(FaqScreen, skipOffstage: false), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
   testWidgets('cerchio categoria in home: voce Tour con la categoria scelta',
       (tester) async {
     sized(tester, const Size(1920, 2400));
