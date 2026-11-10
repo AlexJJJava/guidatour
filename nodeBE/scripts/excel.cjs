@@ -177,7 +177,7 @@ const todo = [
   [3, 'MVP', 'Notifiche email', "Oggi gli avvisi sono solo dentro l'app", F],
   [4, 'MVP', 'Locandina PDF', 'A4 con foto, QR, prezzo e organizzatore; pulsanti Scarica PDF e Stampa', 'Fatto'],
   [5, 'MVP', 'SEO', 'Pagine HTML dal backend: home, città, città + categoria, tour (IT/EN/ES), sitemap, robots.txt, dati strutturati Event, 404/410. Da portare sul dominio definitivo e inviare a Google Search Console', 'Fatto'],
-  [6, 'MVP', 'Privacy e termini', 'Fatte: informativa e termini (IT/EN/ES) dal footer e accanto a ogni consenso; Elimina account in Account. Mancano: migrazione 0010 sul database, titolare e email in app_config.dart, revisione di un legale', 'In corso'],
+  [6, 'MVP', 'Privacy e termini', 'Fatte: informativa e termini (IT/EN/ES) dal footer e accanto a ogni consenso; Elimina account in Account. Migrazione 0010 attiva. Mancano: titolare e email in app_config.dart, revisione di un legale', 'In corso'],
   [7, 'MVP', 'Admin completo', 'Area Gestione: panoramica, sospensione professionisti, eliminazione tour, approvazioni, consensi (migrazione 0007)', 'Fatto'],
   [8, 'MVP', 'Recupero password', "Non presente nell'app", F],
   [9, 'MVP', 'Conferma email e rimozione accessi rapidi', 'Da fare prima del lancio', F],
@@ -225,6 +225,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['10/11/2026', 'Migrazione 0010 attiva', 'Elimina account funziona: provato con un account usa e getta (registrazione, preferito, cancellazione: poi login rifiutato e sessione non più valida)', 'Prova sul database reale'],
   ['10/11/2026', 'Indietro del browser tra le voci', 'Indietro (browser o telefono) chiude prima le pagine aperte e poi torna alla voce del menu precedente; la pagina Tour ritrova ricerca e filtri. Dentro una voce funzionava già', 'Test app (2 nuovi); prova cliccando sul sito'],
   ['10/11/2026', 'Foto della città giusta', 'Ogni foto ha la sua città (o nessuna): un tour mostra solo foto della sua città o neutre, mai il Colosseo a Milano; 4 foto neutre nuove (musei, sere). I cerchi delle categorie seguono la città scelta', 'Test app su tutte le città e categorie'],
   ['10/11/2026', 'Privacy e termini', 'Informativa privacy e termini d’uso in IT/EN/ES (bozza sui dati reali dell’app), nel footer e accanto ai consensi di registrazione, richiesta, carrello e WhatsApp. Account › Elimina account cancella tutti i dati (migrazione 0010, da eseguire); gli admin no', 'Test app (126 superati, 6 nuovi); schermata della pagina privacy'],
