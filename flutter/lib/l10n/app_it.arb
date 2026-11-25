@@ -97,6 +97,17 @@
   "authTermsText": "Accetto i termini d’uso: GuidaTour è intermediario tecnologico e promozionale. Se sono un professionista, sono responsabile di contenuti, abilitazione e svolgimento delle mie offerte.",
   "authHaveAccount": "Hai già un account? Accedi",
   "authNoAccount": "Non hai un account? Registrati",
+  "authForgotPassword": "Password dimenticata?",
+  "authResetTitle": "Reimposta la password",
+  "authResetIntro": "Inserisci l'email del tuo account: ti invieremo un link per scegliere una nuova password.",
+  "authResetSend": "Invia link",
+  "authResetSent": "Se l'email è registrata, a breve riceverai un link per reimpostare la password. Controlla anche lo spam.",
+  "authNewPasswordTitle": "Scegli una nuova password",
+  "authNewPasswordIntro": "Sei entrato con il link dell'email: scegli la nuova password del tuo account.",
+  "fieldNewPassword": "Nuova password",
+  "fieldConfirmPassword": "Ripeti la password",
+  "validationPasswordMismatch": "Le password non coincidono",
+  "authPasswordUpdated": "Password aggiornata.",
   "authSocialComingSoon": "Accesso con {label} non ancora attivo.",
   "@authSocialComingSoon": {
     "placeholders": {

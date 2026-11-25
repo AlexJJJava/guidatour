@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'api_client.dart';
+import 'app_config.dart';
 import 'models.dart';
 
 const _cityPrefKey = 'city';
@@ -15,6 +16,9 @@ const _seenAnswersKey = 'seenAnswers';
 class AppState extends ChangeNotifier {
   AppState() {
     _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.passwordRecovery) {
+        passwordRecovery.value = true;
+      }
       final session = data.session;
       if (session == null) {
         if (currentUser != null) _clearUserData();
@@ -26,9 +30,14 @@ class AppState extends ChangeNotifier {
 
   late final StreamSubscription<AuthState> _authSub;
 
+  /// Vero quando si arriva dal link "reimposta password" dell'email: la
+  /// sessione è già attiva e l'app deve chiedere la nuova password.
+  final passwordRecovery = ValueNotifier<bool>(false);
+
   @override
   void dispose() {
     _authSub.cancel();
+    passwordRecovery.dispose();
     super.dispose();
   }
 
@@ -323,6 +332,38 @@ class AppState extends ChangeNotifier {
       return e.message;
     } catch (_) {
       return 'Registrazione non riuscita. Controlla la connessione e riprova.';
+    }
+  }
+
+  /// Invia l'email con il link per reimpostare la password. Il link riporta
+  /// al sito (sul web alla pagina attuale, così funziona anche in locale):
+  /// l'indirizzo deve stare tra i Redirect URLs di Supabase Auth.
+  /// Restituisce un messaggio di errore, o null se l'invio è riuscito.
+  Future<String?> sendPasswordReset(String email) async {
+    final redirect =
+        kIsWeb ? '${Uri.base.origin}${Uri.base.path}' : publicSiteUrl;
+    try {
+      await Supabase.instance.client.auth
+          .resetPasswordForEmail(email.trim(), redirectTo: redirect);
+      return null;
+    } on AuthException catch (e) {
+      return e.message;
+    } catch (_) {
+      return 'Invio non riuscito. Controlla la connessione e riprova.';
+    }
+  }
+
+  /// Imposta la nuova password dell'utente collegato (dopo il link email).
+  Future<String?> updatePassword(String password) async {
+    try {
+      await Supabase.instance.client.auth
+          .updateUser(UserAttributes(password: password));
+      passwordRecovery.value = false;
+      return null;
+    } on AuthException catch (e) {
+      return e.message;
+    } catch (_) {
+      return 'Salvataggio non riuscito. Controlla la connessione e riprova.';
     }
   }
 

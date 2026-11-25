@@ -11,6 +11,7 @@ import 'models.dart';
 import 'screens/account_screen.dart';
 import 'screens/admin_screen.dart';
 import 'screens/assignments_screen.dart';
+import 'screens/auth_screen.dart' show showNewPasswordDialog;
 import 'screens/bookings_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/dashboard_overview_screen.dart';
@@ -80,8 +81,8 @@ class GuidaTourApp extends StatelessWidget {
               focusedErrorBorder: field(kDanger, 1.6),
               disabledBorder: field(kLine.withValues(alpha: 0.6)),
               labelStyle: const TextStyle(color: kMuted),
-              floatingLabelStyle:
-                  const TextStyle(color: kPrimaryText, fontWeight: FontWeight.w600),
+              floatingLabelStyle: const TextStyle(
+                  color: kPrimaryText, fontWeight: FontWeight.w600),
               hintStyle: TextStyle(color: kMuted.withValues(alpha: 0.8)),
               prefixIconColor: kMuted,
               suffixIconColor: kMuted,
@@ -339,6 +340,28 @@ class _AppShellState extends State<AppShell> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _openLinkedTour());
+    appState.passwordRecovery.addListener(_onPasswordRecovery);
+    // L'evento può arrivare prima che la shell esista (link appena aperto).
+    if (appState.passwordRecovery.value) {
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _onPasswordRecovery());
+    }
+  }
+
+  @override
+  void dispose() {
+    appState.passwordRecovery.removeListener(_onPasswordRecovery);
+    super.dispose();
+  }
+
+  /// Arrivo dal link "reimposta password" dell'email: si chiede subito la
+  /// nuova password, una volta sola.
+  bool _askingPassword = false;
+  Future<void> _onPasswordRecovery() async {
+    if (!appState.passwordRecovery.value || _askingPassword || !mounted) return;
+    _askingPassword = true;
+    await showNewPasswordDialog(context);
+    _askingPassword = false;
   }
 
   Future<void> _openLinkedTour() async {

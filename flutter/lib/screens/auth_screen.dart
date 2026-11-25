@@ -194,6 +194,17 @@ class _AuthScreenState extends State<AuthScreen> {
                           ? t.validationPasswordLength
                           : null,
                     ),
+                    if (!_register)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          key: const ValueKey('forgot-password'),
+                          onPressed: _busy
+                              ? null
+                              : () => _showResetDialog(context, _email.text),
+                          child: Text(t.authForgotPassword),
+                        ),
+                      ),
                     if (_register) ...[
                       const SizedBox(height: 16),
                       Text(t.authRoleTitle,
@@ -267,6 +278,203 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Chiede l'email e invia il link per reimpostare la password. Il messaggio
+/// di conferma è lo stesso anche per email non registrate.
+Future<void> _showResetDialog(BuildContext context, String email) async {
+  final sent = await showDialog<bool>(
+    context: context,
+    builder: (_) => _ResetPasswordDialog(initialEmail: email),
+  );
+  if (sent == true && context.mounted) {
+    snack(context, l10n(context).authResetSent);
+  }
+}
+
+class _ResetPasswordDialog extends StatefulWidget {
+  const _ResetPasswordDialog({required this.initialEmail});
+  final String initialEmail;
+
+  @override
+  State<_ResetPasswordDialog> createState() => _ResetPasswordDialogState();
+}
+
+class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final _email = TextEditingController(text: widget.initialEmail.trim());
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _email.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _busy = true);
+    final msg = await appState.sendPasswordReset(_email.text);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (msg != null) {
+      snack(context, msg);
+    } else {
+      Navigator.of(context).pop(true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = l10n(context);
+    return AlertDialog(
+      title: Text(t.authResetTitle),
+      content: SizedBox(
+        width: 400,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(t.authResetIntro, style: const TextStyle(color: kMuted)),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _email,
+                autofocus: true,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                    labelText: t.fieldEmail,
+                    border: const OutlineInputBorder()),
+                validator: (v) =>
+                    (v == null || !v.contains('@')) ? t.validationEmail : null,
+                onFieldSubmitted: (_) => _busy ? null : _send(),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _busy ? null : () => Navigator.of(context).pop(false),
+          child: Text(t.cancel),
+        ),
+        FilledButton(
+          onPressed: _busy ? null : _send,
+          child: Text(t.authResetSend),
+        ),
+      ],
+    );
+  }
+}
+
+/// Dopo il link dell'email l'utente è già collegato: si sceglie la nuova
+/// password. Chiudere senza salvare lascia la password di prima.
+Future<void> showNewPasswordDialog(BuildContext context) async {
+  final saved = await showDialog<bool>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const _NewPasswordDialog(),
+  );
+  if (saved != true) appState.passwordRecovery.value = false;
+  if (saved == true && context.mounted) {
+    snack(context, l10n(context).authPasswordUpdated);
+  }
+}
+
+class _NewPasswordDialog extends StatefulWidget {
+  const _NewPasswordDialog();
+
+  @override
+  State<_NewPasswordDialog> createState() => _NewPasswordDialogState();
+}
+
+class _NewPasswordDialogState extends State<_NewPasswordDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _password = TextEditingController();
+  final _confirm = TextEditingController();
+  bool _hidden = true;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _password.dispose();
+    _confirm.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _busy = true);
+    final msg = await appState.updatePassword(_password.text);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (msg != null) {
+      snack(context, msg);
+    } else {
+      Navigator.of(context).pop(true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = l10n(context);
+    final eye = IconButton(
+      icon: Icon(_hidden ? Icons.visibility_off : Icons.visibility),
+      onPressed: () => setState(() => _hidden = !_hidden),
+    );
+    return AlertDialog(
+      title: Text(t.authNewPasswordTitle),
+      content: SizedBox(
+        width: 400,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(t.authNewPasswordIntro,
+                  style: const TextStyle(color: kMuted)),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _password,
+                autofocus: true,
+                obscureText: _hidden,
+                decoration: InputDecoration(
+                    labelText: t.fieldNewPassword,
+                    border: const OutlineInputBorder(),
+                    suffixIcon: eye),
+                validator: (v) => (v == null || v.length < 6)
+                    ? t.validationPasswordLength
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _confirm,
+                obscureText: _hidden,
+                decoration: InputDecoration(
+                    labelText: t.fieldConfirmPassword,
+                    border: const OutlineInputBorder()),
+                validator: (v) =>
+                    v != _password.text ? t.validationPasswordMismatch : null,
+                onFieldSubmitted: (_) => _busy ? null : _save(),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _busy ? null : () => Navigator.of(context).pop(false),
+          child: Text(t.cancel),
+        ),
+        FilledButton(
+          onPressed: _busy ? null : _save,
+          child: Text(t.save),
+        ),
+      ],
     );
   }
 }

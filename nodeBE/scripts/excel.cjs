@@ -136,6 +136,7 @@ const ops = [
   ['Proporre tour ad altri professionisti', N, N, P, 'Sì (da decidere)', P, N],
   ['Ricevere proposte', N, N, P, 'Solo accompagnamento e pacchetti', P, N],
   ['Chiedere ruoli professionali dal profilo', N, P, P, P, P, P],
+  ['Recuperare la password (link via email)', N, P, P, P, P, P],
   ['Approvare registrazioni', N, N, N, N, N, P],
   ['Sospendere o riattivare professionisti', N, N, N, N, N, P],
   ['Eliminare tour di altri', N, N, N, N, N, P],
@@ -160,7 +161,7 @@ const tests = [
   ['Backend online', 'Date multiple', 6, 'Superato', 'Tour con più date in ordine; ricerca per data; richiesta e carrello con la data (data estranea rifiutata); modifica delle date senza toccare gli altri campi; tour con la sola data; limiti'],
   ['Backend online', 'Foto profilo', 5, 'Superato', 'Caricamento, rimozione, cartelle altrui, formato e indirizzi esterni'],
   ['Backend online', 'Pagine SEO', 12, 'Superato', 'npm run test:site: titolo, descrizione, canonical, hreflang, JSON-LD Event e ItemList, 404 e 410 noindex, sitemap senza [TEST], robots, immagini, API invariate'],
-  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, ruoli dal profilo, login senza cambio pagina, menu lingua, carrello e richieste, approvazioni, Gestione admin, Account e profilo, pallino, ritaglio foto, lettura delle foto (JPG vero, foto grandi ridotte, file non validi), locandina PDF, blocchi, link QR, date multiple, foto per tour, data leggibile, barra Prenota, ricerca dalla home sulla voce Tour, destinazioni dei pulsanti, ritorno ai tour dalla scheda, privacy e termini, elimina account, indietro tra le voci, foto per città, contrasto dei colori, layout', 129, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
+  ['App Flutter', 'Pagine, intestazione e footer, FAQ, copertina, una sola intestazione dopo login, home senza guide, professionisti non approvati come turisti, più ruoli e registrazione multipla, ruoli dal profilo, login senza cambio pagina, menu lingua, carrello e richieste, approvazioni, Gestione admin, Account e profilo, pallino, ritaglio foto, lettura delle foto (JPG vero, foto grandi ridotte, file non validi), locandina PDF, blocchi, link QR, date multiple, foto per tour, data leggibile, barra Prenota, ricerca dalla home sulla voce Tour, destinazioni dei pulsanti, ritorno ai tour dalla scheda, privacy e termini, elimina account, indietro tra le voci, foto per città, contrasto dei colori, recupero password, layout', 132, 'Superato', 'Totale della suite app, inclusi layout responsive e smoke test. Non clicca sul sito reale'],
   ['Non coperto', 'Prova end-to-end nel browser', 0, 'Da provare', 'Clic reali sul sito pubblicato'],
 ];
 const wsT = sheet('Test', 'Esiti del 10 novembre 2026. Comandi backend: npm run test:roles e npm run test:site (cartella nodeBE).',
@@ -179,7 +180,7 @@ const todo = [
   [5, 'MVP', 'SEO', 'Pagine HTML dal backend: home, città, città + categoria, tour (IT/EN/ES), sitemap, robots.txt, dati strutturati Event, 404/410. Da portare sul dominio definitivo e inviare a Google Search Console', 'Fatto'],
   [6, 'MVP', 'Privacy e termini', 'Fatte: informativa e termini (IT/EN/ES) dal footer e accanto a ogni consenso; Elimina account in Account. Migrazione 0010 attiva. Mancano: titolare e email in app_config.dart, revisione di un legale', 'In corso'],
   [7, 'MVP', 'Admin completo', 'Area Gestione: panoramica, sospensione professionisti, eliminazione tour, approvazioni, consensi (migrazione 0007)', 'Fatto'],
-  [8, 'MVP', 'Recupero password', "Non presente nell'app", F],
+  [8, 'MVP', 'Recupero password', "Password dimenticata? nel login: email con link, al ritorno si sceglie la nuova password (IT/EN/ES). Da provare con un'email vera; l'indirizzo del sito deve stare tra i Redirect URLs di Supabase", 'Fatto'],
   [9, 'MVP', 'Conferma email e rimozione accessi rapidi', 'Da fare prima del lancio', F],
   [10, 'MVP', 'Hosting sempre attivo', 'Render free si addormenta, i QR devono essere sempre raggiungibili', 'Da decidere'],
   [11, 'Fase 2', 'Strutture partner', 'QR dedicati e statistiche', F],
@@ -225,6 +226,7 @@ for (let r = 5; r < 5 + dec.length; r++) wsQ.getCell(r, 4).fill = fill('FFF9C4')
 
 // Una riga per ogni attività completata, la più recente in alto.
 const log = [
+  ['13/11/2026', 'Recupero password', 'Nel login il link Password dimenticata? apre un riquadro con l’email (già compilata se scritta): Supabase invia un link che riporta al sito già collegati, e l’app chiede subito nuova password e conferma. Messaggio di invio uguale anche per email non registrate. Dall’app Android il link apre il sito', 'Test app (132 superati, 3 nuovi sul recupero password)'],
   ['10/11/2026', 'Più contrasto nella grafica', 'Stessi colori, tinte più leggibili: testi e link oro in oro bruno (5,5:1 invece di 3,4:1), grigio dei testi secondari più scuro, bordi di card e menu più visibili, bordi dei campi a 3:1, card dei tour con bordo sottile, velo più scuro sulle foto, sottotitolo e voci della home con ombra leggera, voce selezionata della barra mobile in oro', 'Test app (129 superati, 3 nuovi sui contrasti); schermate prima/dopo di home, scheda tour e accesso'],
   ['10/11/2026', 'Schema del database aggiornato', 'schema.sql con la funzione delete_my_account (migrazione 0010); immagine dello schema rigenerata (docs/GuidaTour_Schema_DB.png e .svg) con la nota sulla cancellazione account. Tabelle e colonne invariate dal 06/11', 'npm run docs:db'],
   ['10/11/2026', 'Documento per la revisione legale', 'Doc condiviso con contesto del servizio, 14 punti da verificare (privacy, consumatori, DSA) con colonna Esito, dati mancanti e i due testi italiani completi: https://claude.ai/artifact/Ci9G2zCtPaxLWV3ujz95qC', 'Testi copiati dal codice dell’app'],
