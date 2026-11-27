@@ -1,0 +1,19 @@
+target/
+*.class
+*.log
+# Eclipse / STS
+.settings/
+.classpath
+.project
+.factorypath
+.apt_generated/
+bin/
+# IntelliJ / VS Code
+.idea/
+*.iml
+.vscode/
+# segreti e configurazioni locali: mai nel repo
+.env
+.env.*
+application-local.yml
+application-local.properties

@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: guidatour-backend
+
+server:
+  port: 8080
+  # niente dettagli degli errori nelle risposte
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+guidatour:
+  cors:
+    # origini dell'app Flutter web, separate da virgola (es. http://localhost:5000); vuoto = nessuna
+    allowed-origins: ${GUIDATOUR_CORS_ALLOWED_ORIGINS:}
